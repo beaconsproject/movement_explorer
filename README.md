@@ -9,9 +9,9 @@ The Movement Explorer website consists of a set of R workflows and shiny apps to
 
 Data preparation and cleaning is an essential first step prior to doing and data exploration and modelling. There are several resources to help with this step, including:
 
-- Movebank
-- MoveApps
-- amt package workflow
+- Movebank.org
+- MoveApps.org
+- amt package (see workflow)
 - ExMove
 - can't remember, but see tools paper
 
@@ -25,7 +25,9 @@ Movement and habitat selection often vary by season and migration periods. Conse
 
 **Shiny app**
 
->shiny::runGitHub(repo="beaconsproject/movement_explorer", subdir="seasonal_explorer")
+The following link will soon be available:
+
+>shiny::runGitHub(repo="beaconsproject/movement_explorer", subdir="seasonal_movements")
 
 Other methods and tools exist to perform similar analyses, including:
 
@@ -35,9 +37,8 @@ Other methods and tools exist to perform similar analyses, including:
 
 ## Step 3 - Exploring range and occurrence distributions
 
->shiny::runGitHub(repo="beaconsproject/movement_explorer", subdir="home_range_explorer")
+The following link will soon be available:
 
-
-## Step 4 - Developing species habitat models (HSF, iSSF)
+>shiny::runGitHub(repo="beaconsproject/movement_explorer", subdir="home_ranges")
 
 
