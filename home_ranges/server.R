@@ -57,42 +57,6 @@ server = function(input, output, session) {
     }
   })
 
-  # Read linear disturbance data
-  line <- eventReactive(input$dist_data, {
-    req(input$getButton)
-    file <- input$dist_data$datapath
-    ext <- tools::file_ext(file)
-    if(ext == "gpkg"){
-      st_read(file, "linear_disturbance", quiet=TRUE)
-    } else {
-      showNotification("Wrong file type, must be GPKG file (.gpkg)", type = "error")
-    }
-  })
-
-  # Read areal disturbance data
-  poly <- eventReactive(input$dist_data, {
-    req(input$getButton)
-    file <- input$dist_data$datapath
-    ext <- tools::file_ext(file)
-    if(ext == "gpkg"){
-      st_read(file, "areal_disturbance", quiet=TRUE)
-    } else {
-      showNotification("Wrong file type, must be GPKG file (.gpkg)", type = "error")
-    }
-  })
-
-  # Read fire data
-  fire <- eventReactive(input$dist_data, {
-    req(input$getButton)
-    file <- input$dist_data$datapath
-    ext <- tools::file_ext(file)
-    if(ext == "gpkg"){
-      st_read(file, "fires", quiet=TRUE)
-    } else {
-      showNotification("Wrong file type, must be GPKG file (.gpkg)", type = "error")
-    }
-  })
-
   # PROCESS DATA
   # ------------
   
@@ -164,24 +128,47 @@ server = function(input, output, session) {
       mutate(year = year(time))
   })
 
-  # mcp home range
-  mcp <- reactive({
-    if (input$caribou=="All caribou") {
-      hr_mcp(trk_all(), levels=input$levels) #|> st_transform(4326)
-    } else {
-      hr_mcp(trk_one(), levels=input$levels) #|> st_transform(4326)
-    }
-  })
-
-  # kde home range
-  kde <- reactive({
-    lvl <- input$levels
-    if (lvl==1) {lvl=0.999}
-    if (input$caribou=="All caribou") {
-      hr_kde(trk_all(), levels=lvl) #|> st_transform(4326)
-    } else {
-      hr_kde(trk_one(), levels=lvl) #|> st_transform(4326)
-    }
+  # Estimate home range
+  hr <- reactive({
+    if (input$hr=="MCP") {
+      if (input$caribou=="All caribou") {
+        hr_mcp(trk_all(), levels=input$levels) #|> st_transform(4326)
+      } else {
+        hr_mcp(trk_one(), levels=input$levels) #|> st_transform(4326)
+      }
+    } else if (input$hr=="KDE") {
+      lvl <- input$levels
+      if (lvl==1) {lvl=0.999}
+      if (input$caribou=="All caribou") {
+        hr_kde(trk_all(), levels=lvl) #|> st_transform(4326)
+      } else {
+        hr_kde(trk_one(), levels=lvl) #|> st_transform(4326)
+      }
+    } else if (input$hr=="aKDE") {
+      lvl <- input$levels
+      #if (lvl==1) {lvl=0.999}
+      if (input$caribou=="All caribou") {
+        hr_akde(trk_all(), levels=lvl) #|> st_transform(4326)
+      } else {
+        hr_akde(trk_one(), levels=lvl) #|> st_transform(4326)
+      }
+    } else if (input$hr=="LoCoH") {
+      lvl <- input$levels
+      #if (lvl==1) {lvl=0.999}
+      if (input$caribou=="All caribou") {
+        hr_locoh(trk_all(), levels=lvl) #|> st_transform(4326)
+      } else {
+        hr_locoh(trk_one(), levels=lvl) #|> st_transform(4326)
+      }
+    } else if (input$hr=="OD") {
+      lvl <- input$levels
+      #if (lvl==1) {lvl=0.999}
+      if (input$caribou=="All caribou") {
+        hr_od(trk_all(), levels=lvl) #|> st_transform(4326)
+      } else {
+        hr_od(trk_one(), levels=lvl) #|> st_transform(4326)
+      }
+    }      
   })
 
   # GENERATE OUTPUTS
@@ -200,52 +187,24 @@ server = function(input, output, session) {
 
       if (input$caribou=="All caribou") {
         trk_all <- mutate(trk_all(), year=as.double(year)) |> group_by(id, year) |> arrange(id, year)
-        #trk2020 <- trk_all |> filter(year==2020)
-        #trk2021 <- trk_all |> filter(year==2021)
-        #trk2022 <- trk_all |> filter(year==2022)
-        #trk2023 <- trk_all |> filter(year==2023)
-        #trk2024 <- trk_all |> filter(year==2024)
-        #trk2025 <- trk_all |> filter(year==2025)
-        m <- m |> addPolygons(data=hr_isopleths(mcp()), color="black", fill=F, weight=2, group="HR MCP (black)")
-        m <- m |> addPolygons(data=hr_isopleths(kde()), color="blue", fill=F, weight=2, group="HR KDE (blue)")
-        #groups <- NULL
-        #if (nrow(trk2020)>0) {
-        #  m <- m |> addPolylines(data=trk2020, lng=~x_, lat=~y_, color=col_yrs6[1], weight=2, group="Track 2020")
-        #  groups <- c(groups, "Track 2020")
-        #}
-        #if (nrow(trk2021)>0) {
-        #  m <- m |>addPolylines(data=trk2021, lng=~x_, lat=~y_, color=col_yrs6[2], weight=2, group="Track 2021")
-        #  groups <- c(groups, "Track 2021")
-        #}
-        #if (nrow(trk2022)>0) {
-        #  m <- m |>addPolylines(data=trk2022, lng=~x_, lat=~y_, color=col_yrs6[3], weight=2, group="Track 2022")
-        #   groups <- c(groups, "Track 2022")
-        #}
-        #if (nrow(trk2023)>0) {
-        #  m <- m |> addPolylines(data=trk2023, lng=~x_, lat=~y_, color=col_yrs6[4], weight=2, group="Track 2023")
-        #  groups <- c(groups, "Track 2023")
-        #}
-        #if (nrow(trk2024)>0) {
-        #  m <- m |> addPolylines(data=trk2024, lng=~x_, lat=~y_, color=col_yrs6[5], weight=2, group="Track 2024")
-        #  groups <- c(groups, "Track 2024")
-        #}
-        #if (nrow(trk2025)>0) {
-        #  m <- m |> addPolylines(data=trk2025, lng=~x_, lat=~y_, color=col_yrs6[6], weight=2, group="Track 2025")
-        #  groups <- c(groups, "Track 2025")
-        #}
+        m <- m |> addPolygons(data=hr_isopleths(hr()), color="blue", fill=F, weight=2, group="Home range")
         m <- m |> 
           addCircles(data=trk_all, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, 
             group="Locations", popup=trk_all()$t_) |>
-          addPolylines(data=line(), color="black", weight=3, group="Linear disturbance") |>
-          addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-          addPolygons(data=fire(), color="red", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          addPolygons(data=bnd4326, color="black", weight=2, fill=FALSE, group="Study area") |>
+          addPolylines(data=line, color="black", weight=3, group="Linear disturbance") |>
+          addPolygons(data=poly, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+          addPolygons(data=foot4326, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+          addPolygons(data=fire, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          addPolygons(data=pa4326, color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+          addPolygons(data=ipca4326, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Proposed IPCAs") |>
           addLegend("topleft", colors=col_yrs6, labels=years, title="Year") |>
           addScaleBar(position="bottomright") |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Google.Imagery"),
-            overlayGroups = c("Locations","Areal disturbance","Linear disturbance","Fires","HR MCP (black)","HR KDE (blue)"),
+            overlayGroups = c("Locations","Study area","Areal disturbance","Linear disturbance","Footprint 500m","Protected areas","Proposed IPCAs","Fires","HR MCP (black)","HR KDE (blue)"),
             options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup(c("Areal disturbance","Linear disturbance","Fires","HR MCP (black)","HR KDE (blue)"))
+          hideGroup(c("Areal disturbance","Linear disturbance","Footprint 500m","Protected areas","Proposed IPCAs","Fires","HR MCP (black)","HR KDE (blue)"))
 
       } else {
         trk_one <- mutate(trk_one(), year=as.double(year))
@@ -255,8 +214,7 @@ server = function(input, output, session) {
         trk2023 <- trk_one |> filter(year==2023)
         trk2024 <- trk_one |> filter(year==2024)
         trk2025 <- trk_one |> filter(year==2025)
-        m <- m |> addPolygons(data=hr_isopleths(mcp()), color="black", fill=F, weight=2, group="HR MCP (black)")
-        m <- m |> addPolygons(data=hr_isopleths(kde()), color="blue", fill=F, weight=2, group="HR KDE (blue)")
+        m <- m |> addPolygons(data=hr_isopleths(hr()), color="blue", fill=F, weight=2, group="Home range")
         groups <- NULL
         if (nrow(trk2020)>=1) {
           m <- m |> addPolylines(data=trk2020, lng=~x_, lat=~y_, color=col_yrs6[1], weight=2, group="Track 2020")
@@ -285,16 +243,20 @@ server = function(input, output, session) {
         m <- m |> 
           addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, 
             group="Locations", popup=trk_one()$t_) |>
-          addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-          addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-          addPolygons(data=fire(), color="red", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          addPolygons(data=bnd4326, color="black", weight=2, fill=FALSE, group="Study area") |>
+          addPolylines(data=line, color="black", weight=2, group="Linear disturbance") |>
+          addPolygons(data=poly, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+          addPolygons(data=foot4326, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+          addPolygons(data=fire, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          addPolygons(data=pa4326, color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+          addPolygons(data=ipca4326, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Proposed IPCAs") |>
           addLegend("topleft", colors=col_yrs6, labels=years, title="Year") |>
           addScaleBar(position="bottomright") |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Google.Imagery"),
-            overlayGroups = c("Locations",groups,"Areal disturbance","Linear disturbance","Fires","HR MCP (black)","HR KDE (blue)"),
+            overlayGroups = c("Locations",groups,"Study area","Areal disturbance","Linear disturbance","Footprint 500m","Fires","Protected areas","Proposed IPCAs","Home range"),
             options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup(c(groups,"Areal disturbance","Linear disturbance","Fires","HR MCP (black)","HR KDE (blue)"))
+          hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Protected areas","Proposed IPCAs"))
       }
       m
     }
@@ -308,27 +270,25 @@ server = function(input, output, session) {
       } else {
         x <- trk_one()
       }
-      mcp_km2 <- as.integer(hr_area(mcp())['area']/1000000)
-      kde_km2 <- as.integer(hr_area(kde())['area']/1000000)
-      tibble(Statistic=c("Locations", "MCP home range (km2)", "MCP intact (%)", "MCP in IPCA (%)",
-                                      "KDE home range (km2)", "KDE intact (%)", "KDE in IPCA (%)"), 
-             Value=c(nrow(x), mcp_km2, 0, 0, kde_km2, 0, 0))
-    }
-  })
-
-  # Summary statistics based on mapped features
-  output$tab2 <- renderTable({
-    if (input$goButton) {
-      if (input$caribou=='All caribou') {
-        x <- trk_all()
+      hr_m2 <- as.numeric(hr_area(hr())['area'])
+      hr_km2 <- round(hr_m2/1000000,2)
+      hr <- hr_isopleths(hr()) |>
+        st_transform(3578)
+      hrxfoot <- st_intersection(hr, foot)
+      if (nrow(hrxfoot)>0) {
+        hrxfoot_pct <- round(st_area(hrxfoot)/hr_m2*100,2)
       } else {
-        x <- trk_one()
+        hrxfoot_pct <- 0
       }
-      mcp_km2 <- as.integer(hr_area(mcp())['area']/1000000)
-      kde_km2 <- as.integer(hr_area(kde())['area']/1000000)
-      tibble(Statistic=c("Locations", "MCP home range (km2)", "MCP intact (%)", "MCP in IPCA (%)",
-                                      "KDE home range (km2)", "KDE intact (%)", "KDE in IPCA (%)"), 
-             Value=c(nrow(x), mcp_km2, 0, 0, kde_km2, 0, 0))
+      hrxpca <- st_intersection(hr, pca)
+      if (nrow(hrxpca)>0) {
+        hrxpca_pct <- round(st_area(hrxpca)/hr_m2*100,2)
+      } else {
+        hrxpca_pct <- 0
+      }
+     
+      tibble(Statistic=c("Locations", "Study area (km2)", "Study area disturbed (%)", "Home range (km2)", "HR disturbed (%)", "HR in PCAs (%)"), 
+        Value=c(nrow(x), bnd_km2, foot_pct, hr_km2, hrxfoot_pct, hrxpca_pct))
     }
   })
 

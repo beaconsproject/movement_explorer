@@ -25,7 +25,7 @@ ui = dashboardPage(skin="green",
       hr(),
       fileInput("gps_data", "Movement data (csv):", accept=".csv"),
       fileInput("seg_data", "Segmentation data (csv):", accept=".csv"),
-      fileInput("dist_data", "Disturbance data (gpkg):", accept=".gpkg"),
+      #fileInput("dist_data", "Disturbance data (gpkg):", accept=".gpkg"),
       br(),
       actionButton("getButton", "Load data")
     ),
@@ -35,6 +35,8 @@ ui = dashboardPage(skin="green",
       selectInput("caribou", "Select individual:", choices=NULL, multiple=FALSE),
       selectInput("season", "Select season:", choices=NULL),
       sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2024,2024), sep=""),
+      hr(),
+      selectInput("hr", "Estimator:", choices=c("MCP", "KDE", "aKDE", "LoCoH", "OD")),
       sliderInput("levels", "Select isopleth levels:", min=0.5, max=1, value=0.95),
       hr(),
       actionButton("goButton", "Map", style="color: #000"),
@@ -77,8 +79,7 @@ ui = dashboardPage(skin="green",
           ),
           tabBox(
             id = "four", width="3",
-            tabPanel("Statistics1", tableOutput("tab1")),
-            tabPanel("Statistics2", tableOutput("tab2"))
+            tabPanel("Statistics", tableOutput("tab1"))
           )
         )
       )     
