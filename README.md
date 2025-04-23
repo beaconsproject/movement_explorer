@@ -11,5 +11,4 @@ The app can also be run from a local machine using the following steps (note, th
 
   3. Start the Shiny app:
 
-    shiny::runGitHub("beaconsproject/movement_explorer/HRX")
-
+    shiny::runGitHub("beaconsproject/movement_explorer", subdir="HRX")
