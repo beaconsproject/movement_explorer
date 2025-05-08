@@ -8,7 +8,7 @@ ui = dashboardPage(skin="black",
   # 2.1 Dashboard header
   #-------------------------------------------------
 
-  #dashboardHeader(title = "Home Range Explorer"),
+  title = "Home Range Explorer",
   dashboardHeader(title = tags$div(
    tags$img(
      src = "logoblanc.png",  # Replace with your logo file name
@@ -38,7 +38,7 @@ ui = dashboardPage(skin="black",
        #menuItem("Contact us", href = "mailto: beaconsproject@ualberta.ca", icon = icon("address-book"))
        tags$li(
          class = "treeview",
-         tags$a(href = "mailto:beaconsproject@ualberta.ca", icon("address-book"), "Contact us")
+         tags$a(href = "mailto:beacons@ualberta.ca", icon("address-book"), "Contact us")
        )
      ),
      # Plain Text "About Us" Positioned Next to Dropdown
@@ -80,18 +80,14 @@ ui = dashboardPage(skin="black",
     conditionalPanel(
       condition='input.tabs=="hr"',
       hr(),
-      selectInput("caribou", "Select individual:", choices=NULL, multiple=FALSE),
+      selectInput("caribou", "Select individual:", choices=NULL, multiple=TRUE),
       selectInput("season", "Select season:", choices=NULL),
-      sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2024,2024), sep=""),
-      hr(),
-      selectInput("hr", "Estimator for HR1:", choices=c("MCP", "KDE", "aKDE"), selected="MCP"),
-      sliderInput("levels", "Isopleth level:", min=0.5, max=1, value=0.95),
-      numericInput("h", "KDE bandwidth:", 2, min=0, max=10),
-      selectInput("hr2", "Estimator for HR2:", choices=c("MCP", "KDE", "aKDE"), selected="KDE"),
-      sliderInput("levels2", "Isopleth level:", min=0.5, max=1, value=0.95),
-      numericInput("h2", "KDE bandwidth:", 2, min=0, max=10),
-      hr(),
+      sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
       actionButton("goButton", "Calculate HRs", style="color: #000"),
+      hr(),
+      selectInput("hr", "Estimator for HR1:", choices=c("MCP", "KDE", "aKDE", "LoCoH", "OD"), selected="MCP"),
+      sliderInput("levels", "Isopleth levels:", min=0.5, max=1, value=c(0.5, 0.95)),
+      numericInput("h", "KDE bandwidth:", 2, min=0, max=10),
     ),
     conditionalPanel(
       condition='input.tabs=="download"',
@@ -107,7 +103,8 @@ ui = dashboardPage(skin="black",
   dashboardBody(
     useShinyjs(),
     # Link to custom CSS for the orange theme
-    tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "green-theme.css")),
+    tags$head(tags$link(rel = "icon", type = "image/png", href = "logoblanc.png"),
+      tags$link(rel = "stylesheet", type = "text/css", href = "green-theme.css")),
     tabItems(
       tabItem(tabName="home",
         fluidRow(
@@ -131,6 +128,7 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="9",
             tabPanel("Home ranges", leafletOutput("map1", height=900) |> withSpinner()),
+            tabPanel("HR output", verbatimTextOutput("hr_output")),
             tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
           ),
           tabBox(

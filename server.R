@@ -24,7 +24,7 @@ server = function(input, output, session) {
       x <- st_read(input$gps_data$datapath)
     }
     ids <- as.character(sort(unique(x$id)))
-    updateSelectInput(session, "caribou", choices=c("All caribou", ids), selected=ids[1])
+    updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
   })
 
   # Update choices for seasons/migration periods based on input segmentation data
@@ -207,6 +207,33 @@ server = function(input, output, session) {
     glimpse(pca())
   })
 
+  # Output disturbance data to table
+  output$hr_output <- renderPrint({
+    req(input$caribou)
+    #print(hr_isopleths(hr1()[1]))
+    hr1_m2 <- as.numeric(hr_area(hr1())['area'][[1]][1])
+    foot <- foot() |> st_transform(3578)
+    hr <- hr_isopleths(hr1()) |>
+      st_transform(3578)
+    hrxfoot <- st_intersection(hr, foot)
+    if (nrow(hrxfoot)>0) {
+      hrxfoot_pct <- round(st_area(hrxfoot)/hr1_m2*100,2)
+    } else {
+      hrxfoot_pct <- 0
+    }
+    print(hrxfoot_pct)
+    print(hrxfoot_pct[1])
+    print(hrxfoot_pct[2])
+  })
+
+  hr0 <- reactive({
+    req(input$caribou)
+      #cat("One or more caribou\n")
+      #cat("Length:", length(input$caribou), "\n")
+      #cat("Name:", input$caribou, "\n")
+      print(hr_isopleths(hr1()))
+  })
+      
   #-------------------------------------------------
   # 3.3 Section: Home Ranges
   #-------------------------------------------------
@@ -225,87 +252,26 @@ server = function(input, output, session) {
   # Estimate home range
   hr1 <- reactive({
     if (input$hr=="MCP") {
-      if (input$caribou=="All caribou") {
-        hr_mcp(trk_all(), levels=input$levels)
-      } else {
-        hr_mcp(trk_one(), levels=input$levels)
-      }
+      hr_mcp(trk_one(), levels=input$levels)
     } else if (input$hr=="KDE") {
       lvl <- input$levels
-      if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_kde(trk_all(), levels=lvl)
-      } else {
-        hr_kde(trk_one(), levels=lvl)
-      }
+      if (lvl[2]==1) {lvl[2]=0.999}
+      hr_kde(trk_one(), levels=lvl)
     } else if (input$hr=="aKDE") {
       lvl <- input$levels
       #if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_akde(trk_all(), levels=lvl)
-      } else {
-        hr_akde(trk_one(), levels=lvl)
-      }
+      hr_akde(trk_one(), levels=lvl)
     } else if (input$hr=="LoCoH") {
       lvl <- input$levels
       #if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_locoh(trk_all(), levels=lvl)
-      } else {
-        hr_locoh(trk_one(), levels=lvl)
-      }
+      hr_locoh(trk_one(), levels=lvl)
     } else if (input$hr=="OD") {
       lvl <- input$levels
       #if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_od(trk_all(), levels=lvl)
-      } else {
-        hr_od(trk_one(), levels=lvl)
-      }
+      hr_od(trk_one(), levels=lvl)
     }      
   })
-  
-  hr2 <- reactive({
-    if (input$hr2=="MCP") {
-      if (input$caribou=="All caribou") {
-        hr_mcp(trk_all(), levels=input$levels2)
-      } else {
-        hr_mcp(trk_one(), levels=input$levels2)
-      }
-    } else if (input$hr2=="KDE") {
-      lvl <- input$levels2
-      if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_kde(trk_all(), levels=lvl)
-      } else {
-        hr_kde(trk_one(), levels=lvl)
-      }
-    } else if (input$hr2=="aKDE") {
-      lvl <- input$levels2
-      #if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_akde(trk_all(), levels=lvl)
-      } else {
-        hr_akde(trk_one(), levels=lvl)
-      }
-    } else if (input$hr2=="LoCoH") {
-      lvl <- input$levels2
-      #if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_locoh(trk_all(), levels=lvl)
-      } else {
-        hr_locoh(trk_one(), levels=lvl)
-      }
-    } else if (input$hr2=="OD") {
-      lvl <- input$levels2
-      #if (lvl==1) {lvl=0.999}
-      if (input$caribou=="All caribou") {
-        hr_od(trk_all(), levels=lvl)
-      } else {
-        hr_od(trk_one(), levels=lvl)
-      }
-    }      
-  })
+
 
   # GENERATE OUTPUTS
   # ----------------
@@ -319,40 +285,17 @@ server = function(input, output, session) {
       m <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
         addTiles(google, group="Google.Imagery") |>
         addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
+        addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
 
-      if (input$caribou=="All caribou") {
-        trk_all <- mutate(trk_all(), year=as.double(year)) |> group_by(id, year) |> arrange(id, year)
-        m <- m |> addPolygons(data=hr_isopleths(hr1()), color="blue", fill=F, weight=2, group="HR 1") |>
-          addPolygons(data=hr_isopleths(hr2()), color="red", fill=F, weight=2, group="HR 2")
-        m <- m |> 
-          #addPolygons(data=herd4326, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="YG herd boundary") |>
-          addCircles(data=trk_all, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_all()$t_) |>
-          addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
-          addPolylines(data=line(), color="black", weight=3, group="Linear disturbance") |>
-          addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-          addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-          addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-          addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
-          #addPolygons(data=ipca4326, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Proposed IPCAs") |>
-          addLegend("topleft", colors=col_yrs6, labels=years, title="Year") |>
-          addScaleBar(position="bottomright") |>
-          addLayersControl(position = "topright",
-            baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Google.Imagery"),
-            overlayGroups = c("Locations","Study area","Areal disturbance","Linear disturbance","Footprint 500m","Conservation areas","Fires","HR 1","HR 2"),
-            options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup(c("Areal disturbance","Linear disturbance","Footprint 500m","Conservation areas","Fires","HR MCP (black)","HR KDE (blue)"))
-
-      } else {
-        trk_one <- mutate(trk_one(), year=as.double(year))
+              trk_one <- mutate(trk_one(), year=as.double(year))
         trk2020 <- trk_one |> filter(year==2020)
         trk2021 <- trk_one |> filter(year==2021)
         trk2022 <- trk_one |> filter(year==2022)
         trk2023 <- trk_one |> filter(year==2023)
         trk2024 <- trk_one |> filter(year==2024)
         trk2025 <- trk_one |> filter(year==2025)
-        m <- m |> addPolygons(data=hr_isopleths(hr1()), color="blue", fill=F, weight=2, group="HR 1") |>
-          addPolygons(data=hr_isopleths(hr2()), color="red", fill=F, weight=2, group="HR 2")
+        m <- m |> addPolygons(data=hr_isopleths(hr1()), color="blue", fill=F, weight=2, group="Home ranges")
         groups <- NULL
         if (nrow(trk2020)>=1) {
           m <- m |> addPolylines(data=trk2020, lng=~x_, lat=~y_, color=col_yrs6[1], weight=2, group="Track 2020")
@@ -391,11 +334,10 @@ server = function(input, output, session) {
           addLegend("topleft", colors=col_yrs6, labels=years, title="Year") |>
           addScaleBar(position="bottomright") |>
           addLayersControl(position = "topright",
-            baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Google.Imagery"),
-            overlayGroups = c("Locations",groups,"Study area","Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas","HR 1","HR 2"),
+            baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Google.Imagery","Esri.WorldGrayCanvas"),
+            overlayGroups = c("Locations",groups,"Study area","Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas","Home ranges"),
             options = layersControlOptions(collapsed = FALSE)) |>
           hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
-      }
       m
     }
   })
@@ -403,11 +345,11 @@ server = function(input, output, session) {
   # Summary statistics based on mapped features
   output$tab1 <- renderTable({
     if (input$goButton) {
-      if (input$caribou=='All caribou') {
-        x <- trk_all()
-      } else {
+      #if (input$caribou=='All caribou') {
+      #  x <- trk_all()
+      #} else {
         x <- trk_one()
-      }
+      #}
       # Calculate a few statistics
       pca <- pca() |> st_transform(3578) |>
         st_union()
@@ -420,46 +362,30 @@ server = function(input, output, session) {
       pca_km2 <- units::set_units(pca_m2, km^2)
 
       # Estimator 1
-      hr_m2 <- as.numeric(hr_area(hr1())['area'])
-      hr_km2 <- round(hr_m2/1000000,2)
+      #hr_m2 <- as.numeric(hr_area(hr1())['area'])
+      #hr_km2 <- round(hr_m2/1000000,2)
+      hr1_m2 <- as.numeric(hr_area(hr1())['area'][[1]][1])
+      hr1_km2 <- round(hr1_m2/1000000,2)
+      hr2_m2 <- as.numeric(hr_area(hr1())['area'][[1]][2])
+      hr2_km2 <- round(hr2_m2/1000000,2)
       hr <- hr_isopleths(hr1()) |>
         st_transform(3578)
       hrxfoot <- st_intersection(hr, foot)
       if (nrow(hrxfoot)>0) {
-        hrxfoot_pct <- round(st_area(hrxfoot)/hr_m2*100,2)
+        hrxfoot_pct <- round(st_area(hrxfoot)/hr1_m2*100,2)
       } else {
         hrxfoot_pct <- 0
       }
       hrxpca <- st_intersection(hr, pca)
       if (nrow(hrxpca)>0) {
-        hrxpca_pct <- round(st_area(hrxpca)/hr_m2*100,2)
+        hrxpca_pct <- round(st_area(hrxpca)/hr1_m2*100,2)
       } else {
         hrxpca_pct <- 0
       }
-     
-      # Estimator 2
-      hr2_m2 <- as.numeric(hr_area(hr2())['area'])
-      hr2_km2 <- round(hr2_m2/1000000,2)
-      hr2 <- hr_isopleths(hr2()) |>
-        st_transform(3578)
-      hr2xfoot <- st_intersection(hr2, foot)
-      if (nrow(hr2xfoot)>0) {
-        hr2xfoot_pct <- round(st_area(hr2xfoot)/hr2_m2*100,2)
-      } else {
-        hr2xfoot_pct <- 0
-      }
-      hr2xpca <- st_intersection(hr2, pca)
-      if (nrow(hr2xpca)>0) {
-        hr2xpca_pct <- round(st_area(hr2xpca)/hr2_m2*100,2)
-      } else {
-        hr2xpca_pct <- 0
-      }
-
       tibble(
-        Statistic=c("Locations", "Study area (km2)", "Study area disturbed (%)", "HR1 (km2)", "HR2 (km2)", "HR1 disturbed (%)", 
-          "HR2 disturbed (%)", "HR1 in PCAs (%)", "HR2 in PCAs (%)"), 
-        Value=c(nrow(x), bnd_km2, foot_pct, hr_km2, hr2_km2, hrxfoot_pct, hr2xfoot_pct, hrxpca_pct, hr2xpca_pct))
-      
+        Statistic=c("Locations", "Study area (km2)", "Study area disturbed (%)", "HR95 (km2)", 
+                    "HR50 (km2)", "HR95 disturbed (%)", "HR50 disturbed (%)", "HR95 in PCAs (%)", "HR50 in PCAs (%)"), 
+        Value=c(nrow(x), bnd_km2, foot_pct, hr1_km2, hr2_km2, hrxfoot_pct[1], hrxfoot_pct[2], hrxpca_pct[1], hrxpca_pct[2] ))
     }
   })
 
@@ -470,7 +396,7 @@ server = function(input, output, session) {
         on.exit(removeModal())
         if (input$goButton) {
           st_write(hr_isopleths(hr1()), dsn=file, layer=paste0('HR1_',input$hr,input$levels), append=TRUE)
-          st_write(hr_isopleths(hr2()), dsn=file, layer=paste0('HR2_',input$hr2,input$levels2), append=TRUE)
+          st_write(gps_subset(), dsn=file, layer=paste0('GPS_', input$season), append=TRUE)
        }
     }
   )
