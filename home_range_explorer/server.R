@@ -207,33 +207,13 @@ server = function(input, output, session) {
     glimpse(pca())
   })
 
-  # Output disturbance data to table
-  output$hr_output <- renderPrint({
-    req(input$caribou)
-    #print(hr_isopleths(hr1()[1]))
-    hr1_m2 <- as.numeric(hr_area(hr1())['area'][[1]][1])
-    foot <- foot() |> st_transform(3578)
-    hr <- hr_isopleths(hr1()) |>
-      st_transform(3578)
-    hrxfoot <- st_intersection(hr, foot)
-    if (nrow(hrxfoot)>0) {
-      hrxfoot_pct <- round(st_area(hrxfoot)/hr1_m2*100,2)
-    } else {
-      hrxfoot_pct <- 0
-    }
-    print(hrxfoot_pct)
-    print(hrxfoot_pct[1])
-    print(hrxfoot_pct[2])
+  # Output sampling rates to table
+  output$sampling_rates <- renderDT({
+    trk_all() |> summarize_sampling_rate_many(cols='id') |>
+      datatable() |>
+      formatRound(columns=c('min','q1','median','mean','q3','max','sd'), digits=2)
   })
 
-  hr0 <- reactive({
-    req(input$caribou)
-      #cat("One or more caribou\n")
-      #cat("Length:", length(input$caribou), "\n")
-      #cat("Name:", input$caribou, "\n")
-      print(hr_isopleths(hr1()))
-  })
-      
   #-------------------------------------------------
   # 3.3 Section: Home Ranges
   #-------------------------------------------------
@@ -272,6 +252,24 @@ server = function(input, output, session) {
     }      
   })
 
+  # Output HR results
+  output$hr_output <- renderPrint({
+    req(input$caribou)
+    #print(hr_isopleths(hr1()[1]))
+    hr1_m2 <- as.numeric(hr_area(hr1())['area'][[1]][1])
+    foot <- foot() |> st_transform(3578)
+    hr <- hr_isopleths(hr1()) |>
+      st_transform(3578)
+    hrxfoot <- st_intersection(hr, foot)
+    if (nrow(hrxfoot)>0) {
+      hrxfoot_pct <- round(st_area(hrxfoot)/hr1_m2*100,2)
+    } else {
+      hrxfoot_pct <- 0
+    }
+    print(hrxfoot_pct)
+    print(hrxfoot_pct[1])
+    print(hrxfoot_pct[2])
+  })
 
   # GENERATE OUTPUTS
   # ----------------

@@ -1,0 +1,200 @@
+#-------------------------------------------------
+# 3. Server functions
+#-------------------------------------------------
+
+server = function(input, output, session) {
+
+  # RELOAD
+  observeEvent(input$reload_btn, {
+    session$reload()
+  })
+
+  #-------------------------------------------------
+  # 3.1 Section: Select data
+  #-------------------------------------------------
+
+  # UPDATE UI
+  # ---------
+
+  # Update choices for caribou individuals input based on input movement data
+  observeEvent(c(input$selectInput, input$gpkg), {
+    if (input$selectInput == "usedemo") {
+      x <- readr::read_csv("www/demo_gps.csv")
+    } else if (input$selectInput == "usegpkg") {
+      req(input$gpkg)
+      x <- readr::read_csv(input$gpkg$datapath)
+    }
+    ids <- as.character(sort(unique(x$id)))
+    updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
+  })
+
+  # Update choices for seasons/migration periods based on input segmentation data
+  observeEvent(c(input$selectInput, input$csv), {
+    if (input$selectInput == "usedemo") {
+      x <- readr::read_csv("www/demo_segments.csv")
+    } else if (input$selectInput == "usegpkg") {
+      req(input$csv)
+      x <- readr::read_csv(input$csv$datapath)
+    }
+    seasons <- x$season
+    updateSelectInput(session, "season", choices=c("Annual",seasons), selected="Annual")
+  })
+
+  # READ INPUT FILES
+  # ----------------
+
+  # Read gps movement data
+  gps_csv <- eventReactive(input$selectInput, {
+    if (input$selectInput == "usedemo") {
+      readr::read_csv('www/demo_gps.csv') |>
+          mutate(year=year(time), yday=yday(time))
+    } else if (input$selectInput == "usegpkg") {
+      req(input$gpkg)
+      readr::read_csv(input$gpkg$datapath) |>
+        mutate(year=year(time), yday=yday(time))
+    }
+  })
+
+  # Convert gps table to sf object
+  gps_sf <- reactive({
+    gps_csv() |>
+      st_as_sf(coords = c('long', 'lat')) |>
+      st_set_crs(4326) |>
+      mutate(year = year(time))
+  })
+
+  # Read seasons and migration periods data
+  seg_csv <- eventReactive(input$selectInput, {
+    if (input$selectInput == "usedemo") {
+      readr::read_csv('www/demo_segments.csv')
+    } else if (input$selectInput == "usegpkg") {
+      req(input$csv)
+      readr::read_csv(input$csv$datapath) 
+    }
+  })
+
+  # Output segments data to table
+  output$seg_data1 <- renderDT({
+    req(input$getButton)
+    x <- seg_csv()
+    datatable(x)
+  })
+
+  # Create tracks using amt package
+  trk_all <- eventReactive(input$getButton, {
+    x <- gps_csv() |>
+      make_track(.x=long, .y=lat, .t=time, id = id, long=long, lat=lat, crs = 4326) |>
+      transform_coords(crs_to = 3578)
+    x |> mutate(sl_ = step_lengths(x), 
+      speed = speed(x),
+      yday = yday(t_),
+      year = year(t_)) |>
+      mutate(yday = ifelse(yday>=day1 & yday<=366, yday-day1+1, 366-day1+1+yday),
+      nsd = nsd(x))
+  })
+  
+  # Output 'GPS data' to table
+  output$gps_data <- renderDT({
+    req(input$getButton)
+    datatable(gps_csv())
+  })
+
+  # Output 'Sampling duration' to plot
+  output$duration <- renderPlot({
+    ggplot(data=gps_sf(), aes(x=time, y=id)) +
+      geom_path(size=1) +
+      xlab('Time') + ylab('Collar ID') +
+      theme(legend.position = 'none') +
+      theme(axis.title = element_text(size = 15)) +
+      theme(axis.text = element_text(size = 13))
+  }, height=600)
+
+  # Output 'Sampling rates' to table
+  output$sampling_rates <- renderDT({
+    trk_all() |> summarize_sampling_rate_many(cols='id') |>
+      datatable() |>
+      formatRound(columns=c('min','q1','median','mean','q3','max','sd'), digits=2)
+  })
+
+  #-------------------------------------------------
+  # 3.3 Section: Define segments
+  #-------------------------------------------------
+
+  # Convert input segments data to expanded table (id by season)
+  seg_csv_list <- reactive({
+    req(input$getButton)
+    x <- seg_csv() |>
+      mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d"))) |>
+      mutate(start = ifelse(start>=day1 & start<=365, start-day1+1, 365-day1+1+start),
+        end = ifelse(end>=day1 & end<=365, end-day1+1, 365-day1+1+end))
+    seg_list <- list(c(0,366))
+    for (i in 1:nrow(x)) {
+      seg_list[[i+1]] <- c(x$start[i], x$end[i])
+    }
+    names(seg_list) <- c('Annual', x$season)
+    return(seg_list)
+  })
+
+  # Update seasonal/migration periods slider input based on selected input
+  observe({
+    segments <- seg_csv_list()
+    updateSliderInput(session, 'segments', value=segments[[input$season]])
+  })
+  
+  # Select tracks for one individual
+  trk_one <- reactive({
+    trk_all() |> 
+      filter(id %in% input$caribou) |>
+      filter(year >= input$daterange[1] & year <= input$daterange[2]) |> 
+      mutate(year=as.factor(year)) |>
+      mutate(selected=as.factor(ifelse((yday>=input$segments[1] & yday<=input$segments[2]), 1, 0)))
+  })
+
+  # Output three plots for segmentation
+  output$segmentPlot <- renderPlot({
+    if (input$goButton) {
+      trk_data <- trk_one()
+      p1 <- ggplot(trk_data, aes(long, lat, color=selected))
+      if (length(input$caribou)==1) {
+        p1 <- p1 + geom_path(color='grey') # only add lines for one individual otherwise too busy
+      }
+      p1 <- p1 + geom_point() +
+        scale_color_manual(values=c('grey65', 'red')) +
+        ylab('Latitude') + xlab('Longitude')
+      p2 <- ggplot(trk_data) +
+        geom_line(aes(yday, long, color=year)) +
+        ylab('Longitude') + xlab('Day of year') +
+        geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      p3 <- ggplot(trk_data) +
+        geom_line(aes(yday, lat, color=year)) + 
+        ylab('Latitude') + xlab('Day of year') +
+        geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      p4 <- ggplot(trk_data) + 
+          geom_line(aes(yday, nsd, color=year)) + 
+          ylab('NSD') + xlab('Day of year') +
+          geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      p1 | (p2/p3/p4)
+    }
+  })
+
+  # Expand segmentation data
+  seg_csv_expand <- reactive({
+    x <- seg_csv() |>
+       #mutate(start=yday(start), end=yday(end))
+       mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d")))
+    ids <- unique(gps_csv()$id)
+    y <- tibble(
+      id=rep(ids, each=nrow(x)), 
+      season=rep(x$season, length(ids)), 
+      start=rep(x$start, length(ids)), 
+      end=rep(x$end, length(ids)))
+  })
+
+  # Output expanded segmentation data to table
+  output$seg_data2 <- renderDT({
+    req(input$getButton)
+    x <- seg_csv_expand()
+    datatable(x)
+  })
+
+}

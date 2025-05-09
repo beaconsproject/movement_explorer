@@ -4,7 +4,7 @@ April 24, 2025
 
 The app is currently split into two apps for now.
 
-### Segmentation app
+### Segmentation Explorer
 
 The app can also be run from a local machine using the following steps (note, the first 2 steps only need to be run once):
 
@@ -17,7 +17,7 @@ The app can also be run from a local machine using the following steps (note, th
 
     shiny::runGitHub("beaconsproject/segmentation", subdir="home")
 
-### Homerange app
+### Home Range Explorer
 
 The app can also be run from a local machine using the following steps (note, the first 2 steps only need to be run once):
 
