@@ -29,3 +29,7 @@ The app can also be run from a local machine using the following steps (note, th
   3. Start the Shiny app:
 
     shiny::runGitHub("beaconsproject/movement_apps/home_range_explorer", subdir="home")
+
+### Movement Explorer
+
+

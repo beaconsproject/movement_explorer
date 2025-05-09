@@ -17,10 +17,11 @@ server = function(input, output, session) {
   # ---------
 
   # Update choices for caribou individuals input based on input movement data
-  observeEvent(input$selectInput, {
+  observeEvent(c(input$selectInput,input$gps_data), {
     if (input$selectInput == "usedemo") {
       x <- readr::read_csv('www/demo_gps.csv')
     } else if (input$selectInput == "usegpkg") {
+      req(input$gps_data)
       x <- st_read(input$gps_data$datapath)
     }
     ids <- as.character(sort(unique(x$id)))
@@ -28,10 +29,11 @@ server = function(input, output, session) {
   })
 
   # Update choices for seasons/migration periods based on input segmentation data
-  observeEvent(input$selectInput, {
+  observeEvent(c(input$selectInput,input$seg_data), {
     if (input$selectInput == "usedemo") {
       x <- readr::read_csv('www/demo_segments.csv')
     } else if (input$selectInput == "usegpkg") {
+      req(input$seg_data)
       x <- st_read(input$seg_data$datapath)
     }
     seasons <- x$season
