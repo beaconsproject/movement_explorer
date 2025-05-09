@@ -1,8 +1,8 @@
-## Movement Explorer
+## BEACONs Movement Apps
 
-April 24, 2025
+May 9, 2025
 
-The app is currently split into two apps for now.
+The BEACONs Movement Apps are meant to facilitate the exploration of movement data. Two apps are currently available.
 
 ### Segmentation Explorer
 
@@ -15,7 +15,7 @@ The app can also be run from a local machine using the following steps (note, th
 
   3. Start the Shiny app:
 
-    shiny::runGitHub("beaconsproject/segmentation", subdir="home")
+    shiny::runGitHub("beaconsproject/movement_apps/segmentation_explorer", subdir="home")
 
 ### Home Range Explorer
 
@@ -28,4 +28,4 @@ The app can also be run from a local machine using the following steps (note, th
 
   3. Start the Shiny app:
 
-    shiny::runGitHub("beaconsproject/homerange", subdir="home")
+    shiny::runGitHub("beaconsproject/movement_apps/home_range_explorer", subdir="home")
