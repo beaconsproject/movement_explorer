@@ -1,35 +1,26 @@
 ## BEACONs Movement Apps
 
-May 9, 2025
+May 13, 2025
 
-The BEACONs Movement Apps are meant to facilitate the exploration of movement data. Two apps are currently available.
+The BEACONs Movement Apps are meant to be used as part of a workflow for exploring movement data, defining seasonal and migration periods, estimating seasonal home ranges, and identifying seasonal movement corridors. Currently, three apps are available. A brief description of each app along with a link is provided below. If you are familiar with R, the apps can also be run on a local computer by downloading this repository.
+
 
 ### Segmentation Explorer
 
-The app can also be run from a local machine using the following steps (note, the first 2 steps only need to be run once):
+The Segmentation Explorer app is designed to assist users in defining seasonal and migration periods in their movement data.
 
-  1. Install R (download from [r-project.org](https://www.r-project.org/) and follow instructions)
-  2. Install the following additional packages:
+- <https://beaconsproject.shinyapps.io/segmentation_explorer/>
 
-    install.packages(c("sf","DT","amt","terra","patchwork",leaflet","dplyr","lubridate","shinydashboard","shinycssloaders","shinyjs"))
-
-  3. Start the Shiny app:
-
-    shiny::runGitHub("beaconsproject/movement_apps/segmentation_explorer", subdir="home")
 
 ### Home Range Explorer
 
-The app can also be run from a local machine using the following steps (note, the first 2 steps only need to be run once):
+The Home Range Explorer is designed to assist users in estimating seasonal and annual home ranges using a variety of approaches.
 
-  1. Install R (download from [r-project.org](https://www.r-project.org/) and follow instructions)
-  2. Install the following additional packages:
-
-    install.packages(c("sf","DT","amt","terra","leaflet","dplyr","lubridate","shinydashboard","shinycssloaders","shinyjs"))
-
-  3. Start the Shiny app:
-
-    shiny::runGitHub("beaconsproject/movement_apps/home_range_explorer", subdir="home")
-
-### Movement Explorer
+- <https://beaconsproject.shinyapps.io/home_range_explorer/>
 
 
+### Corridor Explorer
+
+The Corridor Explorer is designed to assist users in identifying seasonal movement corridors (paths) using a variety of approaches.
+
+- <https://beaconsproject.shinyapps.io/corridor_explorer/>

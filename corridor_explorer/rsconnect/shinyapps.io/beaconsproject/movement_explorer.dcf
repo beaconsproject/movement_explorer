@@ -1,0 +1,10 @@
+name: movement_explorer
+title:
+username: beaconsproject
+account: beaconsproject
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14720345
+bundleId: 10257779
+url: https://beaconsproject.shinyapps.io/movement_explorer/
+version: 1
