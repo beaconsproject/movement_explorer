@@ -15,7 +15,7 @@ Please note that the Movement Explorer app is intended to provide users with a s
 <br>
 
 ::: {align="center"}
-![](pics/gabe51.png)
+![](pics/gabe1.jpg)
 :::
 
 <br>

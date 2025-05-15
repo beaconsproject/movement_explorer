@@ -11,7 +11,7 @@ The Home Range Explorer was designed to assist with this process by providing a 
 <br>
 
 ::: {align="center"}
-![](pics/gabe51.png)
+![](pics/gabe1.jpg)
 :::
 
 <br>

@@ -9,9 +9,8 @@ Understanding how animals use space and migrate is crucial for conservation and 
 <br>
 <div align="center">
 
-![](pics/gabe51.png)
+![](pics/gabe1.jpg)
 
-Source: Gabriel Rivest 2024
 </div>
 <br>
 
