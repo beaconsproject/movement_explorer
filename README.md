@@ -9,7 +9,7 @@ The BEACONs Movement Apps are meant to be used as part of a [workflow](workflow.
 
 The Segmentation Explorer app is designed to assist users in defining seasonal and migration periods in their movement data.
 
-- <https://beaconsproject.shinyapps.io/segmentation_explorer/>
+- <https://beaconsproject.shinyapps.io/movement_explorer/>
 
 
 ### Home Range Explorer
@@ -23,7 +23,7 @@ The Home Range Explorer is designed to assist users in estimating seasonal and a
 
 The Corridor Explorer is designed to assist users in identifying seasonal movement corridors (paths) using a variety of approaches.
 
-- <https://beaconsproject.shinyapps.io/corridor_explorer/>
+- <https://beaconsproject.shinyapps.io/connectivity_explorer/>
 
 
 ## Issues
