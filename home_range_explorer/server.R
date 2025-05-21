@@ -1,17 +1,40 @@
-#-------------------------------------------------
-# 3. Server functions
-#-------------------------------------------------
-
 server = function(input, output, session) {
 
+  ################################################################################################
   # RELOAD
   observeEvent(input$reload_btn, {
     session$reload()
   })
 
   #-------------------------------------------------
-  # 3.1 Section: Select data
+  # Section: Select data
   #-------------------------------------------------
+
+  ##############################################################################
+  # Observe on layers names in gpkg
+  lyr_names <- eventReactive(input$selectInput, {
+    if (input$selectInput == 'usedemo') {
+      file <- 'www/demo.gpkg'
+    } else if (!is.null(input$upload_gpkg)) {
+      file <- input$upload_gpkg$datapath
+      ext <- tools::file_ext(file)
+      if (ext != "gpkg") {
+        showModal(modalDialog(
+          title = "Wrong file type, must be a geopackage (.gpkg)",
+          easyClose = TRUE,
+          footer = NULL)
+        ) 
+        return()
+      }
+    } else {
+      return(NULL)
+    }
+    
+    # Extract layer names
+    layers <- st_layers(file)$name
+    return(layers)
+  })
+  ################################################################################################
 
   # UPDATE UI
   # ---------
@@ -66,68 +89,102 @@ server = function(input, output, session) {
   })
 
   studyarea <- eventReactive(list(input$selectInput, input$upload_gpkg),{
-    #req(input$getButton)
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'studyarea', quiet = TRUE) |>
         st_transform(4326)
     } else if (input$selectInput == "usegpkg") {
+      req(input$upload_gpkg)
+      # Ensure upload_gpkg is not NULL before reading the file
+      has_studyarea <- "studyarea" %in% lyr_names()
+      if (!has_studyarea) {
+        showModal(modalDialog(
+          title = "Missing required 'studyarea' layer in the GeoPackage.",
+          easyClose = TRUE, footer = NULL)) 
+      }
+      req(has_studyarea)
       st_read(input$upload_gpkg$datapath, 'studyarea', quiet = TRUE) |>
         st_transform(4326)
     }
   })
   
-  line <- eventReactive(input$selectInput,{
-    #req(input$getButton)
+  line <- reactive({
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'linear_disturbance', quiet = TRUE) |>
         st_transform(4326)
     } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
+      req(input$upload_gpkg)
+      if ("linear_disturbance" %in% lyr_names()) {
+        st_read(input$upload_gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
+          st_transform(4326)
+      } else {
+        return(NULL)  
+      }
     }
   })
   
-  poly <- eventReactive(input$selectInput,{
-    #req(input$getButton)
+  poly <- reactive({
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'areal_disturbance', quiet = TRUE) |>
         st_transform(4326)
     } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
+       req(input$upload_gpkg)
+       if ("areal_disturbance" %in% lyr_names()) {
+         st_read(input$upload_gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
+           st_transform(4326)
+      } else {
+        return(NULL)  
+      }
     }
   })
 
-  fire <- eventReactive(input$selectInput,{
-    #req(input$getButton)
+  fire <- reactive({
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'fires', quiet = TRUE) |>
         st_transform(4326)
     } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'fires', quiet = TRUE) |>
-        st_transform(4326)
+      req(input$upload_gpkg)
+      if ("fires" %in% lyr_names()) {
+        st_read(input$upload_gpkg$datapath, 'fires', quiet = TRUE) |>
+          st_transform(4326)
+      } else {
+        return(NULL)  
+      }
     }
   })
 
-  foot <- eventReactive(input$selectInput,{
-    #req(input$getButton)
+  foot <- reactive({
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'footprint_500m', quiet = TRUE) |>
         st_transform(4326)
     } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'footprint_500m', quiet = TRUE) |>
-        st_transform(4326)
+      req(input$upload_gpkg)
+      if ("footprint_500m" %in% lyr_names()) {
+        st_read(input$upload_gpkg$datapath, 'footprint_500m', quiet = TRUE) |>
+          st_transform(4326)
+      } else {
+        return(NULL)  
+      }
     }
   })
 
-  pca <- eventReactive(input$selectInput,{
-    #req(input$getButton)
+  pca <- reactive({
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'protected_areas', quiet = TRUE) |>
         st_transform(4326)
     } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'protected_areas', quiet = TRUE) |>
-        st_transform(4326)
+      req(input$upload_gpkg)
+      if ("protected_areas" %in% lyr_names()) {
+        st_read(input$upload_gpkg$datapath, 'protected_areas', quiet = TRUE) |>
+          st_transform(4326)
+      } else {
+        return(NULL)  
+      }
     }
   })
 
@@ -278,7 +335,9 @@ server = function(input, output, session) {
   
   # Leaflet map with locations, home ranges, and disturbances
   output$map1 <- renderLeaflet({
-    if (input$goButton) {
+    req(input$goButton)
+    req(studyarea())
+    #if (input$goButton) {
       years <- unique(gps_sf()$year)
       caribou_pal <- colorFactor(topo.colors(25), gps_sf()$id)
       year_pal <- colorNumeric(palette=col_yrs6, domain=years)
@@ -287,8 +346,7 @@ server = function(input, output, session) {
         addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
-
-              trk_one <- mutate(trk_one(), year=as.double(year))
+        trk_one <- mutate(trk_one(), year=as.double(year))
         trk2020 <- trk_one |> filter(year==2020)
         trk2021 <- trk_one |> filter(year==2021)
         trk2022 <- trk_one |> filter(year==2022)
@@ -339,7 +397,7 @@ server = function(input, output, session) {
             options = layersControlOptions(collapsed = FALSE)) |>
           hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
       m
-    }
+    #}
   })
 
   # Summary statistics based on mapped features

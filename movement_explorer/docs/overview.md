@@ -1,4 +1,6 @@
-## Defining Seasonal and Migration Periods
+## Welcome to the Movement Explorer
+
+Defining Seasonal and Migration Periods.
 
 Understanding how animals use space and migrate is crucial for conservation and for understanding the effects of environmental changes. The Seasonal Explorer app is a tool designed to assist users in defining seasonal and migration periods in their movement data. Specifically, the app will help with the following tasks:
 

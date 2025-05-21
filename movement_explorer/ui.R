@@ -1,11 +1,7 @@
-#-------------------------------------------------
-# 2. User interface
-#-------------------------------------------------
-
 ui = dashboardPage(skin="black",
 
   #-------------------------------------------------
-  # 2.1 Dashboard header
+  # Dashboard header
   #-------------------------------------------------
 
   title = "Movement Explorer",
@@ -15,6 +11,7 @@ ui = dashboardPage(skin="black",
      height = "50px",   # Adjust the height of the logo
      style = "margin-right: 10px;"  # Add some spacing around the logo
    ),"BEACONs Movement Explorer"), titleWidth = 387,
+   
    # Add Reload Button Next to Sidebar Toggle
    tags$li(
      class = "dropdown",
@@ -35,11 +32,7 @@ ui = dashboardPage(skin="black",
        headerText = "",  # No header text in dropdown
        menuItem("Website", href = "https://beaconsproject.ualberta.ca/", icon = icon("globe")),
        menuItem("GitHub", href = "https://github.com/beaconsproject/", icon = icon("github")),
-       #menuItem("Contact us", href = "mailto: beaconsproject@ualberta.ca", icon = icon("address-book"))
-       tags$li(
-         class = "treeview",
-         tags$a(href = "mailto:beacons@ualberta.ca", icon("address-book"), "Contact us")
-       )
+       menuItem("Contact us", href = "mailto: beaconsproject@ualberta.ca", icon = icon("address-book"))
      ),
      # Plain Text "About Us" Positioned Next to Dropdown
      tags$span(
@@ -49,87 +42,90 @@ ui = dashboardPage(skin="black",
    )
   ),
 
-
   #-------------------------------------------------
-  # 2.2 Dashboard sidebar
+  # Dashboard sidebar
   #-------------------------------------------------
 
   dashboardSidebar(
-    sidebarMenu(id='tabs',
-      menuItem('Home', tabName='home', icon=icon('th')),
-      menuItem('Select data', tabName='data', icon=icon('th')),
-      menuItem('Define segments', tabName = 'segments', icon = icon('th'))
+    sidebarMenu(id="tabs",
+      menuItem("Welcome", tabName="home", icon=icon("th")),
+      menuItem("Select study area", tabName="select", icon=icon("arrow-pointer")),
+      menuItem("Define segments", tabName = "segments", icon = icon("arrow-pointer")),
+      menuItem("Download data", tabName = "download", icon = icon("th")),
+      hr()
     ),
     conditionalPanel(
-      condition="input.tabs=='data'",
-      hr(),
+      condition="input.tabs=='select'",
       radioButtons("selectInput", "Select source dataset:",
         choices = list("Use demo dataset" = "usedemo", 
-                       "Upload your own data" = "usegpkg"),
+                       "Upload your own data" = "usecsv"),
         selected = character(0), 
         inline = FALSE),
       conditionalPanel(
-        condition='input.selectInput=="usegpkg"',
-      fileInput('gpkg', 'Movement data (csv):', accept='.csv'),
-      fileInput('csv', 'Segmentation data (csv):', accept='.csv')
+        condition="input.selectInput=='usecsv'",
+        fileInput("csv1", "Movement data (csv):", accept=".csv"),
+        fileInput("csv2", "Segmentation data (csv):", accept=".csv")
       ),
-      #br(),
-      actionButton('getButton', 'Load data')
+      actionButton("getButton", "Load data")
     ),
     conditionalPanel(
       condition="input.tabs=='segments'",
+      selectInput("caribou", "Select individual:", choices=NULL, multiple=FALSE),
+      selectInput("season", "Select season:", choices=NULL),
+      sliderInput("daterange", "Select year(s):", min=2021, max=2024, value=c(2024,2024), sep=""),
+      textInput("day1", "Start of year:", value = NULL),
       hr(),
-      selectInput('caribou', 'Select individual:', choices=NULL, multiple=FALSE),
-      selectInput('season', 'Select season:', choices=NULL),
-      sliderInput('daterange', 'Select year(s):', min=2021, max=2024, value=c(2024,2024), sep=''),
-      #selectInput('stat', 'Select plot type:', choices=c('nsd', 'speed')),
-      hr(),
-      actionButton('goButton', 'Run', style='color: #000'),
-      #hr(),
-      #downloadButton('downloadData', 'Save segmentation data', style='color: #000')
+      actionButton("goButton", "Run", style="color: #000"),
+    ),
+    conditionalPanel(
+      condition='input.tabs=="download"',
+      div(style="position:relative; left:calc(6%);", downloadButton("downloadData", "Save segmentation table", style='color: #000'))
     )
   ),
 
   #-------------------------------------------------
-  # 2.3 Dashboard body
+  # Dashboard body
   #-------------------------------------------------
   
   dashboardBody(
     useShinyjs(),
     # Link to custom CSS for the orange theme
     tags$head(tags$link(rel = "icon", type = "image/png", href = "logoblanc.png"),
-      tags$link(rel = "stylesheet", type = "text/css", href = "green-theme.css")),
+              tags$link(rel = "stylesheet", type = "text/css", href = "green-theme.css")),
    tabItems(
-      tabItem(tabName='home',
+      tabItem(tabName="home",
         fluidRow(
-          tabBox(id = 'one', width='12',
-            tabPanel('Overview', includeMarkdown('docs/overview.md')),
-            tabPanel('User guide', includeMarkdown('docs/user_guide.md')),
-            tabPanel('Dataset', includeMarkdown('docs/datasets.md'))
+          tabBox(id = "one", width="12",
+            tabPanel("Overview", includeMarkdown("docs/overview.md")),
+            tabPanel("User guide", includeMarkdown("docs/user_guide.md")),
+            tabPanel("Datasets", includeMarkdown("docs/datasets.md"))
           )
         )
       ),
-      tabItem(tabName='data',
+      tabItem(tabName="select",
         fluidRow(
-          tabBox(id = 'one', width='12',
-            tabPanel('Movement data', DTOutput('gps_data')),
-            tabPanel('Segmentation data', DTOutput('seg_data1')),
-            #tabPanel('Sampling duration', plotOutput('duration')),
-            tabPanel('Sampling rates', DTOutput('sampling_rates')),
-            tabPanel('Help', includeMarkdown('docs/select_data.md'))
+          tabBox(id = "one", width="12",
+            tabPanel("Movement data", DTOutput("gps_data")),
+            tabPanel("Segmentation data", DTOutput("seg_data1")),
+            #tabPanel("Sampling duration", plotOutput("duration")),
+            tabPanel("Sampling rates", DTOutput("sampling_rates")),
+            tabPanel("Help", includeMarkdown("docs/select_data.md"))
           )
         )
       ),
-      tabItem(tabName='segments',
+      tabItem(tabName="segments",
         fluidRow(
-          tabBox(id='three', width='12',
-            tabPanel('Segmentation plots',
-              #sliderInput('segments', 'Define date range:', min=1, max=366, step=1, value=segments[['FallMigration']], width=1200),
-              sliderInput('segments', 'Define date range:', min=1, max=366, step=1, value=c(0,366), width=1200),
-              plotOutput('segmentPlot', height=750)),
-            tabPanel('Segmentation table', DTOutput('seg_data2')),
+          tabBox(id="three", width="12",
+            tabPanel("Segmentation plots",
+              #sliderInput("segments", "Define date range:", min=1, max=366, step=1, value=segments[["FallMigration"]], width=1200),
+              #sliderInput("segments2", "Define date range:", min=as.Date("Jan-01","%b-%d"), max=as.Date("Dec-01","%b-%d"),
+              #  value=c(as.Date("Feb-01","%b-%d"),as.Date("Jun-30","%b-%d")),timeFormat="%b-%d", width=1200),
+              sliderInput("segments", "Define date range:", min=1, max=365, step=1, value=c(1,365), width=1200),
+              plotOutput("segmentPlot", height=700)),
+            tabPanel("Segmentation table", DTOutput("seg_data2")),
+            tabPanel("Test output", verbatimTextOutput("test_output")),
             tabPanel("Mapview", height=750),
-            tabPanel('Help', includeMarkdown('docs/define_segments.md'))
+            tabPanel("Help", includeMarkdown("docs/define_segments.md"))
           )
         )
       )        

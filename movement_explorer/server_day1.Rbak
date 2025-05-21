@@ -88,9 +88,8 @@ server = function(input, output, session) {
       speed = speed(x),
       yday = yday(t_),
       year = year(t_)) |>
-      #mutate(nsd = nsd(x)) |>
-      mutate(yday = ifelse(yday>=day1() & yday<=366, yday-day1()+1, 366-day1()+1+yday), 
-        nsd = nsd(x))
+      mutate(yday = ifelse(yday>=day1 & yday<=366, yday-day1+1, 366-day1+1+yday),
+      nsd = nsd(x))
   })
   
   # Output 'GPS data' to table
@@ -125,8 +124,8 @@ server = function(input, output, session) {
     req(input$getButton)
     x <- seg_csv() |>
       mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d"))) |>
-      mutate(start = ifelse(start>=day1() & start<=365, start-day1()+1, 365-day1()+1+start),
-        end = ifelse(end>=day1() & end<=365, end-day1()+1, 365-day1()+1+end))
+      mutate(start = ifelse(start>=day1 & start<=365, start-day1+1, 365-day1+1+start),
+        end = ifelse(end>=day1 & end<=365, end-day1+1, 365-day1+1+end))
     seg_list <- list(c(0,366))
     for (i in 1:nrow(x)) {
       seg_list[[i+1]] <- c(x$start[i], x$end[i])
@@ -135,70 +134,53 @@ server = function(input, output, session) {
     return(seg_list)
   })
 
-  # Update start of year
-  observe({
-    x <- seg_csv()
-    x1 <- x$start[x$season=="Annual"]
-    updateTextInput(session, "day1", value=x1)
-  })
-
-  # First day of year - doesn't have to be Jan-01
-  day1 <- reactive({
-    x <- seg_csv()
-    yday(as.Date(x$start[x$season=="Annual"], "%b-%d"))
-  })
-
   # Update seasonal/migration periods slider input based on selected input
   observe({
     segments <- seg_csv_list()
-    x <- seg_csv()
-    x1 <- x$start[x$season=="Annual"]
-    x2 <- x$end[x$season=="Annual"]
-    updateSliderInput(session, 'segments', label=paste0("Define date range (",x1,"-",x2,")"), 
-      value=c(segments[[input$season]][1],segments[[input$season]][2]))
+    updateSliderInput(session, 'segments', value=segments[[input$season]])
   })
-
+  
   # Select tracks for one individual
   trk_one <- reactive({
-    start <- input$segments[1]
-    end <- input$segments[2]
-    x <- trk_all() |> 
+    trk_all() |> 
       filter(id %in% input$caribou) |>
       filter(year >= input$daterange[1] & year <= input$daterange[2]) |> 
       mutate(year=as.factor(year)) |>
-      mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
+      mutate(selected=as.factor(ifelse((yday>=input$segments[1] & yday<=input$segments[2]), 1, 0)))
   })
 
   # Output three plots for segmentation
   output$segmentPlot <- renderPlot({
-    req(input$goButton)
-    trk_data <- trk_one() |>
-      mutate(selected = as.factor(selected))
-    p1 <- ggplot(trk_data, aes(long, lat, color=selected))
-    if (length(input$caribou)==1) {
-      p1 <- p1 + geom_path(color='grey') # only add lines for one individual otherwise too busy
-    }
-    p1 <- p1 + geom_point() +
-      scale_color_manual(values=c('grey65', 'red')) +
-      ylab('Latitude') + xlab('Longitude')
-    p2 <- ggplot(trk_data) +
-      geom_line(aes(yday, long, color=year)) +
-      ylab('Longitude') + xlab('Day of year') +
-      geom_vline(xintercept=c(input$segments[1],input$segments[2]))
-    p3 <- ggplot(trk_data) +
-      geom_line(aes(yday, lat, color=year)) + 
-      ylab('Latitude') + xlab('Day of year') +
-      geom_vline(xintercept=c(input$segments[1],input$segments[2]))
-    p4 <- ggplot(trk_data) + 
-        geom_line(aes(yday, nsd, color=year)) + 
-        ylab('NSD') + xlab('Day of year') +
+    if (input$goButton) {
+      trk_data <- trk_one()
+      p1 <- ggplot(trk_data, aes(long, lat, color=selected))
+      if (length(input$caribou)==1) {
+        p1 <- p1 + geom_path(color='grey') # only add lines for one individual otherwise too busy
+      }
+      p1 <- p1 + geom_point() +
+        scale_color_manual(values=c('grey65', 'red')) +
+        ylab('Latitude') + xlab('Longitude')
+      p2 <- ggplot(trk_data) +
+        geom_line(aes(yday, long, color=year)) +
+        ylab('Longitude') + xlab('Day of year') +
         geom_vline(xintercept=c(input$segments[1],input$segments[2]))
-    p1 | (p2/p3/p4)
+      p3 <- ggplot(trk_data) +
+        geom_line(aes(yday, lat, color=year)) + 
+        ylab('Latitude') + xlab('Day of year') +
+        geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      p4 <- ggplot(trk_data) + 
+          geom_line(aes(yday, nsd, color=year)) + 
+          ylab('NSD') + xlab('Day of year') +
+          geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      p1 | (p2/p3/p4)
+    }
   })
 
   # Expand segmentation data
   seg_csv_expand <- reactive({
-    x <- seg_csv() #|> mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d")))
+    x <- seg_csv() |>
+       #mutate(start=yday(start), end=yday(end))
+       mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d")))
     ids <- unique(gps_csv()$id)
     y <- tibble(
       id=rep(ids, each=nrow(x)), 
@@ -207,33 +189,11 @@ server = function(input, output, session) {
       end=rep(x$end, length(ids)))
   })
 
-  # Reactive data that can be updated
-  output_data <- reactiveVal(tibble(id=NULL, season=NULL, start=NULL, end=NULL))
-
-  # Render the initial table
+  # Output expanded segmentation data to table
   output$seg_data2 <- renderDT({
-    datatable(output_data())
-  })
-  
-  # Render the initial table (test widget)
-  output$test_output <- renderPrint({
-    print(trk_one())
-    print(output_data())
-  })
-
-  # Update the table when the button is clicked
-  observeEvent(input$goButton, {
+    req(input$getButton)
     x <- seg_csv_expand()
-    x$start[x$id==input$caribou & x$season==input$season] <- format(as.Date(input$segments[1]-1), "%b-%d")
-    x$end[x$id==input$caribou & x$season==input$season] <- format(as.Date(input$segments[2]-1), "%b-%d")
-    output_data(x)
+    datatable(x)
   })
-
-  output$downloadData <- downloadHandler(
-    filename = function() { paste("movement_explorer-", Sys.Date(), ".csv", sep="") },
-    content = function(file) {
-      readr::write_csv(seg_csv_expand(), file)
-    }
-  )
 
 }

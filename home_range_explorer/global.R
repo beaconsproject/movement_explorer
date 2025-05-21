@@ -1,18 +1,16 @@
-library(sf)
-library(DT)
-library(amt)
-library(dplyr)
-library(terra)
-library(leaflet)
-library(shinyjs)
-library(markdown)
-library(lubridate)
-library(shinydashboard)
-library(shinycssloaders)
+# Check and install packages if missing
+required_packages <- c("sf", "DT", "amt", "dplyr", "terra", "ggplot2", "leaflet", 
+  "shinyjs", "markdown", "patchwork", "lubridate", "shinydashboard", "shinycssloaders"
+)
 
-#-------------------------------------------------
-# 1. Options and parameters
-#-------------------------------------------------
+# Install any missing packages
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
+if (length(missing_packages) > 0) {
+  install.packages(missing_packages)
+}
+
+# Load the packages
+invisible(lapply(required_packages, library, character.only = TRUE))
 
 # Increase memory size for large files
 options(shiny.maxRequestSize=100*1024^2) 

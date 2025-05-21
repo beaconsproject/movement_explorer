@@ -1,11 +1,7 @@
-#-------------------------------------------------
-# 2. User interface
-#-------------------------------------------------
-
 ui = dashboardPage(skin="black",
 
   #-------------------------------------------------
-  # 2.1 Dashboard header
+  # Dashboard header
   #-------------------------------------------------
 
   title = "Home Range Explorer",
@@ -15,6 +11,7 @@ ui = dashboardPage(skin="black",
      height = "50px",   # Adjust the height of the logo
      style = "margin-right: 10px;"  # Add some spacing around the logo
    ),"BEACONs Home Range Explorer"), titleWidth = 412,
+   
    # Add Reload Button Next to Sidebar Toggle
    tags$li(
      class = "dropdown",
@@ -35,11 +32,7 @@ ui = dashboardPage(skin="black",
        headerText = "",  # No header text in dropdown
        menuItem("Website", href = "https://beaconsproject.ualberta.ca/", icon = icon("globe")),
        menuItem("GitHub", href = "https://github.com/beaconsproject/", icon = icon("github")),
-       #menuItem("Contact us", href = "mailto: beaconsproject@ualberta.ca", icon = icon("address-book"))
-       tags$li(
-         class = "treeview",
-         tags$a(href = "mailto:beacons@ualberta.ca", icon("address-book"), "Contact us")
-       )
+       menuItem("Contact us", href = "mailto: beaconsproject@ualberta.ca", icon = icon("address-book"))
      ),
      # Plain Text "About Us" Positioned Next to Dropdown
      tags$span(
@@ -50,19 +43,19 @@ ui = dashboardPage(skin="black",
   ),
 
   #-------------------------------------------------
-  # 2.2 Dashboard sidebar
+  # Dashboard sidebar
   #-------------------------------------------------
 
   dashboardSidebar(
     sidebarMenu(id="tabs",
-      menuItem("Overview", tabName="home", icon=icon("th")),
-      menuItem("Select data", tabName="data", icon=icon("arrow-pointer")),
+      menuItem("Welcome", tabName="home", icon=icon("th")),
+      menuItem("Select study area", tabName="data", icon=icon("arrow-pointer")),
       menuItem("Home ranges", tabName="hr", icon=icon("arrow-pointer")),
-      menuItem("Download data", tabName = "download", icon = icon("th"))
+      menuItem("Download data", tabName = "download", icon = icon("th")),
+      hr()
     ),
     conditionalPanel(
       condition='input.tabs=="data"',
-      hr(),
       radioButtons("selectInput", "Select source dataset:",
         choices = list("Use demo dataset" = "usedemo", 
                        "Upload your own data" = "usegpkg"),
@@ -79,7 +72,6 @@ ui = dashboardPage(skin="black",
     ),
     conditionalPanel(
       condition='input.tabs=="hr"',
-      hr(),
       selectInput("caribou", "Select individual:", choices=NULL, multiple=TRUE),
       selectInput("season", "Select season:", choices=NULL),
       sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
@@ -97,7 +89,7 @@ ui = dashboardPage(skin="black",
   ),
 
   #-------------------------------------------------
-  # 2.3 Dashboard body
+  # Dashboard body
   #-------------------------------------------------
   
   dashboardBody(
