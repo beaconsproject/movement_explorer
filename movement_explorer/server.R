@@ -1,40 +1,8 @@
 server = function(input, output, session) {
 
-  ################################################################################################
   # RELOAD
   observeEvent(input$reload_btn, {
     session$reload()
-  })
-
-  #-------------------------------------------------
-  # 3.1 Section: Select data
-  #-------------------------------------------------
-
-  # UPDATE UI
-  # ---------
-
-  # Update choices for caribou individuals input based on input movement data
-  observeEvent(c(input$selectInput, input$csv1), {
-    if (input$selectInput == "usedemo") {
-      x <- readr::read_csv("www/demo_gps.csv")
-    } else if (input$selectInput == "usecsv") {
-      req(input$csv1)
-      x <- readr::read_csv(input$csv1$datapath)
-    }
-    ids <- as.character(sort(unique(x$id)))
-    updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
-  })
-
-  # Update choices for seasons/migration periods based on input segmentation data
-  observeEvent(c(input$selectInput, input$csv2), {
-    if (input$selectInput == "usedemo") {
-      x <- readr::read_csv("www/demo_segments.csv")
-    } else if (input$selectInput == "usecsv") {
-      req(input$csv2)
-      x <- readr::read_csv(input$csv2$datapath)
-    }
-    seasons <- x$season
-    updateSelectInput(session, "season", choices=c("Annual",seasons), selected="Annual")
   })
 
   ##############################################################################
@@ -54,14 +22,6 @@ server = function(input, output, session) {
     }
   })
 
-  # Convert gps table to sf object
-  gps_sf <- reactive({
-    gps_csv() |>
-      st_as_sf(coords = c('long', 'lat')) |>
-      st_set_crs(4326) |>
-      mutate(year = year(time))
-  })
-
   # Read seasons and migration periods data
   seg_csv <- eventReactive(input$selectInput, {
     if (input$selectInput == "usedemo") {
@@ -72,12 +32,39 @@ server = function(input, output, session) {
     }
   })
 
-  # Output segments data to table
-  output$seg_data1 <- renderDT({
-    req(input$getButton)
-    x <- seg_csv()
-    datatable(x)
+  ##############################################################################
+  # UPDATE UI
+  ##############################################################################
+
+  # Update choices for caribou individuals input based on input movement data
+  observeEvent(c(input$selectInput, input$csv1), {
+    x <- gps_csv()
+    ids <- as.character(sort(unique(x$id)))
+    updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
   })
+
+  # Update choices for seasons/migration periods based on input segmentation data
+  observeEvent(c(input$selectInput, input$csv2), {
+    x <- seg_csv()
+    seasons <- x$season
+    updateSelectInput(session, "season", choices=c("Annual",seasons), selected="Annual")
+  })
+
+  # Update seasonal/migration periods slider input based on selected input
+  observeEvent(c(input$caribou,input$season),{
+    x <- seg_csv()
+    x1 <- x$start[x$season=="Annual"]
+    x2 <- x$end[x$season=="Annual"]
+    y <- seg_csv_expand()
+    start=y$start_doy[y$id==input$caribou & y$season==input$season]
+    end=y$end_doy[y$id==input$caribou & y$season==input$season]
+    updateSliderInput(session, 'segments', label=paste0("Define date range (",x1,"-",x2,")"), 
+      value=c(start, end))
+  })
+
+  ##############################################################################
+  # CREATE TRACKS
+  ##############################################################################
 
   # Create tracks using amt package
   trk_all <- eventReactive(input$getButton, {
@@ -93,6 +80,28 @@ server = function(input, output, session) {
         nsd = nsd(x))
   })
   
+  # Select tracks for one individual
+  trk_one <- reactive({
+    start <- input$segments[1]
+    end <- input$segments[2]
+    x <- trk_all() |> 
+      filter(id %in% input$caribou) |>
+      filter(year >= input$daterange[1] & year <= input$daterange[2]) |> 
+      mutate(year=as.factor(year)) |>
+      mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
+  })
+
+  ##############################################################################
+  # SUMMARY TABLES & PLOTS
+  ##############################################################################
+
+  # Output segments data to table
+  output$seg_data1 <- renderDT({
+    req(input$getButton)
+    x <- seg_csv()
+    datatable(x)
+  })
+
   # Output 'GPS data' to table
   output$gps_data <- renderDT({
     req(input$getButton)
@@ -101,7 +110,9 @@ server = function(input, output, session) {
 
   # Output 'Sampling duration' to plot
   output$duration <- renderPlot({
-    ggplot(data=gps_sf(), aes(x=time, y=id)) +
+   x <- gps_csv() |>
+      mutate(id = as.factor(id), year = year(time))
+    ggplot(data=x, aes(x=time, y=id)) +
       geom_path(size=1) +
       xlab('Time') + ylab('Collar ID') +
       theme(legend.position = 'none') +
@@ -117,23 +128,8 @@ server = function(input, output, session) {
   })
 
   ##############################################################################
-  # Define segments
+  # DEFINE SEGMENTS
   ##############################################################################
-
-  # Convert input segments data to expanded table (id by season)
-  seg_csv_list <- reactive({
-    req(input$getButton)
-    x <- seg_csv() |>
-      mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d"))) |>
-      mutate(start = ifelse(start>=day1() & start<=365, start-day1()+1, 365-day1()+1+start),
-        end = ifelse(end>=day1() & end<=365, end-day1()+1, 365-day1()+1+end))
-    seg_list <- list(c(0,366))
-    for (i in 1:nrow(x)) {
-      seg_list[[i+1]] <- c(x$start[i], x$end[i])
-    }
-    names(seg_list) <- c('Annual', x$season)
-    return(seg_list)
-  })
 
   # Update start of year
   observe({
@@ -148,25 +144,51 @@ server = function(input, output, session) {
     yday(as.Date(x$start[x$season=="Annual"], "%b-%d"))
   })
 
-  # Update seasonal/migration periods slider input based on selected input
-  observe({
-    segments <- seg_csv_list()
-    x <- seg_csv()
-    x1 <- x$start[x$season=="Annual"]
-    x2 <- x$end[x$season=="Annual"]
-    updateSliderInput(session, 'segments', label=paste0("Define date range (",x1,"-",x2,")"), 
-      value=c(segments[[input$season]][1],segments[[input$season]][2]))
+  # Expand segmentation data
+  seg_csv_expand <- reactive({
+    x <- seg_csv() |> mutate(start_doy=yday(as.Date(start, "%b-%d")), end_doy=yday(as.Date(end, "%b-%d")))
+    x <- x |> mutate(start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
+        end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
+    ids <- unique(gps_csv()$id)
+    y <- tibble(
+      id=rep(ids, each=nrow(x)), 
+      season=rep(x$season, length(ids)), 
+      start=rep(x$start, length(ids)), 
+      end=rep(x$end, length(ids)),
+      start_doy=rep(x$start_doy, length(ids)),
+      end_doy=rep(x$end_doy, length(ids)))
   })
 
-  # Select tracks for one individual
-  trk_one <- reactive({
-    start <- input$segments[1]
-    end <- input$segments[2]
-    x <- trk_all() |> 
-      filter(id %in% input$caribou) |>
-      filter(year >= input$daterange[1] & year <= input$daterange[2]) |> 
-      mutate(year=as.factor(year)) |>
-      mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
+  # Reactive data that can be updated
+  display_data <- reactiveVal(NULL)
+
+  # Initialize display_data when a file is uploaded
+  observeEvent(seg_csv_expand(), {
+    display_data(seg_csv_expand())
+  })
+
+  # Update the table when the sliders are moved
+  observeEvent(c(input$caribou,input$season,input$segments), {
+    x <- display_data()
+    #x <- seg_csv_expand()
+    x$start[x$id==input$caribou & x$season==input$season] <- format(as.Date(input$segments[1]-1), "%b-%d")
+    x$end[x$id==input$caribou & x$season==input$season] <- format(as.Date(input$segments[2]-1), "%b-%d")
+    display_data(x)
+  })
+  
+  # Render expanded table
+  output$seg_data2 <- renderDT({
+    datatable(display_data())
+  })
+  
+  # Render expanded table (test widget)
+  output$test_output <- renderPrint({
+    #print(trk_one())
+    y <- seg_csv_expand()
+    start=yday(as.Date(y$start[y$id==input$caribou & y$season==input$season], "%b-%d"))
+    end=yday(as.Date(y$end[y$id==input$caribou & y$season==input$season], "%b-%d"))
+    print(start)
+    print(end)
   })
 
   # Output three plots for segmentation
@@ -196,44 +218,35 @@ server = function(input, output, session) {
     p1 | (p2/p3/p4)
   })
 
-  # Expand segmentation data
-  seg_csv_expand <- reactive({
-    x <- seg_csv() #|> mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d")))
-    ids <- unique(gps_csv()$id)
-    y <- tibble(
-      id=rep(ids, each=nrow(x)), 
-      season=rep(x$season, length(ids)), 
-      start=rep(x$start, length(ids)), 
-      end=rep(x$end, length(ids)))
-  })
-
-  # Reactive data that can be updated
-  output_data <- reactiveVal(tibble(id=NULL, season=NULL, start=NULL, end=NULL))
-
-  # Render the initial table
-  output$seg_data2 <- renderDT({
-    datatable(output_data())
-  })
-  
-  # Render the initial table (test widget)
-  output$test_output <- renderPrint({
-    print(trk_one())
-    print(output_data())
-  })
-
-  # Update the table when the button is clicked
-  observeEvent(input$goButton, {
-    x <- seg_csv_expand()
-    x$start[x$id==input$caribou & x$season==input$season] <- format(as.Date(input$segments[1]-1), "%b-%d")
-    x$end[x$id==input$caribou & x$season==input$season] <- format(as.Date(input$segments[2]-1), "%b-%d")
-    output_data(x)
-  })
-
+  # Download expanded and updated segmentation table
   output$downloadData <- downloadHandler(
     filename = function() { paste("movement_explorer-", Sys.Date(), ".csv", sep="") },
-    content = function(file) {
-      readr::write_csv(seg_csv_expand(), file)
-    }
+    content = function(file) { readr::write_csv(seg_csv_expand(), file) }
   )
+
+  # Convert input segments data to expanded table (id by season)
+  #seg_csv_list <- reactive({
+  #  req(input$getButton)
+  #  x <- seg_csv() |>
+  #    mutate(start=yday(as.Date(start, "%b-%d")), end=yday(as.Date(end, "%b-%d"))) |>
+  #    mutate(start = ifelse(start>=day1() & start<=365, start-day1()+1, 365-day1()+1+start),
+  #      end = ifelse(end>=day1() & end<=365, end-day1()+1, 365-day1()+1+end))
+  #  seg_list <- list(c(0,366))
+  #  for (i in 1:nrow(x)) {
+  #    seg_list[[i+1]] <- c(x$start[i], x$end[i])
+  #  }
+  #  names(seg_list) <- c('Annual', x$season)
+  #  return(seg_list)
+  #})
+
+  # Update seasonal/migration periods slider input based on selected input
+  #observe({
+  #  segments <- seg_csv_list()
+  #  x <- seg_csv()
+  #  x1 <- x$start[x$season=="Annual"]
+  #  x2 <- x$end[x$season=="Annual"]
+  #  updateSliderInput(session, 'segments', label=paste0("Define date range (",x1,"-",x2,")"), 
+  #    value=c(segments[[input$season]][1],segments[[input$season]][2]))
+  #})
 
 }

@@ -107,7 +107,7 @@ ui = dashboardPage(skin="black",
           tabBox(id = "one", width="12",
             tabPanel("Movement data", DTOutput("gps_data")),
             tabPanel("Segmentation data", DTOutput("seg_data1")),
-            #tabPanel("Sampling duration", plotOutput("duration")),
+            tabPanel("Sampling duration", plotOutput("duration")),
             tabPanel("Sampling rates", DTOutput("sampling_rates")),
             tabPanel("Help", includeMarkdown("docs/select_data.md"))
           )
