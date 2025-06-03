@@ -51,9 +51,8 @@ ui = dashboardPage(skin="black",
       menuItem("Welcome", tabName="home", icon=icon("th")),
       menuItem("Select study area", tabName="select", icon=icon("arrow-pointer")),
       menuItem("Define segments", tabName = "segments", icon=icon("arrow-pointer")),
-      #menuItem("Home ranges (optional)", tabName="hr", icon=icon("arrow-pointer")),
-      #menuItem("Movement paths (optional)", tabName = "paths", icon=icon("arrow-pointer")),
-      #menuItem("Download data", tabName = "download", icon = icon("th")),
+      menuItem("Home ranges", tabName="hr", icon=icon("arrow-pointer")),
+      menuItem("Movement paths", tabName = "paths", icon=icon("arrow-pointer")),
       hr()
     ),
     conditionalPanel(
@@ -66,7 +65,8 @@ ui = dashboardPage(skin="black",
       conditionalPanel(
         condition="input.selectInput=='usecsv'",
         fileInput("csv1", "Movement data (csv):", accept=".csv"),
-        fileInput("csv2", "Segmentation data (csv):", accept=".csv")
+        fileInput("csv2", "Segmentation data (csv):", accept=".csv"),
+        fileInput("upload_gpkg", "Disturbance data (gpkg):", accept=".gpkg")
       ),
       actionButton("getButton", "Load data")
     ),
@@ -102,13 +102,7 @@ ui = dashboardPage(skin="black",
       actionButton("goPath", "Map Corridor", style="color: #000"),
       hr(),
       div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000')),
-    )#,
-    #conditionalPanel(
-      #condition='input.tabs=="download"',
-      #div(style="position:relative; left:calc(6%);", downloadButton("downloadData", "Save segmentation table", style='color: #000')),
-      #br(),
-      #div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000'))
-    #)
+    )
   ),
 
   #-------------------------------------------------
@@ -151,8 +145,6 @@ ui = dashboardPage(skin="black",
               plotOutput("segmentPlot", height=700)),
             tabPanel("Segmentation table", 
               DTOutput("seg_data2")),
-              #br(),
-              #downloadButton("downloadData", "Save segmentation table")),
             tabPanel("Help", includeMarkdown("docs/define_segments.md"))
           )
         )
@@ -161,7 +153,6 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()),
-            #tabPanel("HR output", verbatimTextOutput("hr_output")),
             tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
           )
         )
@@ -170,7 +161,6 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Corridors", leafletOutput("mapPath", height=750) |> withSpinner()),
-            #tabPanel("Test output", verbatimTextOutput("hr_output"))
             tabPanel("Help", includeMarkdown("docs/movement_paths.md"))
           )
         )

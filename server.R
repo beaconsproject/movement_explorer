@@ -435,10 +435,8 @@ server = function(input, output, session) {
   })
 
   # Output HR results
-  output$hr_output <- renderPrint({
-    #cat("Area:", round(od1()$area/1000000,0), "\n")
-    trk_one <- mutate(trk_one3(), year=as.double(year))
-    print(trk_one)
+  output$test_output <- renderPrint({
+    cat("Placeholder for tests\n")
   })
 
   # Leaflet map with locations, home ranges, and disturbances
@@ -482,10 +480,10 @@ server = function(input, output, session) {
   # DOWNLOAD DATA
   ##############################################################################
 
-  # Download updates seasons data
+  # Download updated seasons data
   output$downloadSegments <- downloadHandler(
     filename = function() {
-      paste0("seasons_data_updated_", Sys.Date(), ".csv")
+      paste0("seasons_data_", Sys.Date(), ".csv")
     },
     content = function(file) {
       write.csv(r_seasons_data(), file, row.names = FALSE)
@@ -494,7 +492,9 @@ server = function(input, output, session) {
 
   # Download estimated home ranges
   output$downloadRanges <- downloadHandler(
-    filename = function() { paste("HR_",input$caribou,"_",input$season,"_",input$hr,input$levels,"_",input$hr2,input$levels2," (", Sys.Date(), ").gpkg", sep="") },
+    filename = function() { 
+      paste0("home_ranges_", Sys.Date(), ".csv")
+    },
     content = function(file) {
         showModal(modalDialog("Downloading...", footer=NULL))
         on.exit(removeModal())
@@ -508,7 +508,7 @@ server = function(input, output, session) {
   # Download estimated movement paths
   output$downloadPaths <- downloadHandler(
     filename = function() { 
-      paste("HR_",input$caribou2,"_",input$season2,"_",input$hr,input$levels,"_",input$hr2,input$levels2," (", Sys.Date(), ").gpkg", sep="") 
+      paste0("movement_paths_", Sys.Date(), ".csv")
     },
     content = function(file) {
         showModal(modalDialog("Downloading...", footer=NULL))
