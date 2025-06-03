@@ -51,8 +51,9 @@ ui = dashboardPage(skin="black",
       menuItem("Welcome", tabName="home", icon=icon("th")),
       menuItem("Select study area", tabName="select", icon=icon("arrow-pointer")),
       menuItem("Define segments", tabName = "segments", icon=icon("arrow-pointer")),
-      menuItem("Movement paths", tabName = "paths", icon=icon("arrow-pointer")),
-      menuItem("Download data", tabName = "download", icon = icon("th")),
+      #menuItem("Home ranges (optional)", tabName="hr", icon=icon("arrow-pointer")),
+      #menuItem("Movement paths (optional)", tabName = "paths", icon=icon("arrow-pointer")),
+      #menuItem("Download data", tabName = "download", icon = icon("th")),
       hr()
     ),
     conditionalPanel(
@@ -76,21 +77,38 @@ ui = dashboardPage(skin="black",
       sliderInput("daterange", "Select year(s):", min=2021, max=2024, value=c(2024,2024), sep=""),
       textInput("day1", "Start of year:", value = NULL),
       hr(),
-      actionButton("goButton", "Run", style="color: #000"),
+      actionButton("goButton", "Plot segments", style="color: #000"),
+      br(),
+      div(style="position:relative; left:calc(6%);", downloadButton("downloadSegments", "Save segmentation table", style='color: #000')),
+   ),
+    conditionalPanel(
+      condition='input.tabs=="hr"',
+      selectInput("caribou2", "Select individual:", choices=NULL, multiple=TRUE),
+      selectInput("season2", "Select season:", choices=NULL),
+      sliderInput("daterange2", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
+      actionButton("goRange", "Calculate HRs", style="color: #000"),
+      hr(),
+      selectInput("hr", "Estimator for HR1:", choices=c("MCP", "KDE", "aKDE"), selected="MCP"),
+      sliderInput("levels", "Isopleth levels:", min=0.5, max=1, value=c(0.5, 0.95)),
+      numericInput("h", "KDE bandwidth:", 2, min=0, max=10),
+      hr(),
+      div(style="position:relative; left:calc(6%);", downloadButton("downloadRanges", "Save home ranges", style='color: #000'))
     ),
     conditionalPanel(
       condition="input.tabs=='paths'",
-      selectInput("caribou2", "Select individual:", choices=NULL, multiple=TRUE),
-      selectInput("season2", "Movement period:", choices=NULL),
-      sliderInput("daterange2", "Select year(s):", min=2020, max=2025, value=c(2024,2024), sep=""),
-      actionButton("goButton2", "Map Corridor", style="color: #000"),
-    ),
-    conditionalPanel(
-      condition='input.tabs=="download"',
+      selectInput("caribou3", "Select individual:", choices=NULL, multiple=TRUE),
+      selectInput("season3", "Movement period:", choices=NULL),
+      sliderInput("daterange3", "Select year(s):", min=2020, max=2025, value=c(2024,2024), sep=""),
+      actionButton("goPath", "Map Corridor", style="color: #000"),
+      hr(),
+      div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000')),
+    )#,
+    #conditionalPanel(
+      #condition='input.tabs=="download"',
       #div(style="position:relative; left:calc(6%);", downloadButton("downloadData", "Save segmentation table", style='color: #000')),
       #br(),
-      div(style="position:relative; left:calc(6%);", downloadButton("downloadData2", "Save movement paths", style='color: #000'))
-    )
+      #div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000'))
+    #)
   ),
 
   #-------------------------------------------------
@@ -132,29 +150,29 @@ ui = dashboardPage(skin="black",
               sliderInput("segments", "Define date range:", min=1, max=365, step=1, value=c(1,365), width=1200),
               plotOutput("segmentPlot", height=700)),
             tabPanel("Segmentation table", 
-              DTOutput("seg_data2"),
-              br(),
-              downloadButton("downloadData", "Save segmentation table")),
+              DTOutput("seg_data2")),
+              #br(),
+              #downloadButton("downloadData", "Save segmentation table")),
             tabPanel("Help", includeMarkdown("docs/define_segments.md"))
+          )
+        )
+      ),
+      tabItem(tabName="hr",
+        fluidRow(
+          tabBox(id="three", width="12",
+            tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()),
+            #tabPanel("HR output", verbatimTextOutput("hr_output")),
+            tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
           )
         )
       ),
       tabItem(tabName="paths",
         fluidRow(
-          tabBox(id="three", width="9",
-            tabPanel("Corridors", leafletOutput("map2", height=750) |> withSpinner()),
-            tabPanel("Test output", verbatimTextOutput("hr_output"))
-            #tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
+          tabBox(id="three", width="12",
+            tabPanel("Corridors", leafletOutput("mapPath", height=750) |> withSpinner()),
+            #tabPanel("Test output", verbatimTextOutput("hr_output"))
+            tabPanel("Help", includeMarkdown("docs/movement_paths.md"))
           )
-          #tabBox(
-          #  id = "five", width="3",
-          #  tabPanel("Statistics", tableOutput("tab1"))#,
-            #tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
-          #),
-          #tabBox(
-          #  id = "four", width="3",
-          #  tabPanel("Statistics", tableOutput("tab1"))
-          #)
         )
       )     
     )

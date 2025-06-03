@@ -152,6 +152,7 @@ server = function(input, output, session) {
     ids <- as.character(sort(unique(x$id)))
     updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
     updateSelectInput(session, "caribou2", choices=ids, selected=ids[1])
+    updateSelectInput(session, "caribou3", choices=ids, selected=ids[1])
   })
 
   # Update choices for seasons/migration periods based on input segmentation data
@@ -159,7 +160,8 @@ server = function(input, output, session) {
     x <- seg_csv()
     seasons <- x$season
     updateSelectInput(session, "season", choices=c("Annual",seasons), selected="Annual")
-    updateSelectInput(session, "season2", choices=c("Spring migration","Fall migration"), selected="Spring migration")
+    updateSelectInput(session, "season2", choices=c("Annual","Early winter","Late winter","Summer","Fall rut"), selected="Annual")
+    updateSelectInput(session, "season3", choices=c("Spring migration","Fall migration"), selected="Spring migration")
   })
 
   # Observe changes in ID or Season selection to update the slider's current value
@@ -331,7 +333,7 @@ server = function(input, output, session) {
   })
 
   ##############################################################################
-  # MOVEMENT PATHS
+  # HOME RANGES
   ##############################################################################
 
   # Select tracks for one individual
@@ -339,15 +341,82 @@ server = function(input, output, session) {
     start <- input$segments[1]
     end <- input$segments[2]
     x <- trk_all() |> 
-      filter(id %in% input$caribou2) |>
-      filter(year >= input$daterange2[1] & year <= input$daterange2[2]) |> 
+      filter(id %in% input$caribou3) |>
+      filter(year >= input$daterange3[1] & year <= input$daterange3[2]) |> 
+      mutate(year=as.factor(year)) |>
+      mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
+  })
+
+  # Estimate home range
+  hr1 <- reactive({
+    if (input$hr=="MCP") {
+      hr_mcp(trk_one2(), levels=input$levels)
+    } else if (input$hr=="KDE") {
+      lvl <- input$levels
+      if (lvl[2]==1) {lvl[2]=0.999}
+      hr_kde(trk_one2(), levels=lvl)
+    } else if (input$hr=="aKDE") {
+      lvl <- input$levels
+      #if (lvl==1) {lvl=0.999}
+      hr_akde(trk_one2(), levels=lvl)
+    }      
+  })
+
+  # Leaflet map with locations, home ranges, and disturbances
+  output$mapRange <- renderLeaflet({
+    if (input$goRange) {
+      years <- unique(gps_csv()$year)
+      caribou_pal <- colorFactor(topo.colors(25), gps_csv()$id)
+      year_pal <- colorNumeric(palette=col_yrs6, domain=years)
+      m <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+        addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
+        addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
+        addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
+        groups <- NULL
+        trk_one <- mutate(trk_one2(), year=as.double(year))
+        m <- m |> addPolygons(data=hr_isopleths(hr1()), color="blue", fill=F, weight=2, group="Home ranges")
+        for (i in sort(unique(trk_one$year))) {
+          yr1 <- trk_one |> filter(year==i)
+          groups <- c(groups, paste0("Track ",i))
+          m <- m |> addPolylines(data=yr1, lng=~x_, lat=~y_, color=col_yrs6[1], weight=2, group=paste0("Track ",i))
+        }
+        m <- m |> 
+          addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_one()$t_) |>
+          addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
+          addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
+          addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+          addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+          addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
+          addLegend("topleft", colors=col_yrs6, labels=years, title="Year") |>
+          addScaleBar(position="bottomright") |>
+          addLayersControl(position = "topright",
+            baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+            overlayGroups = c("Locations", groups, "Study area", "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Home ranges"),
+            options = layersControlOptions(collapsed = FALSE)) |>
+          hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
+      m
+    }
+  })
+
+  ##############################################################################
+  # MOVEMENT PATHS
+  ##############################################################################
+
+  # Select tracks for one individual
+  trk_one3 <- reactive({
+    start <- input$segments[1]
+    end <- input$segments[2]
+    x <- trk_all() |> 
+      filter(id %in% input$caribou3) |>
+      filter(year >= input$daterange3[1] & year <= input$daterange3[2]) |> 
       mutate(year=as.factor(year)) |>
       mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
   })
 
   # Convert track to sf linestring
   path1 <- reactive({
-    st_as_sf(trk_one2(), coords = c("x_", "y_"), crs = 4326) |>
+    st_as_sf(trk_one3(), coords = c("x_", "y_"), crs = 4326) |>
       group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
       st_cast("LINESTRING")
@@ -360,7 +429,7 @@ server = function(input, output, session) {
 
   # Estimate home range
   od1 <- reactive({
-    od <- od(trk_one2(), model = fit_ctmm(trk_one2(), "bm"), trast = make_trast(trk_one2()))
+    od <- od(trk_one3(), model = fit_ctmm(trk_one3(), "bm"), trast = make_trast(trk_one3()))
     iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
     corridor <- st_union(iso, st_buffer(path1(), 500)) |> st_sf()
   })
@@ -368,13 +437,13 @@ server = function(input, output, session) {
   # Output HR results
   output$hr_output <- renderPrint({
     #cat("Area:", round(od1()$area/1000000,0), "\n")
-    trk_one <- mutate(trk_one(), year=as.double(year))
+    trk_one <- mutate(trk_one3(), year=as.double(year))
     print(trk_one)
   })
 
   # Leaflet map with locations, home ranges, and disturbances
-  output$map2 <- renderLeaflet({
-    if (input$goButton2) {
+  output$mapPath <- renderLeaflet({
+    if (input$goPath) {
       years <- unique(gps_csv()$year)
       caribou_pal <- colorFactor(topo.colors(25), gps_csv()$id)
       year_pal <- colorNumeric(palette=col_yrs6, domain=years)
@@ -383,7 +452,7 @@ server = function(input, output, session) {
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
         groups <- NULL
-        trk_one <- mutate(trk_one2(), year=as.double(year))
+        trk_one <- mutate(trk_one3(), year=as.double(year))
         m <- m |> addPolygons(data=od1(), color="#386cb0", fill=T, weight=2, fillOpacity=0.5, group="Movement corridor")
         for (i in sort(unique(trk_one$year))) {
           yr1 <- trk_one |> filter(year==i)
@@ -410,10 +479,11 @@ server = function(input, output, session) {
   })
 
   ##############################################################################
-  # DOWNLOAD UPDATED SEASONS DATA
+  # DOWNLOAD DATA
   ##############################################################################
 
-  output$downloadData <- downloadHandler(
+  # Download updates seasons data
+  output$downloadSegments <- downloadHandler(
     filename = function() {
       paste0("seasons_data_updated_", Sys.Date(), ".csv")
     },
@@ -422,7 +492,21 @@ server = function(input, output, session) {
     }
   )
 
-  output$downloadData2 <- downloadHandler(
+  # Download estimated home ranges
+  output$downloadRanges <- downloadHandler(
+    filename = function() { paste("HR_",input$caribou,"_",input$season,"_",input$hr,input$levels,"_",input$hr2,input$levels2," (", Sys.Date(), ").gpkg", sep="") },
+    content = function(file) {
+        showModal(modalDialog("Downloading...", footer=NULL))
+        on.exit(removeModal())
+        if (input$goButton) {
+          st_write(hr_isopleths(hr1()), dsn=file, layer=paste0('HR1_',input$hr,input$levels), append=TRUE)
+          st_write(gps_subset(), dsn=file, layer=paste0('GPS_', input$season), append=TRUE)
+       }
+    }
+  )
+
+  # Download estimated movement paths
+  output$downloadPaths <- downloadHandler(
     filename = function() { 
       paste("HR_",input$caribou2,"_",input$season2,"_",input$hr,input$levels,"_",input$hr2,input$levels2," (", Sys.Date(), ").gpkg", sep="") 
     },
