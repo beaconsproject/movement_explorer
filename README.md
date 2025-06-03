@@ -1,26 +1,17 @@
-## BEACONs Movement Apps
+## BEACONs Movement Explorer
 
-May 18, 2025
+June 2, 2025
 
-The BEACONs Movement Apps are meant to be used as part of a workflow for exploring movement data, defining seasonal and migration periods, estimating annual and seasonal home ranges, and identifying seasonal movement corridors. Currently, three apps are available. A brief description of each app along with a link is provided below. If you are familiar with R, the apps can also be run on a local computer by downloading this repository.
+The BEACONs Movement Explorer is a simple app intended to be used as part of a workflow for exploring movement data. Specifically, the app can help users to:
 
+  - Define seasonal and migration periods in their movement data
+  - Estimate seasonal and annual home ranges using a variety of approaches
+  - Identify seasonal movement corridors (paths) using a variety of approaches
 
-### Movement Explorer
+### Running the app
 
-The Movement Explorer app is designed to assist users in defining seasonal and migration periods in their movement data.
+The app can be run from here:
 
 - <https://beaconsproject.shinyapps.io/movement_explorer/>
 
-
-### Home Range Explorer
-
-The Home Range Explorer is designed to assist users in estimating seasonal and annual home ranges using a variety of approaches.
-
-- <https://beaconsproject.shinyapps.io/home_range_explorer/>
-
-
-### Connectivity Explorer
-
-The Connectivity Explorer is designed to assist users in identifying seasonal movement corridors (paths) using a variety of approaches.
-
-- <https://beaconsproject.shinyapps.io/connectivity_explorer/>
+Alternatively, if you are familiar with R, the app can also be run on a local computer by downloading this repository.
