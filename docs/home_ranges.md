@@ -1,5 +1,7 @@
 ## Help: Home ranges
 
+The concept of an animal's home range, defined as the area traversed by an individual during its normal activities of food gathering, mating, and caring for young, forms a cornerstone of ecological research. In this section of the app, we provide a simple interface to allow users to estimate seasonal and annual home ranges using several approaches described in the literature (ref).
+
 ### Estimators
 
 The following home range estimators are currently available:

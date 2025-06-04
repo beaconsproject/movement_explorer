@@ -51,24 +51,24 @@ ui = dashboardPage(skin="black",
       menuItem("Welcome", tabName="home", icon=icon("th")),
       menuItem("Select study area", tabName="select", icon=icon("arrow-pointer")),
       menuItem("Define segments", tabName = "segments", icon=icon("arrow-pointer")),
-      menuItem("Home ranges", tabName="hr", icon=icon("arrow-pointer")),
-      menuItem("Movement paths", tabName = "paths", icon=icon("arrow-pointer")),
+      #menuItem("Home ranges", tabName="hr", icon=icon("arrow-pointer")),
+      #menuItem("Movement paths", tabName = "paths", icon=icon("arrow-pointer")),
       hr()
     ),
     conditionalPanel(
       condition="input.tabs=='select'",
       radioButtons("selectInput", "Select source dataset:",
         choices = list("Use demo dataset" = "usedemo", 
-                       "Upload your own data" = "usecsv"),
+                       "Upload your own data" = "usedata"),
         selected = character(0), 
         inline = FALSE),
       conditionalPanel(
-        condition="input.selectInput=='usecsv'",
+        condition="input.selectInput=='usedata'",
         fileInput("csv1", "Movement data (csv):", accept=".csv"),
         fileInput("csv2", "Segmentation data (csv):", accept=".csv"),
-        fileInput("upload_gpkg", "Disturbance data (gpkg):", accept=".gpkg")
+        fileInput("gpkg", "Disturbance data (gpkg):", accept=".gpkg")
       ),
-      actionButton("getButton", "Load data")
+      actionButton("getButton", "Load data"),
     ),
     conditionalPanel(
       condition="input.tabs=='segments'",
@@ -88,7 +88,7 @@ ui = dashboardPage(skin="black",
       sliderInput("daterange2", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
       actionButton("goRange", "Calculate HRs", style="color: #000"),
       hr(),
-      selectInput("hr", "Estimator for HR1:", choices=c("MCP", "KDE", "aKDE"), selected="MCP"),
+      selectInput("hr", "Estimator methods:", choices=c("MCP", "KDE", "aKDE"), selected="MCP"),
       sliderInput("levels", "Isopleth levels:", min=0.5, max=1, value=c(0.5, 0.95)),
       numericInput("h", "KDE bandwidth:", 2, min=0, max=10),
       hr(),
@@ -132,8 +132,7 @@ ui = dashboardPage(skin="black",
             tabPanel("Sampling duration", plotOutput("duration")),
             tabPanel("Sampling rates", DTOutput("sampling_rates")),
             tabPanel("Mapview", leafletOutput("map1", height=750) |> withSpinner()),
-            #tabPanel("Test output", verbatimTextOutput("test_output")),
-            tabPanel("Help", includeMarkdown("docs/select_data.md"))
+            tabPanel("Glimpse", verbatimTextOutput("test_output"))
           )
         )
       ),

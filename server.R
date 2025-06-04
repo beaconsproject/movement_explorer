@@ -10,12 +10,12 @@ server = function(input, output, session) {
   ##############################################################################
 
   # Read gps movement data
-  gps_csv <- eventReactive(input$selectInput, {
-   req(input$selectInput)  # Ensure `selectInput` is not NULL
-   if (input$selectInput == "usedemo") {
+  gps_csv <- eventReactive(list(input$selectInput,input$csv1), {
+    req(input$selectInput)  # Ensure `selectInput` is not NULL
+    if (input$selectInput == "usedemo") {
       readr::read_csv('www/demo_gps.csv') |>
           mutate(year=year(time), yday=yday(time))
-    } else if (input$selectInput == "usecsv") {
+    } else if (input$selectInput == "usedata") {
       req(input$csv1)
       readr::read_csv(input$csv1$datapath) |>
         mutate(year=year(time), yday=yday(time))
@@ -23,20 +23,43 @@ server = function(input, output, session) {
   })
 
   # Read seasons and migration periods data
-  seg_csv <- eventReactive(input$selectInput, {
+  seg_csv <- eventReactive(list(input$selectInput,input$csv2), {
+    req(input$selectInput)  # Ensure `selectInput` is not NULL
     if (input$selectInput == "usedemo") {
       readr::read_csv('www/demo_segments.csv')
-    } else if (input$selectInput == "usecsv") {
+    } else if (input$selectInput == "usedata") {
       req(input$csv2)
       readr::read_csv(input$csv2$datapath) 
     }
+  })
+
+  # Test widget
+  output$test_output <- renderPrint({
+    req(input$getButton)
+    #x <- st_layers(input$upload_gpkg$datapath)
+    cat("Movement data\n")
+    glimpse(gps_csv())
+    cat("\nSegmentation data\n")
+    glimpse(seg_csv())
+    cat("\nStudy area\n")
+    glimpse(studyarea())
+    cat("\nLinear disturbance\n")
+    glimpse(line())
+    cat("\nAreal disturbance\n")
+    glimpse(poly())
+    cat("\nFires\n")
+    glimpse(fire())
+    cat("\nFootprint (500m)\n")
+    glimpse(foot())
+    cat("\nConservation areas\n")
+    glimpse(pca())
   })
 
   # Read and expand seasons data
   initial_seasons_data <- eventReactive(input$selectInput, {
     if (input$selectInput == "usedemo") {
       seg_csv <- readr::read_csv('www/demo_segments.csv')
-    } else if (input$selectInput == "usecsv") {
+    } else if (input$selectInput == "usedata") {
       req(input$csv2)
       seg_csv <- readr::read_csv(input$csv2$datapath) 
     }
@@ -63,13 +86,13 @@ server = function(input, output, session) {
     r_seasons_data(initial_seasons_data())
   })
 
-  studyarea <- eventReactive(list(input$selectInput, input$upload_gpkg),{
+  studyarea <- eventReactive(list(input$selectInput, input$gpkg),{
     #req(input$getButton)
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'studyarea', quiet = TRUE) |>
         st_transform(4326)
-    } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'studyarea', quiet = TRUE) |>
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'studyarea', quiet = TRUE) |>
         st_transform(4326)
     }
   })
@@ -79,8 +102,8 @@ server = function(input, output, session) {
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'linear_disturbance', quiet = TRUE) |>
         st_transform(4326)
-    } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
         st_transform(4326)
     }
   })
@@ -90,8 +113,8 @@ server = function(input, output, session) {
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'areal_disturbance', quiet = TRUE) |>
         st_transform(4326)
-    } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
         st_transform(4326)
     }
   })
@@ -101,8 +124,8 @@ server = function(input, output, session) {
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'fires', quiet = TRUE) |>
         st_transform(4326)
-    } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'fires', quiet = TRUE) |>
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'fires', quiet = TRUE) |>
         st_transform(4326)
     }
   })
@@ -112,8 +135,8 @@ server = function(input, output, session) {
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'footprint_500m', quiet = TRUE) |>
         st_transform(4326)
-    } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'footprint_500m', quiet = TRUE) |>
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'footprint_500m', quiet = TRUE) |>
         st_transform(4326)
     }
   })
@@ -123,8 +146,8 @@ server = function(input, output, session) {
     if (input$selectInput == "usedemo") {
       st_read('www/demo_data.gpkg', 'protected_areas', quiet = TRUE) |>
         st_transform(4326)
-    } else if (input$selectInput == "usegpkg") {
-      st_read(input$upload_gpkg$datapath, 'protected_areas', quiet = TRUE) |>
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'protected_areas', quiet = TRUE) |>
         st_transform(4326)
     }
   })
@@ -263,13 +286,6 @@ server = function(input, output, session) {
               rownames = FALSE,
               options = list(pageLength = 10, scrollX = TRUE))
   })
-
-  # Render expanded table (test widget)
-  output$test_output <- renderPrint({
-    trk_all <- mutate(trk_all(), year=as.double(year))
-    print(trk_all)
-  })
-
 
   # Leaflet map with locations, home ranges, and disturbances
   output$map1 <- renderLeaflet({
@@ -434,11 +450,6 @@ server = function(input, output, session) {
     corridor <- st_union(iso, st_buffer(path1(), 500)) |> st_sf()
   })
 
-  # Output HR results
-  output$test_output <- renderPrint({
-    cat("Placeholder for tests\n")
-  })
-
   # Leaflet map with locations, home ranges, and disturbances
   output$mapPath <- renderLeaflet({
     if (input$goPath) {
@@ -492,31 +503,21 @@ server = function(input, output, session) {
 
   # Download estimated home ranges
   output$downloadRanges <- downloadHandler(
-    filename = function() { 
-      paste0("home_ranges_", Sys.Date(), ".csv")
+    filename = function() {
+      paste0("home_ranges_", Sys.Date(), ".gpkg")
     },
     content = function(file) {
-        showModal(modalDialog("Downloading...", footer=NULL))
-        on.exit(removeModal())
-        if (input$goButton) {
-          st_write(hr_isopleths(hr1()), dsn=file, layer=paste0('HR1_',input$hr,input$levels), append=TRUE)
-          st_write(gps_subset(), dsn=file, layer=paste0('GPS_', input$season), append=TRUE)
-       }
+      st_write(hr_isopleths(hr1()), file, layer=paste0(input$hr,"-",input$levels[1],"-",input$levels[2]), append=TRUE)
     }
   )
 
   # Download estimated movement paths
   output$downloadPaths <- downloadHandler(
-    filename = function() { 
-      paste0("movement_paths_", Sys.Date(), ".csv")
+    filename = function() {
+      paste0("movement_paths_", Sys.Date(), ".gpkg")
     },
     content = function(file) {
-        showModal(modalDialog("Downloading...", footer=NULL))
-        on.exit(removeModal())
-        if (input$goButton) {
-          st_write(hr_isopleths(hr1()), dsn=file, layer=paste0('HR1_',input$hr,input$levels), append=TRUE)
-          st_write(gps_subset(), dsn=file, layer=paste0('GPS_', input$season), append=TRUE)
-       }
+      st_write(od1(), file, layer=input$season3, append=TRUE)
     }
   )
 
