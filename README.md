@@ -8,6 +8,10 @@ The BEACONs Movement Explorer is a simple app intended to be used as part of a w
   - Estimate seasonal and annual home ranges using a variety of approaches
   - Identify seasonal movement corridors (paths) using a variety of approaches
 
+<br>
+
+<center><img src="bme.png" alt="Description" style="width:80%; height:auto;"></center>
+
 ### Running the app
 
 The app can be run from here:
@@ -15,5 +19,3 @@ The app can be run from here:
 - <https://beaconsproject.shinyapps.io/movement_explorer/>
 
 Alternatively, if you are familiar with R, the app can also be run on a local computer by downloading this repository.
-
-![[bme.png]]
