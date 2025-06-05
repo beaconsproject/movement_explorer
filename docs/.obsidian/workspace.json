@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "user_guide.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "user_guide"
+              "title": "README"
             }
           }
         ]
@@ -170,8 +170,10 @@
   },
   "active": "76a8e38b84788c64",
   "lastOpenFiles": [
-    "home_ranges.md",
     "user_guide.md",
+    "README.md",
+    "bme.png",
+    "home_ranges.md",
     "movement_paths.md",
     "overview.md",
     "datasets.md"

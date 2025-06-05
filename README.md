@@ -1,6 +1,6 @@
 ## BEACONs Movement Explorer
 
-June 2, 2025
+June 5, 2025
 
 The BEACONs Movement Explorer is a simple app intended to be used as part of a workflow for exploring movement data. Specifically, the app can help users to:
 
@@ -15,3 +15,5 @@ The app can be run from here:
 - <https://beaconsproject.shinyapps.io/movement_explorer/>
 
 Alternatively, if you are familiar with R, the app can also be run on a local computer by downloading this repository.
+
+![[bme.png]]
