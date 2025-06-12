@@ -51,8 +51,8 @@ ui = dashboardPage(skin="black",
       menuItem("Welcome", tabName="home", icon=icon("th")),
       menuItem("Select study area", tabName="select", icon=icon("arrow-pointer")),
       menuItem("Define segments", tabName = "segments", icon=icon("arrow-pointer")),
-      menuItem("Home ranges", tabName="hr", icon=icon("arrow-pointer")),
-      menuItem("Movement paths", tabName = "paths", icon=icon("arrow-pointer")),
+      menuItem("Estimate home ranges", tabName="hr", icon=icon("arrow-pointer")),
+      menuItem("Idenfity movement paths", tabName = "paths", icon=icon("arrow-pointer")),
       hr()
     ),
     conditionalPanel(
@@ -74,8 +74,8 @@ ui = dashboardPage(skin="black",
       condition="input.tabs=='segments'",
       selectInput("caribou", "Select individual:", choices=NULL, multiple=FALSE),
       selectInput("season", "Select season:", choices=NULL),
-      sliderInput("daterange", "Select year(s):", min=2021, max=2024, value=c(2024,2024), sep=""),
-      textInput("day1", "Start of year:", value = NULL),
+      sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2021,2021), sep=""),
+      textInput("day1", "Start of year (e.g., Jan-01):", value = NULL),
       hr(),
       actionButton("goButton", "Plot segments", style="color: #000"),
       br(),
@@ -98,7 +98,7 @@ ui = dashboardPage(skin="black",
       condition="input.tabs=='paths'",
       selectInput("caribou3", "Select individual:", choices=NULL, multiple=TRUE),
       selectInput("season3", "Movement period:", choices=NULL),
-      sliderInput("daterange3", "Select year(s):", min=2020, max=2025, value=c(2024,2024), sep=""),
+      sliderInput("daterange3", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
       actionButton("goPath", "Map Corridor", style="color: #000"),
       hr(),
       div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000')),
@@ -131,8 +131,7 @@ ui = dashboardPage(skin="black",
             tabPanel("Segmentation data", DTOutput("seg_data1")),
             tabPanel("Sampling duration", plotOutput("duration")),
             tabPanel("Sampling rates", DTOutput("sampling_rates")),
-            tabPanel("Mapview", leafletOutput("map1", height=750) |> withSpinner()),
-            tabPanel("Glimpse", verbatimTextOutput("test_output"))
+            tabPanel("Mapview", leafletOutput("map1", height=750) |> withSpinner())
           )
         )
       ),
@@ -152,7 +151,8 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()),
-            tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
+            tabPanel("Help", includeMarkdown("docs/home_ranges.md")),
+            tabPanel("Glimpse", verbatimTextOutput("test_output"))
           )
         )
       ),

@@ -33,39 +33,12 @@ server = function(input, output, session) {
     }
   })
 
-  # Test widget
-  output$test_output <- renderPrint({
-    req(input$getButton)
-    #x <- st_layers(input$upload_gpkg$datapath)
-    cat("Movement data\n")
-    glimpse(gps_csv())
-    cat("\nSegmentation data\n")
-    glimpse(seg_csv())
-    cat("\nStudy area\n")
-    glimpse(studyarea())
-    cat("\nLinear disturbance\n")
-    glimpse(line())
-    cat("\nAreal disturbance\n")
-    glimpse(poly())
-    cat("\nFires\n")
-    glimpse(fire())
-    cat("\nFootprint (500m)\n")
-    glimpse(foot())
-    cat("\nConservation areas\n")
-    glimpse(pca())
-  })
-
   # Read and expand seasons data
-  initial_seasons_data <- eventReactive(input$selectInput, {
-    if (input$selectInput == "usedemo") {
-      seg_csv <- readr::read_csv('www/demo_segments.csv')
-    } else if (input$selectInput == "usedata") {
-      req(input$csv2)
-      seg_csv <- readr::read_csv(input$csv2$datapath) 
-    }
-    x <- seg_csv |> mutate(start_doy=yday(as.Date(start, "%b-%d")), end_doy=yday(as.Date(end, "%b-%d")))
-    x <- x |> mutate(start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
-        end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
+  initial_seasons_data <- eventReactive(seg_csv(),{
+    x <- seg_csv() |> mutate(start_doy=yday(as.Date(start, "%b-%d")), end_doy=yday(as.Date(end, "%b-%d")))
+    x <- x |> mutate(
+      start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
+      end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
     ids <- unique(gps_csv()$id)
     y <- tibble(
       id=rep(ids, each=nrow(x)), 
@@ -74,8 +47,8 @@ server = function(input, output, session) {
       end=rep(x$end, length(ids)),
       start_doy=rep(x$start_doy, length(ids)),
       end_doy=rep(x$end_doy, length(ids)),
-      start_doy_new=0,
-      end_doy_new=0)
+      start_doy_new=start_doy,
+      end_doy_new=end_doy)
   })
 
   # Reactive value to store and manage the seasons_data
@@ -159,14 +132,22 @@ server = function(input, output, session) {
   # Update start of year
   observe({
     x <- seg_csv()
-    x1 <- x$start[x$season=="Annual"]
+    if ("Annual" %in% unique(x$season)) {
+      x1 <- x$start[x$season=="Annual"]
+    } else {
+      x1 <- "Jan-01"
+    }
     updateTextInput(session, "day1", value=x1)
   })
 
   # First day of year - doesn't have to be Jan-01
   day1 <- reactive({
     x <- seg_csv()
-    yday(as.Date(x$start[x$season=="Annual"], "%b-%d"))
+    if ("Annual" %in% unique(x$season)) {
+      yday(as.Date(x$start[x$season=="Annual"], "%b-%d"))
+    } else {
+      yday(as.Date("Jan-01", "%b-%d"))
+    }
   })
 
   # Update choices for caribou individuals input based on input movement data
@@ -222,7 +203,7 @@ server = function(input, output, session) {
   # Create tracks using amt package
   trk_all <- eventReactive(input$getButton, {
     x <- gps_csv() |>
-      make_track(.x=long, .y=lat, .t=time, id = id, long=long, lat=lat, crs = 4326) #|>
+      make_track(.x=long, .y=lat, .t=time, id = id, long=long, lat=lat, elev=elev, crs = 4326) #|>
       #transform_coords(crs_to = 3578)
     x |> mutate(sl_ = step_lengths(x), 
       speed = speed(x),
@@ -345,7 +326,11 @@ server = function(input, output, session) {
         geom_line(aes(yday, nsd, color=year)) + 
         ylab('NSD') + xlab('Day of year') +
         geom_vline(xintercept=c(input$segments[1],input$segments[2]))
-    p1 | (p2/p3/p4)
+    p5 <- ggplot(trk_data) + 
+        geom_line(aes(yday, elev, color=year)) + 
+        ylab('Elevation') + xlab('Day of year') +
+        geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+    p1 | (p2/p3/p4/p5)
   })
 
   ##############################################################################
@@ -354,28 +339,40 @@ server = function(input, output, session) {
 
   # Select tracks for one individual
   trk_one2 <- reactive({
-    start <- input$segments[1]
-    end <- input$segments[2]
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou2 & season==input$season2)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
     x <- trk_all() |> 
-      filter(id %in% input$caribou3) |>
-      filter(year >= input$daterange3[1] & year <= input$daterange3[2]) |> 
-      mutate(year=as.factor(year)) |>
-      mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
+      filter(id %in% input$caribou2) |>
+      filter(year >= input$daterange2[1] & year <= input$daterange2[2]) |> 
+      filter(yday >= start & yday <= end)
+  })
+
+  # Test widget
+  output$test_output <- renderPrint({
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou2 & season==input$season2)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
+    print(start)
+    print(end)
   })
 
   # Estimate home range
   hr1 <- reactive({
     if (input$hr=="MCP") {
-      hr_mcp(trk_one2(), levels=input$levels)
+      x <- hr_mcp(trk_one2(), levels=input$levels)
     } else if (input$hr=="KDE") {
       lvl <- input$levels
       if (lvl[2]==1) {lvl[2]=0.999}
-      hr_kde(trk_one2(), levels=lvl)
+      x <- hr_kde(trk_one2(), levels=lvl)
     } else if (input$hr=="aKDE") {
       lvl <- input$levels
       #if (lvl==1) {lvl=0.999}
-      hr_akde(trk_one2(), levels=lvl)
-    }      
+      x <- hr_akde(trk_one2(), levels=lvl)
+    }
+    hr_isopleths(x)
   })
 
   # Leaflet map with locations, home ranges, and disturbances
@@ -390,12 +387,12 @@ server = function(input, output, session) {
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
         groups <- NULL
         trk_one <- mutate(trk_one2(), year=as.double(year))
-        m <- m |> addPolygons(data=hr_isopleths(hr1()), color="blue", fill=F, weight=2, group="Home ranges")
-        for (i in sort(unique(trk_one$year))) {
-          yr1 <- trk_one |> filter(year==i)
-          groups <- c(groups, paste0("Track ",i))
-          m <- m |> addPolylines(data=yr1, lng=~x_, lat=~y_, color=col_yrs6[1], weight=2, group=paste0("Track ",i))
-        }
+        m <- m |> addPolygons(data=hr1(), color="blue", fill=F, weight=2, group="Home ranges")
+        #for (i in sort(unique(trk_one$year))) {
+        #  yr1 <- trk_one |> filter(year==i)
+        #  groups <- c(groups, paste0("Track ",i))
+        #  m <- m |> addPolylines(data=yr1, lng=~x_, lat=~y_, color=col_yrs6[1], weight=2, group=paste0("Track ",i))
+        #}
         m <- m |> 
           addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_one()$t_) |>
           addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
@@ -419,23 +416,38 @@ server = function(input, output, session) {
   # MOVEMENT PATHS
   ##############################################################################
 
+  trk_one2 <- reactive({
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou2 & season==input$season2)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
+    x <- trk_all() |> 
+      filter(id %in% input$caribou2) |>
+      filter(year >= input$daterange2[1] & year <= input$daterange2[2]) |> 
+      filter(yday >= start & yday <= end)
+  })
+
   # Select tracks for one individual
   trk_one3 <- reactive({
-    start <- input$segments[1]
-    end <- input$segments[2]
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou2 & season==input$season2)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
     x <- trk_all() |> 
       filter(id %in% input$caribou3) |>
       filter(year >= input$daterange3[1] & year <= input$daterange3[2]) |> 
-      mutate(year=as.factor(year)) |>
-      mutate(selected=ifelse(yday>=start & yday<=end, 1, 0))
+      filter(yday >= start & yday <= end)
   })
 
   # Convert track to sf linestring
   path1 <- reactive({
     st_as_sf(trk_one3(), coords = c("x_", "y_"), crs = 4326) |>
-      group_by(id, year) |> 
+      #group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
-      st_cast("LINESTRING")
+      st_cast("LINESTRING") |>
+      st_buffer(500) |>
+      st_union() |> 
+      st_sf()
   })
 
   # Estimate home range
@@ -447,7 +459,12 @@ server = function(input, output, session) {
   od1 <- reactive({
     od <- od(trk_one3(), model = fit_ctmm(trk_one3(), "bm"), trast = make_trast(trk_one3()))
     iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
-    corridor <- st_union(iso, st_buffer(path1(), 500)) |> st_sf()
+    #corridor <- st_union(iso, st_buffer(path1(), 500)) |> st_sf()
+  })
+
+  od1path1 <- reactive({
+    corridor <- st_union(od1(), path1()) |> 
+      st_sf()
   })
 
   # Leaflet map with locations, home ranges, and disturbances
@@ -462,7 +479,9 @@ server = function(input, output, session) {
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
         groups <- NULL
         trk_one <- mutate(trk_one3(), year=as.double(year))
-        m <- m |> addPolygons(data=od1(), color="#386cb0", fill=T, weight=2, fillOpacity=0.5, group="Movement corridor")
+        m <- m |> addPolygons(data=od1(), color="blue", fill=T, weight=2, fillOpacity=0.5, group="Occurrence distribution") |>
+          addPolygons(data=path1(), color="green", fill=T, weight=2, fillOpacity=0.5, group="Buffered tracks") |>
+          addPolygons(data=od1path1(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Movement corridor")
         for (i in sort(unique(trk_one$year))) {
           yr1 <- trk_one |> filter(year==i)
           groups <- c(groups, paste0("Track ",i))
@@ -480,9 +499,9 @@ server = function(input, output, session) {
           addScaleBar(position="bottomright") |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-            overlayGroups = c("Locations", groups, "Study area", "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Movement corridor"),
+            overlayGroups = c("Locations", groups, "Study area", "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Occurrence distribution", "Buffered tracks", "Movement corridor"),
             options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
+          hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Buffered tracks", "Movement corridor"))
       m
     }
   })

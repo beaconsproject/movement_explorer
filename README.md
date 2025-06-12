@@ -1,6 +1,6 @@
 ## BEACONs Movement Explorer
 
-June 5, 2025
+June 12, 2025
 
 The BEACONs Movement Explorer is a simple app intended to be used as part of a workflow for exploring movement data. Specifically, the app can help users to:
 
@@ -26,7 +26,6 @@ Alternatively, if you are familiar with R, the app can also be run on a local co
 - Replace LRH demo with public demo
 - Add LRH and WLH choices for inputs (pwd protected?)
 - Add today's location as big red dots
-- Add elevation plot
 - Add ability to select multiple (or all) individuals
 - Add multi-individual plots (HR area +/-)
 - Add second stats tab for PAs, IPCAs
@@ -35,7 +34,5 @@ Alternatively, if you are familiar with R, the app can also be run on a local co
   - Movement app – complete documentation and fix issues (date range?)
   - Date range solution: if start > end then do this else do that
   - The year 2025 produces strange results in triplots
-- Home range / movement paths
-  - Calculations should be based on ID x SEASON
 - Ideas
   - Develop dual thingy to simulate monitoring and targeted seasonal surveys
