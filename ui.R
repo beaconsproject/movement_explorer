@@ -151,8 +151,7 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()),
-            tabPanel("Help", includeMarkdown("docs/home_ranges.md")),
-            tabPanel("Glimpse", verbatimTextOutput("test_output"))
+            tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
           )
         )
       ),
@@ -160,7 +159,8 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Corridors", leafletOutput("mapPath", height=750) |> withSpinner()),
-            tabPanel("Help", includeMarkdown("docs/movement_paths.md"))
+            tabPanel("Help", includeMarkdown("docs/movement_paths.md")),
+            tabPanel("Glimpse", verbatimTextOutput("test_output"))
           )
         )
       )     

@@ -349,16 +349,6 @@ server = function(input, output, session) {
       filter(yday >= start & yday <= end)
   })
 
-  # Test widget
-  output$test_output <- renderPrint({
-    r <- r_seasons_data() |>
-      filter(id %in% input$caribou2 & season==input$season2)
-    start <- r$start_doy_new
-    end <- r$end_doy_new
-    print(start)
-    print(end)
-  })
-
   # Estimate home range
   hr1 <- reactive({
     if (input$hr=="MCP") {
@@ -416,27 +406,26 @@ server = function(input, output, session) {
   # MOVEMENT PATHS
   ##############################################################################
 
-  trk_one2 <- reactive({
-    r <- r_seasons_data() |>
-      filter(id %in% input$caribou2 & season==input$season2)
-    start <- r$start_doy_new
-    end <- r$end_doy_new
-    x <- trk_all() |> 
-      filter(id %in% input$caribou2) |>
-      filter(year >= input$daterange2[1] & year <= input$daterange2[2]) |> 
-      filter(yday >= start & yday <= end)
-  })
-
   # Select tracks for one individual
   trk_one3 <- reactive({
     r <- r_seasons_data() |>
-      filter(id %in% input$caribou2 & season==input$season2)
+      filter(id %in% input$caribou3 & season==input$season3)
     start <- r$start_doy_new
     end <- r$end_doy_new
     x <- trk_all() |> 
       filter(id %in% input$caribou3) |>
       filter(year >= input$daterange3[1] & year <= input$daterange3[2]) |> 
       filter(yday >= start & yday <= end)
+  })
+
+  # Test widget
+  output$test_output <- renderPrint({
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou3 & season==input$season3)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
+    print(start)
+    print(end)
   })
 
   # Convert track to sf linestring

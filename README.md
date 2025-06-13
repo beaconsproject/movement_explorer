@@ -1,12 +1,13 @@
 ## BEACONs Movement Explorer
 
-June 12, 2025
+June 13, 2025
 
 The BEACONs Movement Explorer is a simple app intended to be used as part of a workflow for exploring movement data. Specifically, the app can help users to:
 
-  - Define seasonal and migration periods in their movement data
-  - Estimate seasonal and annual home ranges using a variety of approaches
-  - Identify seasonal movement corridors (paths) using a variety of approaches
+  - Explore movement data
+  - Define seasonal and migration periods
+  - Estimate seasonal and annual home ranges
+  - Identify seasonal movement corridors (paths)
 
 <br>
 
