@@ -9,6 +9,7 @@ The following home range estimators are currently available:
 - MCP: Minimum convex polygon
 - KDE: Kernel density estimator
 - aKDE: Autocorrelated KDE
+- LoCoH: Local convex hull
 
 ### Isopleth level
 
@@ -33,4 +34,3 @@ The following home range estimators are currently available:
 | Kernel Density Estimation (KDE) | Non-parametric | Places a kernel function over each location point and sums them to estimate probability density. | Can estimate complex shapes, provides a continuous utilization distribution. | Sensitive to bandwidth selection, potential for overestimation, assumes data independence. |
 | Autocorrelated Kernel Density Estimation (aKDE) | Non-parametric | Modifies KDE to account for temporal autocorrelation. | More robust for serially correlated data. | Still requires bandwidth selection. |
 | Local Convex Hull (LoCoH) | Non-parametric | Constructs overlapping local convex hulls based on subsets of data points. | Handles complex shapes and boundaries well, potentially more accurate than KDE. | Parameter selection can be influential. |
-| Brownian Bridge Movement Model (BBMM) | Probabilistic | Incorporates movement path and temporal autocorrelation. | Suitable for GPS data, accounts for movement patterns. | Can be computationally intensive. |

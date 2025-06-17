@@ -13,7 +13,7 @@ server = function(input, output, session) {
   gps_csv <- eventReactive(list(input$selectInput,input$csv1), {
     req(input$selectInput)  # Ensure `selectInput` is not NULL
     if (input$selectInput == "usedemo") {
-      readr::read_csv('www/demo_gps_lr.csv') |>
+      readr::read_csv('www/demo_gps.csv') |>
           mutate(year=year(time), yday=yday(time))
     } else if (input$selectInput == "usedata") {
       req(input$csv1)
@@ -35,20 +35,24 @@ server = function(input, output, session) {
 
   # Read and expand seasons data
   initial_seasons_data <- eventReactive(seg_csv(),{
-    x <- seg_csv() |> mutate(start_doy=yday(as.Date(start, "%b-%d")), end_doy=yday(as.Date(end, "%b-%d")))
-    x <- x |> mutate(
-      start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
-      end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
-    ids <- unique(gps_csv()$id)
-    y <- tibble(
-      id=rep(ids, each=nrow(x)), 
-      season=rep(x$season, length(ids)), 
-      start=rep(x$start, length(ids)), 
-      end=rep(x$end, length(ids)),
-      start_doy=rep(x$start_doy, length(ids)),
-      end_doy=rep(x$end_doy, length(ids)),
-      start_doy_new=start_doy,
-      end_doy_new=end_doy)
+    if (length(names(seg_csv()))==3) {
+      x <- seg_csv() |> mutate(start_doy=yday(as.Date(start, "%b-%d")), end_doy=yday(as.Date(end, "%b-%d")))
+      x <- x |> mutate(
+        start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
+        end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
+      ids <- unique(gps_csv()$id)
+      y <- tibble(
+        id=rep(ids, each=nrow(x)), 
+        season=rep(x$season, length(ids)), 
+        start=rep(x$start, length(ids)), 
+        end=rep(x$end, length(ids)),
+        start_doy=rep(x$start_doy, length(ids)),
+        end_doy=rep(x$end_doy, length(ids)),
+        start_doy_new=start_doy,
+        end_doy_new=end_doy)
+    } else {
+      y <- seg_csv()
+    }
   })
 
   # Reactive value to store and manage the seasons_data
@@ -133,7 +137,7 @@ server = function(input, output, session) {
   observe({
     x <- seg_csv()
     if ("Annual" %in% unique(x$season)) {
-      x1 <- x$start[x$season=="Annual"]
+      x1 <- x$start[x$season=="Annual"][1]
     } else {
       x1 <- "Jan-01"
     }
