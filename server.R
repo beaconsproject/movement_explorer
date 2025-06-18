@@ -372,11 +372,19 @@ server = function(input, output, session) {
     } else if (input$hr=="KDE") {
       lvl <- input$levels
       if (lvl[2]==1) {lvl[2]=0.999}
-      x <- hr_kde(trk_one2(), levels=lvl)
+      if (input$h > 0) {
+        x <- hr_kde(trk_one2(), levels=lvl, h=input$h)
+      } else {
+        x <- hr_kde(trk_one2(), levels=lvl)
+      }
     } else if (input$hr=="aKDE") {
       lvl <- input$levels
       #if (lvl==1) {lvl=0.999}
       x <- hr_akde(trk_one2(), levels=lvl)
+    } else if (input$hr=="LoCoH") {
+      lvl <- input$levels
+      #if (lvl==1) {lvl=0.999}
+      x <- hr_locoh(trk_one2(), levels=lvl)
     }
     hr_isopleths(x)
   })
