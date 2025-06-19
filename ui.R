@@ -51,8 +51,8 @@ ui = dashboardPage(skin="black",
       menuItem("Welcome", tabName="home", icon=icon("th")),
       menuItem("Select study area", tabName="select", icon=icon("arrow-pointer")),
       menuItem("Define segments", tabName = "segments", icon=icon("arrow-pointer")),
-      menuItem("Estimate home ranges", tabName="hr", icon=icon("arrow-pointer")),
-      menuItem("Idenfity movement paths", tabName = "paths", icon=icon("arrow-pointer")),
+      menuItem("Estimate ranges", tabName="hr", icon=icon("arrow-pointer")),
+      menuItem("Identify movement paths", tabName = "paths", icon=icon("arrow-pointer")),
       hr()
     ),
     conditionalPanel(

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "define_segments.md",
+                "file": "user_guide.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "define_segments"
+              "title": "user_guide"
             }
           }
         ]
@@ -166,5 +166,7 @@
     }
   },
   "active": "62bf3ddbc9ce866a",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "define_segments.md"
+  ]
 }

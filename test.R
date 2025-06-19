@@ -14,6 +14,7 @@ leaflet() %>%
       transparent = TRUE)) %>%
   setView(lng = -100, lat = 60, zoom = 4)
 
+# With popup
 leaflet() %>%
   addTiles(group = "base") %>%
   setView(lng = -100, lat = 60, zoom = 4) %>%
@@ -25,3 +26,14 @@ leaflet() %>%
         transparent = TRUE,
         format = "image/png",
         info_format = "text/html"))
+
+# UTM grid
+leaflet() %>%
+  addTiles() %>%
+  addWMSTiles(
+    baseUrl= "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/UTM/MapServer",
+    layers = "UTM_100km",
+    options = WMSTileOptions(
+      format = "image/png",
+      transparent = TRUE)) %>%
+  setView(lng = -100, lat = 60, zoom = 4)
