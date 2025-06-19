@@ -75,7 +75,7 @@ ui = dashboardPage(skin="black",
       selectInput("caribou", "Select individual:", choices=NULL, multiple=FALSE),
       selectInput("season", "Select season:", choices=NULL),
       sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2021,2021), sep=""),
-      textInput("day1", "Start of year (e.g., Jan-01):", value = NULL),
+      #textInput("day1", "Start of year (e.g., Jan-01):", value = NULL),
       hr(),
       actionButton("goButton", "Plot segments", style="color: #000"),
       br(),
@@ -85,6 +85,10 @@ ui = dashboardPage(skin="black",
       condition='input.tabs=="hr"',
       selectInput("caribou2", "Select individual:", choices=NULL, multiple=TRUE),
       selectInput("season2", "Select season:", choices=NULL),
+      #value_box(title="Date range:", "Jan-1 - Dec-31", theme="bg-gradient-indigo-purple"),
+      #textOutput("text"),
+      #verbatimTextOutput("text"),
+      div(style="position:relative; left:calc(6%);", "Date range: Jan-1 - Dec-31"),
       sliderInput("daterange2", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
       actionButton("goRange", "Calculate HRs", style="color: #000"),
       hr(),
@@ -120,7 +124,7 @@ ui = dashboardPage(skin="black",
           tabBox(id = "one", width="12",
             tabPanel("Overview", includeMarkdown("docs/overview.md")),
             tabPanel("User guide", includeMarkdown("docs/user_guide.md")),
-            tabPanel("Datasets", includeMarkdown("docs/datasets.md"))
+            tabPanel("Data requirements", includeMarkdown("docs/datasets.md"))
           )
         )
       ),
@@ -140,18 +144,23 @@ ui = dashboardPage(skin="black",
           tabBox(id="three", width="12",
             tabPanel("Segmentation plots",
               sliderInput("segments", "Define date range:", min=1, max=365, step=1, value=c(1,365), width=1200),
+              #sliderInput("segments", "Define date range:", 
+              #  min=as.Date("Jan-01","%b-%d"), 
+              #  max=as.Date("Dec-31","%b-%d"), 
+              #  value=as.Date(c(as.Date("Apr-19","%b-%d"), as.Date("Aug-19","%b-%d"))), 
+              #  width=1200),
               plotOutput("segmentPlot", height=700)),
             tabPanel("Segmentation table", 
               DTOutput("seg_data2")),
-            tabPanel("Help", includeMarkdown("docs/define_segments.md"))
+            tabPanel("User guide", includeMarkdown("docs/define_segments.md"))
           )
         )
       ),
       tabItem(tabName="hr",
         fluidRow(
           tabBox(id="three", width="12",
-            tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()),
-            tabPanel("Help", includeMarkdown("docs/home_ranges.md"))
+            tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()), 
+            tabPanel("User guide", includeMarkdown("docs/home_ranges.md"))
           )
         )
       ),
@@ -159,8 +168,8 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Corridors", leafletOutput("mapPath", height=750) |> withSpinner()),
-            tabPanel("Help", includeMarkdown("docs/movement_paths.md")),
-            tabPanel("Glimpse", verbatimTextOutput("test_output"))
+            tabPanel("User guide", includeMarkdown("docs/movement_paths.md")),
+            #tabPanel("Glimpse", verbatimTextOutput("test_output"))
           )
         )
       )     

@@ -38,6 +38,8 @@ server = function(input, output, session) {
     if (length(names(seg_csv()))==3) {
       x <- seg_csv() |> mutate(start_doy=yday(as.Date(start, "%b-%d")), end_doy=yday(as.Date(end, "%b-%d")))
       x <- x |> mutate(
+        #start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
+        #end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
         start_doy = ifelse(start_doy>=day1() & start_doy<=365, start_doy-day1()+1, 365-day1()+1+start_doy),
         end_doy = ifelse(end_doy>=day1() & end_doy<=365, end_doy-day1()+1, 365-day1()+1+end_doy))
       ids <- unique(gps_csv()$id)
@@ -133,25 +135,25 @@ server = function(input, output, session) {
   # UPDATE UI
   ##############################################################################
 
-  # Update start of year
-  observe({
-    x <- seg_csv()
-    if ("Annual" %in% unique(x$season)) {
-      x1 <- x$start[x$season=="Annual"][1]
-    } else {
-      x1 <- "Jan-01"
-    }
-    updateTextInput(session, "day1", value=x1)
-  })
+  # Update start of year in textInput
+  #observe({
+  #  x <- seg_csv()
+  #  if ("Annual" %in% unique(x$season)) {
+  #    x1 <- x$start[x$season=="Annual"][1]
+  #  } else {
+  #    x1 <- "Jan-01"
+  #  }
+  #  updateTextInput(session, "day1", value=x1)
+  #})
 
   # First day of year - doesn't have to be Jan-01
   day1 <- reactive({
-    x <- seg_csv()
-    if ("Annual" %in% unique(x$season)) {
-      yday(as.Date(x$start[x$season=="Annual"], "%b-%d"))
-    } else {
+    #x <- seg_csv()
+    #if ("Annual" %in% unique(x$season)) {
+    #  yday(as.Date(x$start[x$season=="Annual"], "%b-%d"))
+    #} else {
       yday(as.Date("Jan-01", "%b-%d"))
-    }
+    #}
   })
 
   first_year <- reactive({
@@ -160,6 +162,16 @@ server = function(input, output, session) {
 
   last_year <- reactive({
     max(gps_csv()$year)
+  })
+
+  #output$text <- renderText({ start_date() })
+
+  start_date <- reactive({
+    as.Date("Jan-01", "%b-%d")
+  })
+
+  end_date <- reactive({
+    as.Date("Dec-31", "%b-%d")
   })
 
   # Update choices for caribou individuals input based on input movement data
@@ -191,7 +203,7 @@ server = function(input, output, session) {
     selected_row_for_slider <- initial_seasons_data() %>%
       filter(id == as.numeric(input$caribou) & season == input$season)
     if (nrow(selected_row_for_slider) == 1) {
-      updateSliderInput(session, "segments", label=paste0("Define date range (year starts on ",input$day1,")"),
+      updateSliderInput(session, "segments", label=paste0("Define date range:"),
                         value = c(selected_row_for_slider$start_doy[1], selected_row_for_slider$end_doy[1]))
     }
   }, ignoreNULL = TRUE, ignoreInit = FALSE) # ignoreInit = FALSE to run on app startup

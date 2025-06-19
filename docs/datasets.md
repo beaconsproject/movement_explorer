@@ -31,7 +31,7 @@ Example table:
 <pre>
 |season           |start  |end    |
 |-----------------|-------|-------|
-|Annual           |Feb-01 |Jan-31 |
+|Annual           |Jan-01 |Dec-31 |
 |Early winter     |Oct-21 |Jan-31 |
 |Late winter      |Feb-01 |Apr-15 |
 |Summer           |Jun-16 |Sep-14 |
@@ -39,10 +39,6 @@ Example table:
 |Spring migration |Apr-01 |Jun-30 |
 |Fall migration   |Sep-01 |Oct-31 |
 </pre>
-
-<br>
-
-**Important note:** One of the rows of the table must contain an "Annual" season with start and end dates ranging 365 days. Depending on the study species and the seasons of interest, the start and end dates do not have to coincide with Jan-01 and Dec31, respectively. The idea is to avoid having a particular season or migratory period span 2 calendar years since this will cause issues with the date range slider.
 
 ### Input 3: Disturbances and conservation areas
 
