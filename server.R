@@ -65,16 +65,16 @@ server = function(input, output, session) {
     r_seasons_data(initial_seasons_data())
   })
 
-  #studyarea <- eventReactive(list(input$selectInput, input$gpkg),{
-  #  #req(input$getButton)
-  #  if (input$selectInput == "usedemo") {
-  #    st_read('www/demo_data.gpkg', 'studyarea', quiet = TRUE) |>
-  #      st_transform(4326)
-  #  } else if (input$selectInput == "usedata") {
-  #    st_read(input$gpkg$datapath, 'studyarea', quiet = TRUE) |>
-  #      st_transform(4326)
-  #  }
-  #})
+  studyarea <- eventReactive(list(input$selectInput, input$gpkg),{
+    #req(input$getButton)
+    if (input$selectInput == "usedemo") {
+      st_read('www/demo_data.gpkg', 'studyarea', quiet = TRUE) |>
+        st_transform(4326)
+    } else if (input$selectInput == "usedata") {
+      st_read(input$gpkg$datapath, 'studyarea', quiet = TRUE) |>
+        st_transform(4326)
+    }
+  })
 
   #line <- eventReactive(input$selectInput,{
   #  #req(input$getButton)
@@ -164,7 +164,7 @@ server = function(input, output, session) {
     max(gps_csv()$year)
   })
 
-  #output$text <- renderText({ start_date() })
+  output$tab2 <- renderText({ start_date() })
 
   start_date <- reactive({
     as.Date("Jan-01", "%b-%d")
@@ -195,6 +195,39 @@ server = function(input, output, session) {
     updateSelectInput(session, "season3", choices=c("Spring migration","Fall migration"), selected="Spring migration")
   })
 
+  ##################################################################################################
+  # Using real dates, not day-of-year
+  
+  # Observe changes in ID or Season selection to update the slider's current value
+  observeEvent(list(input$caribou, input$season), {
+    req(input$caribou, input$season) # Ensure both are selected
+    # Find the original start and end for the selected combination
+    # This part determines what the slider is INITIALLY set to when you pick an ID/Season
+    selected_row_for_slider <- initial_seasons_data() %>%
+      filter(id == as.numeric(input$caribou) & season == input$season)
+    if (nrow(selected_row_for_slider) == 1) {
+      updateSliderInput(session, "segments_date", label=paste0("Define date range:"),
+        value = c(as.Date(selected_row_for_slider$start[1],"%b-%d"), as.Date(selected_row_for_slider$end[1],"%b-%d")))
+    }
+  }, ignoreNULL = TRUE, ignoreInit = FALSE) # ignoreInit = FALSE to run on app startup
+
+  # Observe changes in the slider to update start_new and end_new for the selected row
+  observeEvent(input$segments_date, {
+    req(input$caribou, input$season, input$segments_date)
+    current_data_snapshot <- r_seasons_data() # Get current state of the reactive data
+    selected_id_num <- as.numeric(input$caribou)
+    # Find the index of the row to update
+    row_index <- which(current_data_snapshot$id == selected_id_num & 
+                       current_data_snapshot$season == input$season)
+    if (length(row_index) == 1) {
+      current_data_snapshot$start_doy_new[row_index] <- yday(input$segments_date[1])
+      current_data_snapshot$end_doy_new[row_index] <- yday(input$segments_date[2])
+      r_seasons_data(current_data_snapshot) # Update the reactive data
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE) # ignoreInit = TRUE: only fire if user changes slider
+  
+  ##################################################################################################
+  
   # Observe changes in ID or Season selection to update the slider's current value
   observeEvent(list(input$caribou, input$season), {
     req(input$caribou, input$season) # Ensure both are selected
@@ -204,7 +237,7 @@ server = function(input, output, session) {
       filter(id == as.numeric(input$caribou) & season == input$season)
     if (nrow(selected_row_for_slider) == 1) {
       updateSliderInput(session, "segments", label=paste0("Define date range:"),
-                        value = c(selected_row_for_slider$start_doy[1], selected_row_for_slider$end_doy[1]))
+        value = c(selected_row_for_slider$start_doy[1], selected_row_for_slider$end_doy[1]))
     }
   }, ignoreNULL = TRUE, ignoreInit = FALSE) # ignoreInit = FALSE to run on app startup
 
@@ -242,8 +275,8 @@ server = function(input, output, session) {
   
   # Select tracks for one individual
   trk_one <- reactive({
-    start <- input$segments[1]
-    end <- input$segments[2]
+    start <- yday(input$segments_date[1])
+    end <- yday(input$segments_date[2])
     x <- trk_all() |> 
       filter(id %in% input$caribou) |>
       filter(year >= input$daterange[1] & year <= input$daterange[2]) |> 
@@ -345,19 +378,19 @@ server = function(input, output, session) {
     p2 <- ggplot(trk_data) +
       geom_line(aes(yday, long, color=year)) +
       ylab('Longitude') + xlab('Day of year') +
-      geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      geom_vline(xintercept=c(yday(input$segments_date)[1],yday(input$segments_date)[2]))
     p3 <- ggplot(trk_data) +
       geom_line(aes(yday, lat, color=year)) + 
       ylab('Latitude') + xlab('Day of year') +
-      geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+      geom_vline(xintercept=c(yday(input$segments_date)[1],yday(input$segments_date)[2]))
     p4 <- ggplot(trk_data) + 
         geom_line(aes(yday, nsd, color=year)) + 
         ylab('NSD') + xlab('Day of year') +
-        geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+        geom_vline(xintercept=c(yday(input$segments_date)[1],yday(input$segments_date)[2]))
     p5 <- ggplot(trk_data) + 
         geom_line(aes(yday, elev, color=year)) + 
         ylab('Elevation') + xlab('Day of year') +
-        geom_vline(xintercept=c(input$segments[1],input$segments[2]))
+        geom_vline(xintercept=c(yday(input$segments_date)[1],yday(input$segments_date)[2]))
     p1 | (p2/p3/p4/p5)
   })
 
@@ -422,7 +455,7 @@ server = function(input, output, session) {
         #}
         m <- m |> 
           addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_one()$t_) |>
-          #addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
+          addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
           #addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
           #addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
           #addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
@@ -433,7 +466,7 @@ server = function(input, output, session) {
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
             #overlayGroups = c("Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Home ranges"),
-            overlayGroups = c("Locations", "Home ranges"),
+            overlayGroups = c("Study area", "Locations", "Home ranges"),
             options = layersControlOptions(collapsed = FALSE)) |>
           #hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
           hideGroup("")
@@ -458,13 +491,27 @@ server = function(input, output, session) {
   })
 
   # Test widget
-  output$test_output <- renderPrint({
+  output$text2 <- renderPrint({
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou2 & season==input$season2)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
+    cat(input$season2, ":\n", sep="")
+    startdate <- as.Date(start - 1, origin = paste0(input$daterange2[1], "-01-01"))
+    enddate <- as.Date(end - 1, origin = paste0(input$daterange2[2], "-01-01"))
+    cat(as.character(startdate), "-", as.character(enddate), "\n")
+  })
+
+  # Test widget
+  output$text3 <- renderPrint({
     r <- r_seasons_data() |>
       filter(id %in% input$caribou3 & season==input$season3)
     start <- r$start_doy_new
     end <- r$end_doy_new
-    print(start)
-    print(end)
+    cat(input$season3, ":\n", sep="")
+    startdate <- as.Date(start - 1, origin = paste0(input$daterange3[1], "-01-01"))
+    enddate <- as.Date(end - 1, origin = paste0(input$daterange3[2], "-01-01"))
+    cat(as.character(startdate), "-", as.character(enddate), "\n")
   })
 
   # Convert track to sf linestring
@@ -518,7 +565,7 @@ server = function(input, output, session) {
         }
         m <- m |> 
           addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_one()$t_) |>
-          #addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
+          addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
           #addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
           #addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
           #addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
@@ -529,7 +576,7 @@ server = function(input, output, session) {
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
             #overlayGroups = c("Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Occurrence distribution", "Buffered tracks", "Movement corridor"),
-            overlayGroups = c("Locations", groups, "Occurrence distribution", "Buffered tracks", "Movement corridor"),
+            overlayGroups = c("Study area", "Locations", groups, "Occurrence distribution", "Buffered tracks", "Movement corridor"),
             options = layersControlOptions(collapsed = FALSE)) |>
           hideGroup(c(groups, "Buffered tracks", "Movement corridor"))
       m

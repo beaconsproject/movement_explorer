@@ -65,8 +65,8 @@ ui = dashboardPage(skin="black",
       conditionalPanel(
         condition="input.selectInput=='usedata'",
         fileInput("csv1", "Movement data (csv):", accept=".csv"),
-        fileInput("csv2", "Segmentation data (csv):", accept=".csv")
-        #fileInput("gpkg", "Disturbance data (gpkg):", accept=".gpkg")
+        fileInput("csv2", "Segmentation data (csv):", accept=".csv"),
+        fileInput("gpkg", "Disturbance data (gpkg):", accept=".gpkg")
       ),
       actionButton("getButton", "Load data"),
     ),
@@ -103,7 +103,7 @@ ui = dashboardPage(skin="black",
       selectInput("caribou3", "Select individual:", choices=NULL, multiple=TRUE),
       selectInput("season3", "Movement period:", choices=NULL),
       sliderInput("daterange3", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
-      actionButton("goPath", "Map Corridor", style="color: #000"),
+      actionButton("goPath", "Map path", style="color: #000"),
       hr(),
       div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000')),
     )
@@ -143,12 +143,12 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="12",
             tabPanel("Segmentation plots",
-              sliderInput("segments", "Define date range:", min=1, max=365, step=1, value=c(1,365), width=1200),
-              #sliderInput("segments", "Define date range:", 
-              #  min=as.Date("Jan-01","%b-%d"), 
-              #  max=as.Date("Dec-31","%b-%d"), 
-              #  value=as.Date(c(as.Date("Apr-19","%b-%d"), as.Date("Aug-19","%b-%d"))), 
-              #  width=1200),
+              sliderInput("segments_date", "Define date range:", 
+                min=as.Date("Jan-01","%b-%d"), 
+                max=as.Date("Dec-31","%b-%d"), 
+                value=as.Date(c(as.Date("Jan-01","%b-%d"), as.Date("Dec-31","%b-%d"))), 
+                width=1200),
+              #sliderInput("segments", "Define date range:", min=1, max=365, step=1, value=c(1,365), width=1200),
               plotOutput("segmentPlot", height=700)),
             tabPanel("Segmentation table", 
               DTOutput("seg_data2")),
@@ -158,18 +158,25 @@ ui = dashboardPage(skin="black",
       ),
       tabItem(tabName="hr",
         fluidRow(
-          tabBox(id="three", width="12",
-            tabPanel("Home ranges", leafletOutput("mapRange", height=900) |> withSpinner()), 
+          tabBox(id="three", width="9",
+            tabPanel("Ranges", 
+              leafletOutput("mapRange", height=750) |> withSpinner()), 
             tabPanel("User guide", includeMarkdown("docs/home_ranges.md"))
+          ),
+          tabBox(id = "five", width="3",
+            tabPanel("Statistics", verbatimTextOutput("text2"))
           )
         )
       ),
       tabItem(tabName="paths",
         fluidRow(
-          tabBox(id="three", width="12",
-            tabPanel("Corridors", leafletOutput("mapPath", height=750) |> withSpinner()),
+          tabBox(id="three", width="9",
+            tabPanel("Paths", leafletOutput("mapPath", height=750) |> withSpinner()),
             tabPanel("User guide", includeMarkdown("docs/movement_paths.md")),
             #tabPanel("Glimpse", verbatimTextOutput("test_output"))
+          ),
+          tabBox(id = "five", width="3",
+            tabPanel("Statistics", verbatimTextOutput("text3"))
           )
         )
       )     
