@@ -37,3 +37,22 @@ leaflet() %>%
       format = "image/png",
       transparent = TRUE)) %>%
   setView(lng = -100, lat = 60, zoom = 4)
+
+
+
+Can use provide R dplyr code to group animal movement data by id and time, and keep only the first observation for each id
+library(sf)
+library(tidyverse)
+x <- read_csv('movement_explorer/www/demo_gps.csv') |>
+  group_by(id) |>
+  arrange(time) |>
+  slice(1) |>
+  ungroup() |>
+  st_as_sf(coords=c("long", "lat"), crs=4326)
+x
+
+leaflet() |>
+  addTiles() |>
+  addCircles(data=x, fill=T, stroke=T, weight=12, color="red", 
+          fillColor="red", fillOpacity=1, group="Capture point", popup=x$time)
+

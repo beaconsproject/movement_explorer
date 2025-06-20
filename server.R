@@ -22,6 +22,16 @@ server = function(input, output, session) {
     }
   })
 
+  gps1 <- reactive({
+    x <- gps_csv() |>
+      group_by(id) |>
+      arrange(time) |>
+      slice(1) |>
+      ungroup() #|>
+      #st_as_sf(coords=c("long", "lat"), crs=4326)
+    #x <- x |> mutate(long=st_coordinates(x)[,1], lat=st_coordinates(x)[,2])
+  })
+
   # Read seasons and migration periods data
   seg_csv <- eventReactive(list(input$selectInput,input$csv2), {
     req(input$selectInput)  # Ensure `selectInput` is not NULL
@@ -335,10 +345,13 @@ server = function(input, output, session) {
       caribou_pal <- colorFactor(topo.colors(25), gps_csv()$id)
       cols <- col_yrs6[1:length(years)]
       year_pal <- colorNumeric(palette=cols, domain=years)
+      gps1 <- gps1()
       m <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
         addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-        addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
+        addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
+        addCircles(data=gps1, ~long, ~lat, fill=T, stroke=T, weight=12, color="black", 
+          fillColor="black", fillOpacity=1, group="Capture location", popup=paste0("Caribou ",gps1$id, " collared on ", gps1$time))
         groups <- NULL
         trk_all <- mutate(trk_all(), year=as.double(year))
         for (i in sort(unique(trk_all$id))) {
@@ -352,9 +365,9 @@ server = function(input, output, session) {
           addScaleBar(position="bottomright") |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-            overlayGroups = groups,
+            overlayGroups = c("Capture location", groups),
             options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup("")
+          hideGroup("Capture location")
       m
     }
   })
@@ -500,6 +513,7 @@ server = function(input, output, session) {
     startdate <- as.Date(start - 1, origin = paste0(input$daterange2[1], "-01-01"))
     enddate <- as.Date(end - 1, origin = paste0(input$daterange2[2], "-01-01"))
     cat(as.character(startdate), "-", as.character(enddate), "\n")
+    print(gps1())
   })
 
   # Test widget
