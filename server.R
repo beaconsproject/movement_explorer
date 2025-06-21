@@ -513,7 +513,6 @@ server = function(input, output, session) {
     startdate <- as.Date(start - 1, origin = paste0(input$daterange2[1], "-01-01"))
     enddate <- as.Date(end - 1, origin = paste0(input$daterange2[2], "-01-01"))
     cat(as.character(startdate), "-", as.character(enddate), "\n")
-    print(gps1())
   })
 
   # Test widget
