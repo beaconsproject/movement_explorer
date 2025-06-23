@@ -205,19 +205,17 @@ server = function(input, output, session) {
     updateSelectInput(session, "season3", choices=c("Spring migration","Fall migration"), selected="Spring migration")
   })
 
-  ##################################################################################################
-  # Using real dates, not day-of-year
-  
   # Observe changes in ID or Season selection to update the slider's current value
   observeEvent(list(input$caribou, input$season), {
     req(input$caribou, input$season) # Ensure both are selected
     # Find the original start and end for the selected combination
     # This part determines what the slider is INITIALLY set to when you pick an ID/Season
-    selected_row_for_slider <- initial_seasons_data() %>%
+    selected_row_for_slider <- initial_seasons_data() |>
       filter(id == as.numeric(input$caribou) & season == input$season)
     if (nrow(selected_row_for_slider) == 1) {
       updateSliderInput(session, "segments_date", label=paste0("Define date range:"),
-        value = c(as.Date(selected_row_for_slider$start[1],"%b-%d"), as.Date(selected_row_for_slider$end[1],"%b-%d")))
+        value = c(as.Date(selected_row_for_slider$start[1], format="%b-%d"), as.Date(selected_row_for_slider$end[1], format="%b-%d")),
+        timeFormat="%b-%d")
     }
   }, ignoreNULL = TRUE, ignoreInit = FALSE) # ignoreInit = FALSE to run on app startup
 
@@ -237,34 +235,35 @@ server = function(input, output, session) {
   }, ignoreNULL = TRUE, ignoreInit = TRUE) # ignoreInit = TRUE: only fire if user changes slider
   
   ##################################################################################################
-  
+  # Using day-of-year not real dates
   # Observe changes in ID or Season selection to update the slider's current value
-  observeEvent(list(input$caribou, input$season), {
-    req(input$caribou, input$season) # Ensure both are selected
-    # Find the original start and end for the selected combination
-    # This part determines what the slider is INITIALLY set to when you pick an ID/Season
-    selected_row_for_slider <- initial_seasons_data() %>%
-      filter(id == as.numeric(input$caribou) & season == input$season)
-    if (nrow(selected_row_for_slider) == 1) {
-      updateSliderInput(session, "segments", label=paste0("Define date range:"),
-        value = c(selected_row_for_slider$start_doy[1], selected_row_for_slider$end_doy[1]))
-    }
-  }, ignoreNULL = TRUE, ignoreInit = FALSE) # ignoreInit = FALSE to run on app startup
+  #observeEvent(list(input$caribou, input$season), {
+  #  req(input$caribou, input$season) # Ensure both are selected
+  #  # Find the original start and end for the selected combination
+  #  # This part determines what the slider is INITIALLY set to when you pick an ID/Season
+  #  selected_row_for_slider <- initial_seasons_data() %>%
+  #    filter(id == as.numeric(input$caribou) & season == input$season)
+  #  if (nrow(selected_row_for_slider) == 1) {
+  #    updateSliderInput(session, "segments", label=paste0("Define date range:"),
+  #      value = c(selected_row_for_slider$start_doy[1], selected_row_for_slider$end_doy[1]))
+  #  }
+  #}, ignoreNULL = TRUE, ignoreInit = FALSE) # ignoreInit = FALSE to run on app startup
 
   # Observe changes in the slider to update start_new and end_new for the selected row
-  observeEvent(input$segments, {
-    req(input$caribou, input$season, input$segments)
-    current_data_snapshot <- r_seasons_data() # Get current state of the reactive data
-    selected_id_num <- as.numeric(input$caribou)
-    # Find the index of the row to update
-    row_index <- which(current_data_snapshot$id == selected_id_num & 
-                       current_data_snapshot$season == input$season)
-    if (length(row_index) == 1) {
-      current_data_snapshot$start_doy_new[row_index] <- input$segments[1]
-      current_data_snapshot$end_doy_new[row_index] <- input$segments[2]
-      r_seasons_data(current_data_snapshot) # Update the reactive data
-    }
-  }, ignoreNULL = TRUE, ignoreInit = TRUE) # ignoreInit = TRUE: only fire if user changes slider
+  #observeEvent(input$segments, {
+  #  req(input$caribou, input$season, input$segments)
+  #  current_data_snapshot <- r_seasons_data() # Get current state of the reactive data
+  #  selected_id_num <- as.numeric(input$caribou)
+  #  # Find the index of the row to update
+  #  row_index <- which(current_data_snapshot$id == selected_id_num & 
+  #                     current_data_snapshot$season == input$season)
+  #  if (length(row_index) == 1) {
+  #    current_data_snapshot$start_doy_new[row_index] <- input$segments[1]
+  #    current_data_snapshot$end_doy_new[row_index] <- input$segments[2]
+  #    r_seasons_data(current_data_snapshot) # Update the reactive data
+  #  }
+  #}, ignoreNULL = TRUE, ignoreInit = TRUE) # ignoreInit = TRUE: only fire if user changes slider
+  ##################################################################################################
 
   ##############################################################################
   # CREATE TRACKS

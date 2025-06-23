@@ -5,7 +5,7 @@ Understanding how animals use space and migrate is crucial for conservation and 
   - Visualize animal locations and trajectories
   - Summarize GPS-based sampling characteristics
   - Define seasonal and migration periods
-  - Estimate seasonal and annual home ranges
+  - Estimate annual and seasonal ranges
   - Identify seasonal movement corridors (paths) 
 <br>
 <div align="center">
