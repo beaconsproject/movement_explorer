@@ -366,7 +366,7 @@ server = function(input, output, session) {
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
             overlayGroups = c("Capture location", groups),
             options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup("Capture location")
+          hideGroup(c(groups[2:7], "Capture location"))
       m
     }
   })
