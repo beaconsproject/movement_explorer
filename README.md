@@ -15,16 +15,13 @@ The BEACONs Movement Explorer is a simple app intended to be used as part of a w
 
 ### Running the app
 
-1. From local machine
+Running from local machine:
 
-- Download this repository
-- Start R
-- Run the app: "shiny::runApp("path_to_app/movement_explorer")
+  - Download this repository
+  - Start R or RStudio
+  - Run the app from prompt:
+    - shiny::runApp("path_to_app/movement_explorer")
 
-2. From shinyapps.io (currently does not work)
+Running from shinyapps.io (currently does not work)
 
-The app can be run from here:
-
-- <https://beaconsproject.shinyapps.io/movement_explorer/>
-
-Alternatively, if you are familiar with R, the app can also be run on a local computer by downloading this repository.
+  - <https://beaconsproject.shinyapps.io/movement_explorer/>
