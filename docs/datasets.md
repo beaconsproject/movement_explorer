@@ -23,7 +23,7 @@ Format:
 
 Required attributes:
 - **season**: name of season or migration period
-- **start**: start date in month-day e.g., Jun-16
+- **start**: start date in month-day format e.g., Jun-16
 - **end**: end date in month-day format e.g., Sep-14
 
 Example table:

@@ -361,7 +361,7 @@ server = function(input, output, session) {
         }
         m <- m |> 
           addLegend("topleft", colors=cols, labels=years, title="Year") |>
-          addScaleBar(position="bottomright") |>
+          addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
             overlayGroups = c("Capture location", groups),
@@ -474,7 +474,7 @@ server = function(input, output, session) {
           #addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
           #addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
           addLegend("topleft", colors=cols, labels=years, title="Year") |>
-          addScaleBar(position="bottomright") |>
+          addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
             #overlayGroups = c("Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Home ranges"),
@@ -584,7 +584,7 @@ server = function(input, output, session) {
           #addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
           #addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
           addLegend("topleft", colors=cols, labels=years, title="Year") |>
-          addScaleBar(position="bottomright") |>
+          addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
             #overlayGroups = c("Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Occurrence distribution", "Buffered tracks", "Movement corridor"),
