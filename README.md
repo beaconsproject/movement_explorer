@@ -16,11 +16,21 @@ The BEACONs Movement Explorer is a simple app intended to be used as part of a w
 
 ### Video introduction to the app
 
-- [Video 1 - Welcome](https://drive.google.com/file/d/1B-hoDu5dyd-4hSyTBoIRXnMGgSy8-KV6/view?usp=drive_link)
-- [Video 2 - Select study area](https://drive.google.com/file/d/1NyA7VCmodqu2RhPWgJnTnngn56zM8Abj/view?usp=drive_link)
-- [Video 3 - Define seasons](https://drive.google.com/file/d/1LQRAj7jZT-XaN2wrh9yUgSiEsW8HSGPj/view?usp=drive_link)
-- [Video 4 - Estimate ranges](https://drive.google.com/file/d/1aaRgZgSVhCciojOCWN_OwhAE0pGN-nVL/view?usp=drive_link)
-- [Video 5 - Identify movement paths](https://drive.google.com/file/d/16LC3Ckbe4Akj7KoOkMj1vRnhC0apZhjZ/view?usp=drive_link)
+- Video 1 - Welcome
+  - [YouTube](https://youtu.be/SZrru8WFQ0g)
+  - [Google Drive](https://drive.google.com/file/d/1B-hoDu5dyd-4hSyTBoIRXnMGgSy8-KV6/view?usp=drive_link)
+- Video 2 - Select study area
+  - [YouTube](https://youtu.be/B1pBG36QOjo)
+  - [Google Drive](https://drive.google.com/file/d/1NyA7VCmodqu2RhPWgJnTnngn56zM8Abj/view?usp=drive_link)
+- Video 3 (Google Drive) - Define seasons
+  - [YouTube]()
+  - [Google Drive](https://drive.google.com/file/d/1LQRAj7jZT-XaN2wrh9yUgSiEsW8HSGPj/view?usp=drive_link)
+- Video 4 (Google Drive) - Estimate ranges
+  - [YouTube]()
+  - [Google Drive](https://drive.google.com/file/d/1aaRgZgSVhCciojOCWN_OwhAE0pGN-nVL/view?usp=drive_link)
+- Video 5 (Google Drive) - Identify movement paths
+  - [YouTube]()
+  - [Google Drive](https://drive.google.com/file/d/16LC3Ckbe4Akj7KoOkMj1vRnhC0apZhjZ/view?usp=drive_link)
 
 
 ### Running the app
