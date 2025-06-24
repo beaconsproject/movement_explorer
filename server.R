@@ -504,6 +504,7 @@ server = function(input, output, session) {
 
   # Test widget
   output$text2 <- renderPrint({
+    req(input$getButton)
     r <- r_seasons_data() |>
       filter(id %in% input$caribou2 & season==input$season2)
     start <- r$start_doy_new
@@ -511,11 +512,12 @@ server = function(input, output, session) {
     cat(input$season2, ":\n", sep="")
     startdate <- as.Date(start - 1, origin = paste0(input$daterange2[1], "-01-01"))
     enddate <- as.Date(end - 1, origin = paste0(input$daterange2[2], "-01-01"))
-    cat(as.character(startdate), "-", as.character(enddate), "\n")
+    cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
   })
 
   # Test widget
   output$text3 <- renderPrint({
+    req(input$getButton)
     r <- r_seasons_data() |>
       filter(id %in% input$caribou3 & season==input$season3)
     start <- r$start_doy_new
@@ -523,7 +525,7 @@ server = function(input, output, session) {
     cat(input$season3, ":\n", sep="")
     startdate <- as.Date(start - 1, origin = paste0(input$daterange3[1], "-01-01"))
     enddate <- as.Date(end - 1, origin = paste0(input$daterange3[2], "-01-01"))
-    cat(as.character(startdate), "-", as.character(enddate), "\n")
+    cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
   })
 
   # Convert track to sf linestring
