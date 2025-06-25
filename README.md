@@ -19,13 +19,13 @@ The BEACONs Movement Explorer is a simple app intended to be used as part of a w
   - [YouTube](https://youtu.be/B1pBG36QOjo)
   - [Google Drive](https://drive.google.com/file/d/1NyA7VCmodqu2RhPWgJnTnngn56zM8Abj/view?usp=drive_link)
 - Video 3 - Define seasons
-  - [YouTube]()
+  - YouTube
   - [Google Drive](https://drive.google.com/file/d/1LQRAj7jZT-XaN2wrh9yUgSiEsW8HSGPj/view?usp=drive_link)
 - Video 4 - Estimate ranges
-  - [YouTube]()
+  - YouTube
   - [Google Drive](https://drive.google.com/file/d/1aaRgZgSVhCciojOCWN_OwhAE0pGN-nVL/view?usp=drive_link)
 - Video 5 - Identify movement paths
-  - [YouTube]()
+  - YouTube
   - [Google Drive](https://drive.google.com/file/d/16LC3Ckbe4Akj7KoOkMj1vRnhC0apZhjZ/view?usp=drive_link)
 
 
@@ -33,10 +33,10 @@ The BEACONs Movement Explorer is a simple app intended to be used as part of a w
 
 Running from local machine:
 
-  - Download this repository
+  - Download and extract this repository to a local drive e.g., "D:/Apps/movement_explorer"
   - Start R or RStudio
   - Run the app from prompt:
-    - shiny::runApp("path_to_app/movement_explorer")
+    - shiny::runApp("D:/Apps/movement_explorer")
 
 Running from shinyapps.io (currently does not work)
 
