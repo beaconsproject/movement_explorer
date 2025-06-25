@@ -69,6 +69,8 @@ ui = dashboardPage(skin="black",
         fileInput("gpkg", "Disturbance data (gpkg):", accept=".gpkg")
       ),
       actionButton("getButton", "Load data"),
+      hr(),
+      sliderInput("daterange0", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
     ),
     conditionalPanel(
       condition="input.tabs=='segments'",
@@ -131,7 +133,7 @@ ui = dashboardPage(skin="black",
             tabPanel("Seasons data", DTOutput("seg_data1")),
             tabPanel("Sampling duration", plotOutput("duration")),
             tabPanel("Sampling rates", DTOutput("sampling_rates")),
-            tabPanel("Mapview", leafletOutput("map1", height=750) |> withSpinner())
+            tabPanel("Mapview", leafletOutput("map1", height=800) |> withSpinner())
           )
         )
       ),
@@ -156,7 +158,7 @@ ui = dashboardPage(skin="black",
         fluidRow(
           tabBox(id="three", width="9",
             tabPanel("Ranges", 
-              leafletOutput("mapRange", height=750) |> withSpinner()), 
+              leafletOutput("mapRange", height=800) |> withSpinner()), 
             tabPanel("User guide", includeMarkdown("docs/home_ranges.md"))
           ),
           tabBox(id = "five", width="3",
@@ -167,7 +169,7 @@ ui = dashboardPage(skin="black",
       tabItem(tabName="paths",
         fluidRow(
           tabBox(id="three", width="9",
-            tabPanel("Paths", leafletOutput("mapPath", height=750) |> withSpinner()),
+            tabPanel("Paths", leafletOutput("mapPath", height=800) |> withSpinner()),
             tabPanel("User guide", includeMarkdown("docs/movement_paths.md")),
             #tabPanel("Glimpse", verbatimTextOutput("test_output"))
           ),
