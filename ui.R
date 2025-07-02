@@ -101,6 +101,7 @@ ui = dashboardPage(skin="black",
       selectInput("caribou3", "Select individual:", choices=NULL, multiple=TRUE),
       selectInput("season3", "Movement period:", choices=NULL),
       sliderInput("daterange3", "Select year(s):", min=2020, max=2025, value=c(2021,2024), sep=""),
+      sliderInput("buffer3", "Buffer size (m):", min=0, max=1000, value=c(500), step=100, sep=""),
       actionButton("goPath", "Map path", style="color: #000"),
       hr(),
       div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save movement paths", style='color: #000')),
@@ -129,11 +130,11 @@ ui = dashboardPage(skin="black",
       tabItem(tabName="select",
         fluidRow(
           tabBox(id = "one", width="12",
+            tabPanel("Mapview", leafletOutput("map1", height=800) |> withSpinner()),
             tabPanel("Movement data", DTOutput("gps_data")),
             tabPanel("Seasons data", DTOutput("seg_data1")),
             tabPanel("Sampling duration", plotOutput("duration")),
             tabPanel("Sampling rates", DTOutput("sampling_rates")),
-            tabPanel("Mapview", leafletOutput("map1", height=800) |> withSpinner())
           )
         )
       ),

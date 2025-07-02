@@ -530,12 +530,14 @@ server = function(input, output, session) {
   # Convert track to sf linestring
   path1 <- reactive({
     st_as_sf(trk_one3(), coords = c("x_", "y_"), crs = 4326) |>
+      st_transform(3578) |>
       #group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
       st_cast("LINESTRING") |>
-      st_buffer(500) |>
+      st_buffer(input$buffer3) |>
       st_union() |> 
-      st_sf()
+      st_sf() |>
+      st_transform(4326)
   })
 
   # Estimate home range
@@ -568,9 +570,9 @@ server = function(input, output, session) {
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
         groups <- NULL
         trk_one <- mutate(trk_one3(), year=as.double(year))
-        m <- m |> addPolygons(data=od1(), color="blue", fill=T, weight=2, fillOpacity=0.5, group="Occurrence distribution") |>
-          addPolygons(data=path1(), color="green", fill=T, weight=2, fillOpacity=0.5, group="Buffered tracks") |>
-          addPolygons(data=od1path1(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Movement corridor")
+        m <- m |> #addPolygons(data=od1(), color="blue", fill=T, weight=2, fillOpacity=0.5, group="Occurrence distribution") |>
+          #addPolygons(data=path1(), color="green", fill=T, weight=2, fillOpacity=0.5, group="Buffered tracks") |>
+          addPolygons(data=od1path1(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Movement path")
         for (i in sort(unique(trk_one$year))) {
           yr1 <- trk_one |> filter(year==i)
           groups <- c(groups, paste0("Track ",i))
@@ -588,11 +590,11 @@ server = function(input, output, session) {
           addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-            overlayGroups = c("Study area", "Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Occurrence distribution", "Buffered tracks", "Movement corridor"),
+            overlayGroups = c("Study area", "Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Movement path"),
             #overlayGroups = c("Study area", "Locations", groups, "Occurrence distribution", "Buffered tracks", "Movement corridor"),
             options = layersControlOptions(collapsed = FALSE)) |>
           #hideGroup(c(groups, "Buffered tracks", "Movement corridor"))
-          hideGroup(c(groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Buffered tracks", "Movement corridor"))
+          hideGroup(c(groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
       m
     }
   })
