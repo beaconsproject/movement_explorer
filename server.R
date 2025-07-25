@@ -22,6 +22,14 @@ server = function(input, output, session) {
     }
   })
 
+  studyarea <- reactive({
+    trk <- gps_csv() |>
+      make_track(.x=long, .y=lat, crs = 4326) #|>
+      #transform_coords(3578)
+    aoi <- hr_kde(trk, levels=0.95) |> hr_isopleths() #|>
+      #st_transform(4326)
+  })
+
   #gps1 <- reactive({
   #  x <- gps_csv() |>
   #    group_by(id) |>
@@ -75,71 +83,71 @@ server = function(input, output, session) {
     r_seasons_data(initial_seasons_data())
   })
 
-  studyarea <- eventReactive(list(input$selectInput, input$gpkg),{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/demo_data.gpkg', 'studyarea', quiet = TRUE) |>
-        st_transform(4326)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'studyarea', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #studyarea <- eventReactive(list(input$selectInput, input$gpkg),{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/demo_data.gpkg', 'studyarea', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'studyarea', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
 
-  line <- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/demo_data.gpkg', 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #line <- eventReactive(input$selectInput,{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/demo_data.gpkg', 'linear_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
   
-  poly <- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/demo_data.gpkg', 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #poly <- eventReactive(input$selectInput,{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/demo_data.gpkg', 'areal_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
 
-  fire <- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/demo_data.gpkg', 'fires', quiet = TRUE) |>
-        st_transform(4326)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'fires', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #fire <- eventReactive(input$selectInput,{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/demo_data.gpkg', 'fires', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'fires', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
 
-  foot <- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/demo_data.gpkg', 'footprint_500m', quiet = TRUE) |>
-        st_transform(4326)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'footprint_500m', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #foot <- eventReactive(input$selectInput,{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/demo_data.gpkg', 'footprint_500m', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'footprint_500m', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
 
-  pca <- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/demo_data.gpkg', 'protected_areas', quiet = TRUE) |>
-        st_transform(4326)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'protected_areas', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #pca <- eventReactive(input$selectInput,{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/demo_data.gpkg', 'protected_areas', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'protected_areas', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
 
   ##############################################################################
   # UPDATE UI
@@ -191,6 +199,7 @@ server = function(input, output, session) {
     updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
     updateSelectInput(session, "caribou2", choices=ids, selected=ids[1])
     updateSelectInput(session, "caribou3", choices=ids, selected=ids[1])
+    updateSliderInput(session, "daterange0", min=first_year(), max=last_year(), value=c(first_year()+1,first_year()+1))
     updateSliderInput(session, "daterange", min=first_year(), max=last_year(), value=c(first_year()+1,first_year()+1))
     updateSliderInput(session, "daterange2", min=first_year(), max=last_year(), value=c(first_year()+1,last_year()-1))
     updateSliderInput(session, "daterange3", min=first_year(), max=last_year(), value=c(first_year()+1,last_year()-1))
@@ -228,12 +237,34 @@ server = function(input, output, session) {
     row_index <- which(current_data_snapshot$id == selected_id_num & 
                        current_data_snapshot$season == input$season)
     if (length(row_index) == 1) {
-      current_data_snapshot$start_doy_new[row_index] <- yday(input$segments_date[1])
-      current_data_snapshot$end_doy_new[row_index] <- yday(input$segments_date[2])
+      #start <- current_data_snapshot$start_doy[row_index]
+      #end <- current_data_snapshot$end_doy[row_index]
+      #if (start < end) {
+        current_data_snapshot$start_doy_new[row_index] <- yday(input$segments_date[1])
+        current_data_snapshot$end_doy_new[row_index] <- yday(input$segments_date[2])
+      #} else {
+      #  current_data_snapshot$start_doy_new[row_index] <- yday(input$segments_date[2])
+      #  current_data_snapshot$end_doy_new[row_index] <- yday(input$segments_date[1])
+      #}
       r_seasons_data(current_data_snapshot) # Update the reactive data
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE) # ignoreInit = TRUE: only fire if user changes slider
-  
+
+  # Seasons text output
+  output$text1 <- renderPrint({
+    req(input$goButton)
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou & season==input$season)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
+    cat(input$season, ":\n", sep="")
+    startdate <- as.Date(start - 1, origin = paste0(input$daterange[1], "-01-01"))
+    enddate <- as.Date(end - 1, origin = paste0(input$daterange[2], "-01-01"))
+    #cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
+    #cat(min(trk_one2()$yday), "-", max(trk_one2()$yday), "\n")
+    #print(r_seasons_data())
+  })
+
   ##################################################################################################
   # Using day-of-year not real dates
   # Observe changes in ID or Season selection to update the slider's current value
@@ -417,8 +448,27 @@ server = function(input, output, session) {
     end <- r$end_doy_new
     x <- trk_all() |> 
       filter(id %in% input$caribou2) |>
-      filter(year >= input$daterange2[1] & year <= input$daterange2[2]) |> 
-      filter(yday >= start & yday <= end)
+      filter(year >= input$daterange2[1] & year <= input$daterange2[2]) #|> 
+      #filter(yday >= start & yday <= end)
+    if (start < end) {
+      x <- x |> filter(yday >= start & yday <= end)
+    } else {
+      x <- x |> filter(yday <= end & yday >= start)
+    }    
+  })
+
+  # Ranges text output
+  output$text2 <- renderPrint({
+    req(input$getButton)
+    r <- r_seasons_data() |>
+      filter(id %in% input$caribou2 & season==input$season2)
+    start <- r$start_doy_new
+    end <- r$end_doy_new
+    cat(input$season2, ":\n", sep="")
+    startdate <- as.Date(start - 1, origin = paste0(input$daterange2[1], "-01-01"))
+    enddate <- as.Date(end - 1, origin = paste0(input$daterange2[2], "-01-01"))
+    cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
+    cat(min(trk_one2()$yday), "-", max(trk_one2()$yday), "\n")
   })
 
   # Estimate home range
@@ -467,20 +517,20 @@ server = function(input, output, session) {
         m <- m |> 
           addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_one()$t_) |>
           addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
-          addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-          addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-          addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-          addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-          addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
+          #addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
+          #addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+          #addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+          #addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          #addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
           addLegend("topleft", colors=cols, labels=years, title="Year") |>
           addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-            overlayGroups = c("Study area","Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Home ranges"),
-            #overlayGroups = c("Study area", "Locations", "Home ranges"),
+            #overlayGroups = c("Study area","Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Home ranges"),
+            overlayGroups = c("Study area", "Locations", "Home ranges"),
             options = layersControlOptions(collapsed = FALSE)) |>
-          hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
-          #hideGroup("")
+          #hideGroup(c(groups,"Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
+          hideGroup("")
       m
     }
   })
@@ -497,24 +547,16 @@ server = function(input, output, session) {
     end <- r$end_doy_new
     x <- trk_all() |> 
       filter(id %in% input$caribou3) |>
-      filter(year >= input$daterange3[1] & year <= input$daterange3[2]) |> 
-      filter(yday >= start & yday <= end)
+      filter(year >= input$daterange3[1] & year <= input$daterange3[2]) #|> 
+      #filter(yday >= start & yday <= end)
+    if (start < end) {
+      x <- x |> filter(yday >= start & yday <= end)
+    } else {
+      x <- x |> filter(yday <= end & yday >= start)
+    }    
   })
 
-  # Test widget
-  output$text2 <- renderPrint({
-    req(input$getButton)
-    r <- r_seasons_data() |>
-      filter(id %in% input$caribou2 & season==input$season2)
-    start <- r$start_doy_new
-    end <- r$end_doy_new
-    cat(input$season2, ":\n", sep="")
-    startdate <- as.Date(start - 1, origin = paste0(input$daterange2[1], "-01-01"))
-    enddate <- as.Date(end - 1, origin = paste0(input$daterange2[2], "-01-01"))
-    cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
-  })
-
-  # Test widget
+  # Movement paths text output
   output$text3 <- renderPrint({
     req(input$getButton)
     r <- r_seasons_data() |>
@@ -525,6 +567,7 @@ server = function(input, output, session) {
     startdate <- as.Date(start - 1, origin = paste0(input$daterange3[1], "-01-01"))
     enddate <- as.Date(end - 1, origin = paste0(input$daterange3[2], "-01-01"))
     cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
+    #cat(min(trk_one3()$yday), "-", max(trk_one3()$yday), "\n")
   })
 
   # Convert track to sf linestring
@@ -581,20 +624,20 @@ server = function(input, output, session) {
         m <- m |> 
           addCircles(data=trk_one, ~x_, ~y_, fill=T, stroke=T, weight=2, color=~year_pal(year), fillColor=~year_pal(year), fillOpacity=1, group="Locations", popup=trk_one()$t_) |>
           addPolygons(data=studyarea(), color="black", weight=2, fill=FALSE, group="Study area") |>
-          addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-          addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-          addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-          addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-          addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
+          #addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
+          #addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+          #addPolygons(data=foot(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+          #addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+          #addPolygons(data=pca(), color="darkblue", weight=1, fill=TRUE, fillOpacity=0.5, group="Conservation areas") |>
           addLegend("topleft", colors=cols, labels=years, title="Year") |>
           addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
           addLayersControl(position = "topright",
             baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-            overlayGroups = c("Study area", "Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Movement path"),
-            #overlayGroups = c("Study area", "Locations", groups, "Occurrence distribution", "Buffered tracks", "Movement corridor"),
+            #overlayGroups = c("Study area", "Locations", groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas", "Movement path"),
+            overlayGroups = c("Locations", groups, "Movement path"),
             options = layersControlOptions(collapsed = FALSE)) |>
-          #hideGroup(c(groups, "Buffered tracks", "Movement corridor"))
-          hideGroup(c(groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
+          #hideGroup(c(groups, "Areal disturbance","Linear disturbance","Footprint 500m","Fires","Conservation areas"))
+          hideGroup(c(groups))
       m
     }
   })
