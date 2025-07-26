@@ -140,6 +140,9 @@ ui = dashboardPage(skin="black",
       ),
       tabItem(tabName="segments",
         fluidRow(
+          #tabBox(id = "five", width="12",
+          #  tabPanel("Statistics", verbatimTextOutput("text1"))
+          #),
           tabBox(id="three", width="12",
             tabPanel("Plots",
               sliderInput("segments_date", "Define date range:", 
@@ -152,10 +155,7 @@ ui = dashboardPage(skin="black",
             tabPanel("Table", 
               DTOutput("seg_data2")),
             tabPanel("User guide", includeMarkdown("docs/define_segments.md"))
-          ),
-          #tabBox(id = "five", width="12",
-          #  tabPanel("Statistics", verbatimTextOutput("text1"))
-          #)
+          )
         )
       ),
       tabItem(tabName="hr",

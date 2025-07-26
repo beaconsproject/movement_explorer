@@ -199,7 +199,7 @@ server = function(input, output, session) {
     updateSelectInput(session, "caribou", choices=ids, selected=ids[1])
     updateSelectInput(session, "caribou2", choices=ids, selected=ids[1])
     updateSelectInput(session, "caribou3", choices=ids, selected=ids[1])
-    updateSliderInput(session, "daterange0", min=first_year(), max=last_year(), value=c(first_year()+1,first_year()+1))
+    updateSliderInput(session, "daterange0", min=first_year(), max=last_year(), value=c(first_year(),last_year()))
     updateSliderInput(session, "daterange", min=first_year(), max=last_year(), value=c(first_year()+1,first_year()+1))
     updateSliderInput(session, "daterange2", min=first_year(), max=last_year(), value=c(first_year()+1,last_year()-1))
     updateSliderInput(session, "daterange3", min=first_year(), max=last_year(), value=c(first_year()+1,last_year()-1))
@@ -220,7 +220,8 @@ server = function(input, output, session) {
     # Find the original start and end for the selected combination
     # This part determines what the slider is INITIALLY set to when you pick an ID/Season
     selected_row_for_slider <- initial_seasons_data() |>
-      filter(id == as.numeric(input$caribou) & season == input$season)
+      filter(id == input$caribou & season == input$season)
+      #filter(id == as.numeric(input$caribou) & season == input$season)
     if (nrow(selected_row_for_slider) == 1) {
       updateSliderInput(session, "segments_date", label=paste0("Define date range:"),
         value = c(as.Date(selected_row_for_slider$start[1], format="%b-%d"), as.Date(selected_row_for_slider$end[1], format="%b-%d")),
@@ -232,7 +233,8 @@ server = function(input, output, session) {
   observeEvent(input$segments_date, {
     req(input$caribou, input$season, input$segments_date)
     current_data_snapshot <- r_seasons_data() # Get current state of the reactive data
-    selected_id_num <- as.numeric(input$caribou)
+    #selected_id_num <- as.numeric(input$caribou)
+    selected_id_num <- input$caribou
     # Find the index of the row to update
     row_index <- which(current_data_snapshot$id == selected_id_num & 
                        current_data_snapshot$season == input$season)
@@ -253,16 +255,14 @@ server = function(input, output, session) {
   # Seasons text output
   output$text1 <- renderPrint({
     req(input$goButton)
-    r <- r_seasons_data() |>
-      filter(id %in% input$caribou & season==input$season)
-    start <- r$start_doy_new
-    end <- r$end_doy_new
-    cat(input$season, ":\n", sep="")
-    startdate <- as.Date(start - 1, origin = paste0(input$daterange[1], "-01-01"))
-    enddate <- as.Date(end - 1, origin = paste0(input$daterange[2], "-01-01"))
-    #cat(as.character(startdate[1]), "-", as.character(enddate[1]), "\n")
-    #cat(min(trk_one2()$yday), "-", max(trk_one2()$yday), "\n")
-    #print(r_seasons_data())
+    selected_row_for_slider <- initial_seasons_data() |>
+      filter(id == input$caribou & season == input$season)
+    x <- gps_csv()
+    ids <- as.character(sort(unique(x$id)))
+    print(ids)
+    print(input$caribou)
+    print(input$season)
+    print(selected_row_for_slider)
   })
 
   ##################################################################################################
