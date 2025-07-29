@@ -3,11 +3,11 @@ required_packages <- c("sf", "DT", "amt", "dplyr", "terra", "ggplot2", "leaflet"
   "shinyjs", "markdown", "patchwork", "lubridate", "shinydashboard", "shinycssloaders"
 )
 
-# Install any missing packages
-missing_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
-if (length(missing_packages) > 0) {
-  install.packages(missing_packages)
-}
+# Install any missing packages (I think this affects running it on shinyapps.io?)
+#missing_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
+#if (length(missing_packages) > 0) {
+#  install.packages(missing_packages)
+#}
 
 # Load the packages
 invisible(lapply(required_packages, library, character.only = TRUE))
