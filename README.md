@@ -16,11 +16,11 @@ Please note that the app has some known issues and is in development, and we wou
 
 These videos will be updated regularly to reflect recent modifications to the app.
 
-- Video 1 - [Overview](https://drive.google.com/file/d/1B-hoDu5dyd-4hSyTBoIRXnMGgSy8-KV6/view?usp=drive_link)
-- Video 2 - [Select study area](https://drive.google.com/file/d/1NyA7VCmodqu2RhPWgJnTnngn56zM8Abj/view?usp=drive_link)
-- Video 3 - [Define seasons](https://drive.google.com/file/d/1LQRAj7jZT-XaN2wrh9yUgSiEsW8HSGPj/view?usp=drive_link)
-- Video 4 - [Estimate ranges](https://drive.google.com/file/d/1aaRgZgSVhCciojOCWN_OwhAE0pGN-nVL/view?usp=drive_link)
-- Video 5 - [Identify movement paths](https://drive.google.com/file/d/16LC3Ckbe4Akj7KoOkMj1vRnhC0apZhjZ/view?usp=drive_link)
+- Video 1 - [Overview](https://drive.google.com/file/d/1B-hoDu5dyd-4hSyTBoIRXnMGgSy8-KV6/view?usp=sharing)
+- Video 2 - [Select study area](https://drive.google.com/file/d/1NyA7VCmodqu2RhPWgJnTnngn56zM8Abj/view?usp=sharing)
+- Video 3 - [Define seasons](https://drive.google.com/file/d/1LQRAj7jZT-XaN2wrh9yUgSiEsW8HSGPj/view?usp=sharing)
+- Video 4 - [Estimate ranges](https://drive.google.com/file/d/1RmLIXZLFExRZqtmYR3AednMeFnKYD2VX/view?usp=sharing)
+- Video 5 - [Identify movement paths](https://drive.google.com/file/d/16LC3Ckbe4Akj7KoOkMj1vRnhC0apZhjZ/view?usp=sharing)
 
 
 ### Running the app
