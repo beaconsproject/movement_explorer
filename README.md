@@ -1,6 +1,6 @@
 ## BEACONs Movement Explorer
 
-July 28, 2025
+July 29, 2025
 
 The BEACONs Movement Explorer is a simple app intended to be used as part of a workflow for exploring movement data. Specifically, the app can help users to:
 
@@ -25,7 +25,23 @@ These videos will be updated regularly to reflect recent modifications to the ap
 
 ### Running the app
 
-Assuming that you have some basic knowledge of R, the best way to run is app (for now) is to download it and run it from a local machine:
+The app can be run from a local machine using the following steps (note, the first 2 steps only need to be run once):
+
+1.  Install R (download from [r-project.org](https://www.r-project.org/) and follow instructions)
+2.  Install the following additional packages:
+
+```         
+install.packages(c("leaflet", "tidyverse", "cli","shinydashboard", "shinycssloaders", "shiny", "shinyjs",
+   "markdown", "dplyr", "tidyr", "sf", "shinyMatrix"))
+```
+
+3.  Start the Shiny app:
+
+```         
+shiny::runGitHub("beaconsproject/movement_explorer")
+```
+
+Alternatively, you can download the repository and run it from a local machine:
 
   - Download and extract this repository to a local drive e.g., "D:/Apps/movement_explorer"
   - Start R or RStudio
