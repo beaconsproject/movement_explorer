@@ -1,6 +1,6 @@
-## Datasets
+## Dataset requirements
 
-The Movement Explorer app requires three input files: one containing animal movement data, the second identifying seasonal and migration periods, and the third disturbances and conservation areas. All required attribute and layer names are highlighted in bold letters.
+The Movement Explorer comes with a demo dataset that can be used to explore the functionality of the app. Alternatively, you can upload your own data, which should consist of two input files:
 
 ### Input 1: Animal movement data
 
@@ -9,40 +9,17 @@ Format:
 
 Required attributes:
 - **id**: Individual identification e.g., collar id
-- **time**: a timestamp indicating the year, month, day, hour, minute, second
-- **long**: longitude (crs:4326)
-- **lat**: latitude (crs:4326)
-- **elev**: elevation in metres
+- **timestamp**: a timestamp indicating the year, month, day, hour, minute, second
+- **longitude**: longitude (crs:4326)
+- **latitude**: latitude (crs:4326)
+- **elevation**: elevation in metres
+- **season**: name of season or migration period
 
 Any additional variables will be loaded and can be viewed but will not be used in any of the analyses. 
 
-### Input 2: Seasonal and migration periods
+### Input 2: Disturbances and conservation areas
 
-Format:
-- Text file - comma separated values (".csv")
-
-Required attributes:
-- **season**: name of season or migration period
-- **start**: start date in month-day format e.g., Jun-16
-- **end**: end date in month-day format e.g., Sep-14
-
-Example table:
-
-<pre>
-|season           |start  |end    |
-|-----------------|-------|-------|
-|Annual           |Jan-01 |Dec-31 |
-|Early winter     |Oct-21 |Jan-31 |
-|Late winter      |Feb-01 |Apr-15 |
-|Summer           |Jun-16 |Sep-14 |
-|Fall rut         |Sep-15 |Oct-20 |
-|Spring migration |Apr-01 |Jun-30 |
-|Fall migration   |Sep-01 |Oct-31 |
-</pre>
-
-### Input 3: Disturbances and conservation areas
-
-The third input can be generated from the Geopackage Creator app.
+The second input can be generated from the Geopackage Creator app.
 
 Format: 
 - Geopackage file (".gpkg")

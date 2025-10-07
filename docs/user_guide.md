@@ -4,7 +4,7 @@ Understanding how animals move and migrate is important for conservation and for
 
 ### 1. Welcome
 
-The "Welcome" section includes an **Overview** of the app, a **User guide** (this section), and a description of the **Datasets** required to use the app. It is highly recommended that a user first read these sections, especially the **Datasets** section prior to using the app.
+The "Welcome" section includes an **Overview** of the app, a **User guide** (this section), a description of the **Datasets requirements** to use the app, and sections describing how to **Estimate ranges** and **Identify corridors**. It is highly recommended that a user first read these sections, especially the **Datasets requirements** section prior to using the app.
 
 ### 2. Select data
 
@@ -17,14 +17,6 @@ After the files have been selected, just click on the **Load data** button. Once
 <br>
 
 <img src="pics/a1_movement_data.png" width="600" />
-
-<p>
-
-**Segmentation data**. Displays the segmentation data that was uploaded.
-
-<br>
-
-<img src="pics/a2_segmentation_data.png" width="600" />
 
 <p>
 
@@ -42,7 +34,9 @@ After the files have been selected, just click on the **Load data** button. Once
 
 <img src="pics/a4_sampling_rates.png" width="600" />
 
-<p>
+### Explore data
+
+The **Explore data** section allows the user to view the movement data interactively along with some underlying disturbance and conservation datasets described in the **Datasets requirements** help tab. Three filters are provided allowing the user to select individuals, seasons, and a range of years.
 
 **Mapview**. Interactive map displaying GPS relocations for all animals in the study area.
 
@@ -50,29 +44,7 @@ After the files have been selected, just click on the **Load data** button. Once
 
 <img src="pics/a5_mapview.png" width="600" />
 
-### 3. Define segments
-
-The "Define segments" section is where you view and modify the start and end dates for each seasonal or migration period for each individual animal. You first select an individual and a range of years and then click on the **Plot segments** button. The app provides plots that show the animal's movement speed and direction over time. These plots help identify the start and end points of migration periods. You can use a slider to adjust these points. Initially, they are set to the values that were uploaded in the segmentation data provided by the user. There are two main output tabs on the right:
-
-- **Segmentation plots**: The larger plot on the left shows the distribution of relocations for that individual and range of years. The red points highlight those that are within the fall migration period. The three plots on the right provide information of the speed and direction of movement across time, from Jan 1 to Dec 31, measure as day of year from 1 to 365. The top 2 graphs show the relationship between longitude and latitude and day of year. Likewise, the bottom graph plots the net squared displacement (or NSD) over time. Higher NSD values indicate larger distances travelled over 6 hour periods. Together, these plots can help identify start and end times of migration periods. We can adjust the start and end times using the slider and this will change the vertical bars in the plots as well as the points highlighted in red.
-
-<br>
-
-<img src="pics/b1_segmentation_plots.png" width="600" />
-
-<p>
-
-- **Segmentation table**: This is an extended version of the segmentation data that was uploaded. It is first duplicated for each individual animal and then start and end dates are converted into day-of-year format, ranging from 1-365. The last 2 columns are initially filled with 0s but will be populated with values derived from moving the two sliders.
-
-<br>
-
-<img src="pics/b2_segmentation_table.png" width="600" />
-
-<p>
-
-Once you are satisfied with the modifications you've made to the start and end dates, you can save the results to a new segmentation table by clicking the **Save segmentation table** button.
-
-### 4. Home ranges
+### 4. Estimate ranges
 
 Seasonal and annual home ranges can be estimated for individual or groups of individuals using one of more years of data using the interface elements (**Select individual**, **Select season**, **Select year(s)**) in the sidebar. Three **Estimator methods** are currently available: minimum convex polygons (MCP), kernel density estimates (KDE), and autocorrelated KDEs. **Isopleth levels** are set to 0.5 and 0.95 but can be modified using the slider. The **KDE bandwidth** currently cannot be modified. To estimate and visualize the home ranges just click on the **Calculate HRs** button. The map on the right will display two home range boundaries based on the user-selected method and isopleth levels. The underlying points and trajectories can also be viewed. Additionally, disturbances and conservation areas are displayed. Not all layers are turned on, but these can be turned on and off by selecting them in the legend.
 
@@ -85,7 +57,7 @@ Seasonal and annual home ranges can be estimated for individual or groups of ind
 
 You can click on the **Save home ranges** button at any time to download the estimated home ranges. After you click the button, you can select a folder and filename of your choice.
 
-### 5. Movement paths
+### 5. Identify corridors
 
 Movement paths (corridors) can be estimated for individual or groups of individuals using one of more years of data using the interface elements (**Select individual**, **Movement period**, **Select year(s)**) in the sidebar. Currently, only "Spring" and "Fall" migration periods are permitted. By clicking on the **Map corridor** button, the app calculates and displays the likely paths that animals take during their spring and fall migrations. These paths are the estimated movement paths (corridors) used by the selected individual(s) for the selected time period. The computation may take a bit of time depending on the amount of input data or caribou relocations that we have available. Once the computation has completed, several map layers will be shown in the map and associated legend, including the estimated movement paths (corridors) as well as the underlying GPS data and trajectories.
 
