@@ -19,25 +19,25 @@ exploreDataServer <- function(input, output, session, project){
     updateSliderInput(session, "daterange", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
-  line <- eventReactive(input$selectInput,{
-    req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #line <- eventReactive(input$selectInput,{
+  #  req(input$getButton)
+  ##  if (input$selectInput == "usedemo") {
+   #   st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
+   # } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+   # }
+  #})
   
-  poly <- eventReactive(input$selectInput,{
+  #poly <- eventReactive(input$selectInput,{
     #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
+   # } else if (input$selectInput == "usedata") {
+   #   st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
+   #     st_transform(4326)
+    #}
+  #})
 
   # Select tracks based on filters
   trk_one <- reactive({
@@ -76,8 +76,8 @@ exploreDataServer <- function(input, output, session, project){
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-        addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
         addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
         addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
