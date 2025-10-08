@@ -4,7 +4,13 @@ server = function(input, output, session) {
   observeEvent(input$reload_btn, {
     session$reload()
   })
-
+  
+  
+  reactiveValsList <- list(
+    savedRanges = reactiveVal(list()),
+    savedPaths = reactiveVal(list())
+  )
+  
   # R/selectData.R
   selectDataServer(input, output, session, project)
 
@@ -12,8 +18,11 @@ server = function(input, output, session) {
   exploreDataServer(input, output, session, project)
 
   # R/estimateRange.R
-  estimateRangesServer(input, output, session, project)
+  estimateRangesServer(input, output, session, project, reactiveValsList)
 
   # R/estimateRange.R
-  identifyCorridorsServer(input, output, session, project)
+  identifyCorridorsServer(input, output, session, project, reactiveValsList)
+  
+  # R/estimateRange.R
+  dwdDataServer(input, output, session, project, reactiveValsList)
 }
