@@ -9,7 +9,7 @@ selectData <- tabItem(tabName = "select",
 )
 
 selectDataServer <- function(input, output, session, project){
-
+ 
   # Read gps movement data
   gps_csv <<- eventReactive(list(input$selectInput,input$csv1), {
     req(input$selectInput)  # Ensure `selectInput` is not NULL
@@ -30,8 +30,8 @@ selectDataServer <- function(input, output, session, project){
     aoi <- hr_kde(trk, levels=0.9999) |> hr_isopleths()
   })
 
-  line <- eventReactive(input$selectInput,{
-    req(input$getButton)
+  line_sf <<- eventReactive(input$selectInput,{
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
     } else if (input$selectInput == "usedata") {
@@ -40,8 +40,8 @@ selectDataServer <- function(input, output, session, project){
     }
   })
   
-  poly <- eventReactive(input$selectInput,{
-    #req(input$getButton)
+  poly_sf <<- eventReactive(input$selectInput,{
+    req(input$selectInput)
     if (input$selectInput == "usedemo") {
       st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
     } else if (input$selectInput == "usedata") {
@@ -129,21 +129,4 @@ selectDataServer <- function(input, output, session, project){
       datatable() |>
       formatRound(columns=c('min','q1','median','mean','q3','max','sd'), digits=2)
   })
-
-  # Download disturbance gpkg
-  output$saveDemoData <- downloadHandler(
-    filename = function() {
-      paste0("demo_", Sys.Date(), ".gpkg")
-    },
-    content = function(file) {
-      st_write(studyarea(), file, "studyarea", append=TRUE)
-      st_write(line(), file, "linear_disturbance", append=TRUE)
-      st_write(poly(), file, "areal_disturbance", append=TRUE)
-      st_write(fire(), file, "fires", append=TRUE)
-      st_write(ifl2000(), file, "ifl_2000", append=TRUE)
-      st_write(ifl2020(), file, "ifl_2020", append=TRUE)
-      st_write(pa(), file, "protected_areas", append=TRUE)
-    }
-  )
-
 }
