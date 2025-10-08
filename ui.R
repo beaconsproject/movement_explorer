@@ -42,6 +42,7 @@ ui = dashboardPage(skin="black",
       menuItem("Explore data", tabName="explore", icon=icon("arrow-pointer")),
       menuItem("Estimate ranges", tabName="ranges", icon=icon("arrow-pointer")),
       menuItem("Identify corridors", tabName="corridors", icon=icon("arrow-pointer")),
+      menuItem("Download data", tabName="download", icon=icon("arrow-pointer")),
       hr()
     ),
     conditionalPanel(
@@ -54,12 +55,12 @@ ui = dashboardPage(skin="black",
         condition="input.selectInput=='usedata'",
         fileInput("csv1", "Movement data (csv):", accept=".csv"),
       ),
-      actionButton("getButton", "Load data"),
-      br(),
-      conditionalPanel(
-        condition="input.selectInput=='usedemo'",
-        div(style="position:relative; left:calc(6%);", downloadButton("saveDemoData", "Save demo dataset", style='color: #000')),
-      ),
+      actionButton("getButton", "Load data")
+      #br(),
+      #conditionalPanel(
+      #  condition="input.selectInput=='usedemo'",
+      #  div(style="position:relative; left:calc(6%);", downloadButton("saveDemoData", "Save demo dataset", style='color: #000')),
+      #),
     ),
     conditionalPanel(
       condition="input.tabs=='explore'",
@@ -72,14 +73,19 @@ ui = dashboardPage(skin="black",
       condition="input.tabs=='ranges'",
       actionButton("runButton2", "Map ranges"),
       br(),
-      actionButton("downloadRanges", "Save ranges")
+      actionButton("saveRanges", "Save ranges")
       #div(style="position:relative; left:calc(6%);", downloadButton("downloadRanges", "Save ranges", style='color: #000'))
     ),
     conditionalPanel(
       condition="input.tabs=='corridors'",
       actionButton("runButton3", "Map corridors"),
       br(),
-      div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save corridors", style='color: #000')),
+      actionButton("savePaths", "Save corridors")
+      #div(style="position:relative; left:calc(6%);", downloadButton("downloadPaths", "Save corridors", style='color: #000')),
+    ),
+    conditionalPanel(
+      condition="input.tabs=='download'",
+      div(style="position:relative; left:calc(6%);", downloadButton("saveData", "Save data", style='color: #000')),
     )
   ),
   
