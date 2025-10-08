@@ -13,6 +13,7 @@ library(bslib)
 library(shinycssloaders)
 library(amt)
 library(markdown)
+library(shinyscreenshot)
 
 # Options
 options(shiny.maxRequestSize=100*1024^2) 

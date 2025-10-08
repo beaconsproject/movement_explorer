@@ -40,28 +40,16 @@ estimateRangesServer <- function(input, output, session, project, rv){
     updateSliderInput(session, "daterange2b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
+  observeEvent(input$range1, {
+    screenshot(id="map2a", scale=1, filename="range_plot1")
+  })
+
+  observeEvent(input$range2, {
+    screenshot(id="map2b", scale=1, filename="range_plot2")
+  })
+
   savedRanges <<- list()
   
-  #line <- eventReactive(input$selectInput,{
-  #  req(input$getButton)
-  #  if (input$selectInput == "usedemo") {
-  #    st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
-  #  } else if (input$selectInput == "usedata") {
-  #    st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-  #      st_transform(4326)
-  #  }
-  #})
-  
-  #poly <- eventReactive(input$selectInput,{
-  #  #req(input$getButton)
-  #  if (input$selectInput == "usedemo") {
-  #    st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
-  #  } else if (input$selectInput == "usedata") {
-  #    st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-  #      st_transform(4326)
-  #  }
-  #})
-
   trk_one2a <- reactive({
     if (input$id2a=="ALL" & input$season2a=="ALL") {
       trk_all() |> filter(year>=input$daterange2a[1] & year<=input$daterange2a[2])

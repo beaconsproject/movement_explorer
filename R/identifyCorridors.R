@@ -4,25 +4,25 @@ identifyCorridors <- tabItem(tabName = "corridors",
         selectInput("id3a", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season3a", "Select season:", choices=NULL),
         sliderInput("daterange3a", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
-        #selectInput("hr3a", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
+        selectInput("hr3a", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3a", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
         sliderInput("min3a", "Min individuals:", min=1, max=20, value=3, step=1, sep=""),
         sliderInput("patch3a", "Min patch size (km2):", min=0, max=5, value=1, step=0.1, sep="")
       ),
       box(width=9,
-        leafletOutput("map3a", height=550) |> withSpinner()
+        leafletOutput("map3a", height=625) |> withSpinner()
       ),
       box(width=3,
         selectInput("id3b", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season3b", "Select season:", choices=NULL),
         sliderInput("daterange3b", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
-        #selectInput("hr3b", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
+        selectInput("hr3b", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3b", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
         sliderInput("min3b", "Min individuals:", min=1, max=20, value=3, step=1, sep=""),
         sliderInput("patch3b", "Min patch size (km2):", min=0, max=5, value=1, step=0.1, sep=""),
       ),
       box(width=9,
-        leafletOutput("map3b", height=550) |> withSpinner()
+        leafletOutput("map3b", height=625) |> withSpinner()
       )
   )
 )
@@ -42,29 +42,16 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     updateSliderInput(session, "daterange3b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
+  observeEvent(input$path1, {
+    screenshot(id="map3a", scale=1, filename="corridor_plot1")
+  })
+
+  observeEvent(input$path2, {
+    screenshot(id="map3b", scale=1, filename="corridor_plot2")
+  })
   
   savedRanges <<-list()
     
-  #line <- eventReactive(input$selectInput,{
-  #  req(input$getButton)
-  #  if (input$selectInput == "usedemo") {
-  #    st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
-  #  } else if (input$selectInput == "usedata") {
-   #   st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-  #      st_transform(4326)
-  #  }
-  #})
-  
-  #poly <- eventReactive(input$selectInput,{
-    #req(input$getButton)
- #   if (input$selectInput == "usedemo") {
-  #    st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
- #   } else if (input$selectInput == "usedata") {
- #     st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
- #       st_transform(4326)
-  #  }
- # })
-
   # Select tracks for one individual
   trk_one3a <- reactive({
     if (input$id3a=="ALL" & input$season3a=="ALL") {
@@ -215,35 +202,35 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
 
   # Brownian bridge method
-  #od3a <- reactive({
-  #  od <- od(trk_one3a(), model = fit_ctmm(trk_one3a(), "bm"), trast = make_trast(trk_one3a()))
-  #  iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
-  #})
+  od3a <- reactive({
+    od <- od(trk_one3a(), model = fit_ctmm(trk_one3a(), "bm"), trast = make_trast(trk_one3a()))
+    iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
+  })
 
   # Brownian bridge method
-  #od3b <- reactive({
-  #  od <- od(trk_one3b(), model = fit_ctmm(trk_one3b(), "bm"), trast = make_trast(trk_one3b()))
-  #  iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
-  #})
+  od3b <- reactive({
+    od <- od(trk_one3b(), model = fit_ctmm(trk_one3b(), "bm"), trast = make_trast(trk_one3b()))
+    iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
+  })
 
   corridor3a <- reactive({
-    #if (input$hr3a=="Line buffer") {
+    if (input$hr3a=="Line buffer") {
       path3buffa()
-    #} else if (input$hr3a=="Brownian bridge") {
-    #  od3a()
-    #} else if (input$hr3a=="Mixed approach") {
-    #  st_union(od3a(), path3buffa()) |> st_sf()
-    #}
+    } else if (input$hr3a=="Brownian bridge") {
+      od3a()
+    } else if (input$hr3a=="Mixed approach") {
+      st_union(od3a(), path3buffa()) |> st_sf()
+    }
   })
 
   corridor3b <- reactive({
-    #if (input$hr3b=="Line buffer") {
+    if (input$hr3b=="Line buffer") {
       path3buffb()
-    #} else if (input$hr3b=="Brownian bridge") {
-    #  od3b()
-    #} else if (input$hr3b=="Mixed approach") {
-    #  st_union(od3b(), path3buffb()) |> st_sf()
-    #}
+    } else if (input$hr3b=="Brownian bridge") {
+      od3b()
+    } else if (input$hr3b=="Mixed approach") {
+      st_union(od3b(), path3buffb()) |> st_sf()
+    }
   })
 
   output$map3a <- renderLeaflet({

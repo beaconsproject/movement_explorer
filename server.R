@@ -4,8 +4,11 @@ server = function(input, output, session) {
   observeEvent(input$reload_btn, {
     session$reload()
   })
-  
-  
+
+  observeEvent(input$screen_btn, {
+    screenshot(scale=5, filename="movement_explorer")
+  })
+
   reactiveValsList <- list(
     savedRanges = reactiveVal(list()),
     savedPaths = reactiveVal(list())
