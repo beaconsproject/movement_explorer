@@ -27,7 +27,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
   )
 )
 
-identifyCorridorsServer <- function(input, output, session, project){
+identifyCorridorsServer <- function(input, output, session, project, rv){
 
   # Update choices for inputs based on movement data
   observeEvent(c(input$selectInput, input$csv1), {
@@ -42,25 +42,28 @@ identifyCorridorsServer <- function(input, output, session, project){
     updateSliderInput(session, "daterange3b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
-  line <- eventReactive(input$selectInput,{
-    req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
   
-  poly <- eventReactive(input$selectInput,{
+  savedRanges <<-list()
+    
+  #line <- eventReactive(input$selectInput,{
+  #  req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
+  #  } else if (input$selectInput == "usedata") {
+   #   st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
+  
+  #poly <- eventReactive(input$selectInput,{
     #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+ #   if (input$selectInput == "usedemo") {
+  #    st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
+ #   } else if (input$selectInput == "usedata") {
+ #     st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
+ #       st_transform(4326)
+  #  }
+ # })
 
   # Select tracks for one individual
   trk_one3a <- reactive({
@@ -254,8 +257,8 @@ identifyCorridorsServer <- function(input, output, session, project){
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-        addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
         addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
@@ -289,8 +292,8 @@ identifyCorridorsServer <- function(input, output, session, project){
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-        addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
         addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
@@ -313,17 +316,24 @@ identifyCorridorsServer <- function(input, output, session, project){
     }
   })
 
-  # Download movement paths
-  output$downloadPaths <- downloadHandler(
-    filename = function() {
-      paste0("demo_", Sys.Date(), ".gpkg")
-    },
-    content = function(file) {
-      hr3a <- hr3a() |> filter(level==0.95)
-      st_write(hr3a, file, paste0("range_", input$id3a, "_", input$season3a, "_", input$daterange3a[1], "-", input$daterange3a[2]), append=TRUE)
-      hr3b <- hr3b() |> filter(level==0.95)
-      st_write(hr3b, file, paste0("range_", input$id3b, "_", input$season3b, "_", input$daterange3b[1], "-", input$daterange3b[2]), append=TRUE)
-    }
-  )
-
+  # Save ranges
+  observeEvent(input$savePaths, {
+    req(input$savePaths)
+    updateActionButton(session, "savePaths", label = "Saved!")
+    saved <- rv$savedPaths()
+    
+    corridor3a <- corridor3a()
+    name3a <- paste0("path_", input$id3a, "_", input$season3a, "_", input$daterange3a[1], "-", input$daterange3a[2])
+    saved[[name3a]] <- corridor3a
+    
+    corridor3b <- corridor3b() 
+    name3b <- paste0("path_", input$id3b, "_", input$season3b, "_", input$daterange3b[1], "-", input$daterange3b[2])
+    saved[[name3b]] <- corridor3b
+    
+    rv$savedPaths(saved)
+    
+    later::later(function() {
+      updateActionButton(session, "savePaths", label = "Save segments")
+    }, 2)
+  })
 }

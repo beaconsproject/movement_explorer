@@ -25,7 +25,7 @@ estimateRanges <- tabItem(tabName = "ranges",
   )
 )
 
-estimateRangesServer <- function(input, output, session, project){
+estimateRangesServer <- function(input, output, session, project, rv){
 
   # Update choices for inputs based on movement data
   observeEvent(c(input$selectInput, input$csv1), {
@@ -40,25 +40,27 @@ estimateRangesServer <- function(input, output, session, project){
     updateSliderInput(session, "daterange2b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
-  line <- eventReactive(input$selectInput,{
-    req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  savedRanges <<- list()
   
-  poly <- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
+  #line <- eventReactive(input$selectInput,{
+  #  req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
+  
+  #poly <- eventReactive(input$selectInput,{
+  #  #req(input$getButton)
+  #  if (input$selectInput == "usedemo") {
+  #    st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
+  #  } else if (input$selectInput == "usedata") {
+  #    st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
+  #      st_transform(4326)
+  #  }
+  #})
 
   trk_one2a <- reactive({
     if (input$id2a=="ALL" & input$season2a=="ALL") {
@@ -164,8 +166,8 @@ estimateRangesServer <- function(input, output, session, project){
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-        addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
         addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
@@ -202,8 +204,8 @@ estimateRangesServer <- function(input, output, session, project){
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-        addPolylines(data=line(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
         addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
         addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
@@ -228,14 +230,28 @@ estimateRangesServer <- function(input, output, session, project){
     }
   })
 
-  # Download ranges
-  output$downloadRanges <- eventReactive(input$downloadRanges,{
-    req(input$downloadRanges)
-    file <- paste0("C:/Users/pierr/OneDrive/Desktop/demo_", Sys.Date(), ".gpkg")
+  # Save ranges
+  observeEvent(input$saveRanges, {
+    req(input$saveRanges)
+    #browser()
+    updateActionButton(session, "saveRanges", label = "Saved!")
+    
+    saved <- rv$savedRanges()
+    
     hr2a <- hr2a() |> filter(level==0.95)
-    st_write(hr2a, file, paste0("range_", input$hr2a, "_", input$id2a, "_", input$season2a, "_", input$daterange2a[1], "_", input$daterange2a[2]), append=TRUE)
-    hr2b <- hr2b() |> filter(level==0.95)
-    st_write(hr2b, file, paste0("range_", input$hr2b, "_", input$id2b, "_", input$season2b, "_", input$daterange2b[1], "_", input$daterange2b[2]), append=TRUE)
-  })
+    name2a <- paste0("range_", input$id2a, "_", input$season2a, "_", input$daterange2a[1], "-", input$daterange2a[2])
+    saved[[name2a]] <- hr2a
 
+    hr2b <- hr2b() |> filter(level==0.95)
+    name2b <- paste0("range_", input$id2b, "_", input$season2b, "_", input$daterange2b[1], "-", input$daterange2b[2])
+    saved[[name2b]] <- hr2b
+    
+    rv$savedRanges(saved)
+    
+    later::later(function() {
+      updateActionButton(session, "saveRanges", label = "Save segments")
+    }, 2)
+    
+  })
+  
 }
