@@ -12,6 +12,7 @@ library(stars)
 library(bslib)
 library(shinycssloaders)
 library(amt)
+library(markdown)
 
 # Options
 options(shiny.maxRequestSize=100*1024^2) 
