@@ -155,85 +155,108 @@ estimateRangesServer <- function(input, output, session, project, rv){
 
   # Leaflet map with locations, home ranges, and disturbances
   output$map2a <- renderLeaflet({
-    if (input$runButton2) {
-      gps <- trk_one2a()
-      years <- unique(gps_csv()$year)
-      cols <- col_yrs6[1:length(years)]
-      year_pal <- colorNumeric(palette=col_yrs6[1:length(years)], domain=years)
-      #pal <- colorFactor(c("#ff9d9a","#77aadd"), levels = levels(hr2()$level))
-      leaflet(options = leafletOptions(attributionControl=FALSE)) |>
-        addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
-        addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-        addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-        addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-        addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-        addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-        addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-        addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
-        addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
-        addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
-        addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
+    leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+      addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
+      addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
+      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
+      addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
+      addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+      addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+      addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+      addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
+      addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
+      addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+      addLayersControl(position = "topright",
+                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                       overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
+                       options = layersControlOptions(collapsed = FALSE)) |>
+      hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
+  })
+
+  observeEvent(input$runButton2, {
+    req(trk_one2a(), gps_csv(), path2a(), hr2a())
+    
+    # isolate() ensures the map uses the current inputs at button press only
+    gps <- isolate(trk_one2a())
+    years <- isolate(unique(gps_csv()$year))
+    path <- isolate(path2a())
+    hr <- isolate(hr2a())
+    
+    cols <- isolate(col_yrs6[1:length(years)])
+    year_pal <- isolate(colorNumeric(palette = col_yrs6[1:length(years)], domain = years))
+    
+    leafletProxy("map2a") |>
+      clearGroup("Points")|>
+      clearGroup("Tracks")|>
+      clearGroup("Ranges")|>
+      clearControls() |>
+      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
           fillColor=~year_pal(year), fillOpacity=1, group="Points", popup=gps$t_) |>
-        addPolylines(data=path2a(), color="black", weight=1, group=paste0("Tracks")) |>
-        addPolygons(data=hr2a(), color="blue", fill=F, weight=2, group="Ranges") |>
-        #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=hr2()$level, fillOpacity=0.5, group="Ranges") |>
-        #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=pal(hr2()$level), fillOpacity=input$alpha, group="Ranges") |>
-        addLegend("topleft", colors=cols, labels=years, title="Year") |>
-        addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
-        addLayersControl(position = "topright",
-          baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-          overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
-          "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
-          options = layersControlOptions(collapsed = FALSE)) |>
-        hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-          "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
-    }
+      addPolylines(data=path2a(), color="black", weight=1, group=paste0("Tracks")) |>
+      addPolygons(data=hr2a(), color="blue", fill=F, weight=2, group="Ranges") |>
+      #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=hr2()$level, fillOpacity=0.5, group="Ranges") |>
+      #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=pal(hr2()$level), fillOpacity=input$alpha, group="Ranges") |>
+      addLegend("topleft", colors=cols, labels=years, title="Year") |>
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) 
   })
 
   output$map2b <- renderLeaflet({
-    if (input$runButton2) {
-      gps <- trk_one2b()
-      years <- unique(gps_csv()$year)
-      cols <- col_yrs6[1:length(years)]
-      year_pal <- colorNumeric(palette=col_yrs6[1:length(years)], domain=years)
-      #pal <- colorFactor(c("#ff9d9a","#77aadd"), levels = levels(hr2()$level))
-      leaflet(options = leafletOptions(attributionControl=FALSE)) |>
-        addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
-        addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-        addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-        addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-        addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-        addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-        addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-        addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-        addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
-        addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
-        addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
-        addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
+    leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+      addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
+      addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
+      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
+      addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
+      addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
+      addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+      addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+      addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
+      addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
+      addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+      addLayersControl(position = "topright",
+                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                       overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
+                       options = layersControlOptions(collapsed = FALSE)) |>
+      hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
+  })
+  
+  observeEvent(input$runButton2, {
+    req(trk_one2b(), gps_csv(), path2b(), hr2b())
+    
+    gps <- isolate(trk_one2b())
+    years <- isolate(unique(gps_csv()$year))
+    path <- isolate(path2b())
+    hr <- isolate(hr2b())
+      
+    cols <- col_yrs6[1:length(years)]
+    year_pal <- colorNumeric(palette=col_yrs6[1:length(years)], domain=years)
+      
+    leafletProxy("map2b") |>
+      clearGroup("Points")|>
+      clearGroup("Tracks")|>
+      clearGroup("Ranges")|>
+      clearControls() |>
+      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
           fillColor=~year_pal(year), fillOpacity=1, group="Points", popup=gps$t_) |>
-        addPolylines(data=path2b(), color="black", weight=1, group=paste0("Tracks")) |>
-        addPolygons(data=hr2b(), color="blue", fill=F, weight=2, group="Ranges") |>
-        #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=hr2()$level, fillOpacity=0.5, group="Ranges") |>
-        #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=pal(hr2()$level), fillOpacity=input$alpha, group="Ranges") |>
-        addLegend("topleft", colors=cols, labels=years, title="Year") |>
-        addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
-        addLayersControl(position = "topright",
-          baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-          overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
-          "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
-          options = layersControlOptions(collapsed = FALSE)) |>
-        hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-          "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
-    }
+      addPolylines(data=path2b(), color="black", weight=1, group=paste0("Tracks")) |>
+      addPolygons(data=hr2b(), color="blue", fill=F, weight=2, group="Ranges") |>
+      #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=hr2()$level, fillOpacity=0.5, group="Ranges") |>
+      #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=pal(hr2()$level), fillOpacity=input$alpha, group="Ranges") |>
+      addLegend("topleft", colors=cols, labels=years, title="Year") |>
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) 
   })
 
   # Save ranges
   observeEvent(input$saveRanges, {
     req(input$saveRanges)
-    #browser()
+    
     updateActionButton(session, "saveRanges", label = "Saved!")
     
     saved <- rv$savedRanges()
