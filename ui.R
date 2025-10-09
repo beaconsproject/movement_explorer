@@ -25,12 +25,12 @@ ui = dashboardPage(skin="black",
 
   dashboardSidebar(
     sidebarMenu(id="tabs",
-      menuItem("Welcome", tabName="home", icon=icon("th")),
-      menuItem("Select data", tabName="select", icon=icon("arrow-pointer")),
-      menuItem("Explore data", tabName="explore", icon=icon("arrow-pointer")),
-      menuItem("Estimate ranges", tabName="ranges", icon=icon("arrow-pointer")),
-      menuItem("Identify corridors", tabName="corridors", icon=icon("arrow-pointer")),
-      menuItem("Download data", tabName="download", icon=icon("th")),
+      menuItem("Welcome", tabName="home", icon=icon(name ="fas fa-home")),
+      menuItem("Select data", tabName="select", icon = icon(name = "fas fa-upload", lib = "font-awesome")),
+      menuItem("Explore data", tabName="explore", icon = icon(name = "fas fa-globe")),
+      menuItem("Estimate ranges", tabName="ranges", icon=icon(name = "fas fa-draw-polygon")),
+      menuItem("Identify corridors", tabName="corridors", icon=icon(name = "fas fa-code-branch")),
+      menuItem("Download data", tabName="download", icon=icon(name = "fas fa-download")),
       hr()
     ),
     conditionalPanel(
