@@ -6,10 +6,6 @@ Understanding how animals move and migrate is important for conservation and for
 
 The "Welcome" section includes an **Overview** of the app, a **User guide** (this section), a description of the **Datasets requirements** to use the app, and sections describing how to **Estimate ranges** and **Identify corridors**. It is highly recommended that a user first read these sections, especially the **Datasets requirements** section prior to using the app.
 
-<br>
-
-<img src="pics/welcome.png" width="600" />
-
 ## 2. Select data
 
 The "Select data" section is where you upload the data that you would like to view and analyse. As long as your data is formatted correctly as described in the **Datasets** section, uploading it into the app is straightfoward. To usata
@@ -22,27 +18,13 @@ After the files have been selected, just click on the **Load data** button. Once
 
 Displays the movement data that was uploaded.
 
-<br>
-
-<img src="pics/a1_movement_data.png" width="600" />
-
 ### Sampling duration tab
 
 Plots a graph showing, for each individual animal, the length of time that its location was recorded.
 
-<br>
-
-<img src="pics/a3_sampling_duration.png" width="600" />
-
-<p>
-
 ### Sampling rates tab
 
 Displays descriptive statistics of sampling rates for each individual animal such as the average length of time between relocation.
-
-<br>
-
-<img src="pics/a4_sampling_rates.png" width="600" />
 
 ## 3. Explore data
 
@@ -52,32 +34,15 @@ The **Explore data** section allows the user to view the movement data interacti
 
 Interactive map displaying GPS relocations for all animals in the study area.
 
-<br>
-
-<img src="pics/a5_mapview.png" width="600" />
-
 ## 4. Estimate ranges
 
 Seasonal and annual home ranges can be estimated for individual or groups of individuals using one of more years of data using the interface elements (**Select individual**, **Select season**, **Select year(s)**) in the sidebar. Three **Estimator methods** are currently available: minimum convex polygons (MCP), kernel density estimates (KDE), and autocorrelated KDEs. **Isopleth levels** are set to 0.5 and 0.95 but can be modified using the slider. The **KDE bandwidth** currently cannot be modified. To estimate and visualize the home ranges just click on the **Calculate HRs** button. The map on the right will display two home range boundaries based on the user-selected method and isopleth levels. The underlying points and trajectories can also be viewed. Additionally, disturbances and conservation areas are displayed. Not all layers are turned on, but these can be turned on and off by selecting them in the legend.
-
-<br>
-
-<img src="pics/c1_home_ranges.png" width="600" />
-
-<p>
-
 
 You can click on the **Save home ranges** button at any time to download the estimated home ranges. After you click the button, you can select a folder and filename of your choice.
 
 ## 5. Identify corridors
 
 Movement paths (corridors) can be estimated for individual or groups of individuals using one of more years of data using the interface elements (**Select individual**, **Movement period**, **Select year(s)**) in the sidebar. Currently, only "Spring" and "Fall" migration periods are permitted. By clicking on the **Map corridor** button, the app calculates and displays the likely paths that animals take during their spring and fall migrations. These paths are the estimated movement paths (corridors) used by the selected individual(s) for the selected time period. The computation may take a bit of time depending on the amount of input data or caribou relocations that we have available. Once the computation has completed, several map layers will be shown in the map and associated legend, including the estimated movement paths (corridors) as well as the underlying GPS data and trajectories.
-
-<br>
-
-<img src="pics/d1_corridors.png" width="600" />
-
-<p>
 
 You can click on the **Save movement paths** button at any time to download the estimated home ranges. After you click the button, you can select a folder and filename of your choice.
 
