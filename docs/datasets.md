@@ -19,8 +19,6 @@ Any additional variables will be loaded and can be viewed but will not be used i
 
 ### Input 2: Disturbances and conservation areas
 
-The second input can be generated from the Geopackage Creator app.
-
 Format: 
 - Geopackage file (".gpkg")
 
@@ -32,3 +30,14 @@ Required layers:
 - **fire**: fire polygons (polygons)
 - **footprint_500m**: combined linear and areal disturbances buffered by 500m (polygon)
 - **protected_areas**: protected and conserved areas, including IPCAs (polygons)
+
+Any additional layers will not be loaded nor used in any of the analyses.
+
+### Notes:
+
+📌 For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.**
+
+📌 All spatial layers must have the same projection. 
+
+📌 The second input can be generated from the Geopackage Creator app.
+
