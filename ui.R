@@ -55,12 +55,15 @@ ui = dashboardPage(skin="black",
     conditionalPanel(
       condition="input.tabs=='ranges'",
       actionButton("runButton2", "Map ranges"),
+      checkboxInput("sync_maps", "Link map zoom & pan", value = TRUE),
+      br(),
       br(),
       actionButton("saveRanges", "Save ranges"),
       hr(),
       actionButton("range1", "Map1 screenshot"),
       br(),
       actionButton("range2", "Map2 screenshot"),
+      
       #sliderInput("range_size", "Screen shot resolution", min=1, max=10, value=1)
     ),
     conditionalPanel(
