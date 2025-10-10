@@ -8,7 +8,7 @@ selectData <- tabItem(tabName = "select",
   )
 )
 
-selectDataServer <- function(input, output, session, project){
+selectDataServer <- function(input, output, session, project, rv){
  
   # Read gps movement data
   gps_csv <<- eventReactive(list(input$selectInput,input$csv1), {
@@ -30,73 +30,22 @@ selectDataServer <- function(input, output, session, project){
     aoi <- hr_kde(trk, levels=0.9999) |> hr_isopleths()
   })
 
-  line_sf <<- eventReactive(input$selectInput,{
+  observeEvent(input$selectInput, {
     req(input$selectInput)
+    
+    namelist <- c("linear_disturbance", "areal_disturbance", "ifl_2000", "ifl_2020", "protected_areas","footprint_500m", "fires")
     if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'linear_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'linear_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
-  
-  poly_sf <<- eventReactive(input$selectInput,{
-    req(input$selectInput)
-    if (input$selectInput == "usedemo") {
-      st_read('www/little_rancheria.gpkg', 'areal_disturbance', quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, 'areal_disturbance', quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
-
-  ifl2000 <<- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read("www/little_rancheria.gpkg", "ifl_2000", quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, "ifl_2000", quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
-  
-  ifl2020 <<- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read("www/little_rancheria.gpkg", "ifl_2020", quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, "ifl_2020", quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
-  
-  pa <<- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read("www/little_rancheria.gpkg", "protected_areas", quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, "protected_areas", quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
-
-  fp500 <<- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read("www/little_rancheria.gpkg", "footprint_500m", quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, "footprint_500m", quiet = TRUE) |>
-        st_transform(4326)
-    }
-  })
-
-  fire <<- eventReactive(input$selectInput,{
-    #req(input$getButton)
-    if (input$selectInput == "usedemo") {
-      st_read("www/little_rancheria.gpkg", "fires", quiet = TRUE)
-    } else if (input$selectInput == "usedata") {
-      st_read(input$gpkg$datapath, "fires", quiet = TRUE) |>
-        st_transform(4326)
+      for(name in namelist){
+        i<- st_read('www/little_rancheria.gpkg', name, quiet = TRUE)
+        j<- i |>  st_transform(4326)
+        
+        current_layers <- rv$layers()
+        current_layers[[name]] <- i
+        rv$layers(current_layers)
+        pj_layers <- rv$layers_4326()
+        pj_layers[[name]] <- j
+        rv$layers_4326(pj_layers)
+      }
     }
   })
 
