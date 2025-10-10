@@ -8,9 +8,14 @@ estimateRanges <- tabItem(tabName = "ranges",
         sliderInput("levels2a", "Isopleth levels:", min=0.5, max=1, value=c(0.5, 0.95)),
         sliderInput("h2a", "KDE bandwidth (0 = estimated by app):", min=0, max=1, value=c(0), step=0.01)
       ),
-      box(width=9,
-          leafletOutput("map2a", height=550) |> withSpinner()
-      ),
+     box(
+       width = 9,
+       div(
+         style = "position: relative;",  # allows layering inside
+         leafletOutput("map2a", height = 550) |> withSpinner(),
+         tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
+       )
+     ),
       box(width=3,
         selectInput("id2b", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season2b", "Select season:", choices=NULL),
@@ -19,9 +24,14 @@ estimateRanges <- tabItem(tabName = "ranges",
         sliderInput("levels2b", "Isopleth levels:", min=0.5, max=1, value=c(0.5, 0.95)),
         sliderInput("h2b", "KDE bandwidth (0 = estimated by app):", min=0, max=1, value=c(0), step=0.01)
       ),
-      box(width=9,
-            leafletOutput("map2b", height=550) |> withSpinner()
-      )
+     box(
+       width = 9,
+       div(
+         style = "position: relative;",  # allows layering inside
+         leafletOutput("map2b", height = 550) |> withSpinner(),
+         tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
+       )
+     )
   )
 )
 
@@ -171,20 +181,22 @@ estimateRangesServer <- function(input, output, session, project, rv){
     if(input$getButton){
       map2a <- map2a |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-        addPolylines(data=layers$linear_disturbance, color="black", weight=2, group="Linear disturbance") |>
-        addPolygons(data=layers$areal_disturbance, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-        addPolygons(data=layers$footprint_500m, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-        addPolygons(data=layers$fires, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-        addPolygons(data=layers$ifl_2000, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
-        addPolygons(data=layers$ifl_2020, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
-        addPolygons(data=layers$protected_areas, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+        addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
+        addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+        addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+        addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+        addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+        addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+        #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
+        addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
         addLayersControl(position = "topright",
                          baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                          overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
-                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
                          options = layersControlOptions(collapsed = FALSE)) |>
         hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
-                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
     }
      map2a 
   })
@@ -217,10 +229,10 @@ estimateRangesServer <- function(input, output, session, project, rv){
       addLayersControl(position = "topright",
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                        overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
                        options = layersControlOptions(collapsed = FALSE)) |>
       hideGroup(c("Tracks",  "Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
   })
 
   output$map2b <- renderLeaflet({
@@ -232,20 +244,22 @@ estimateRangesServer <- function(input, output, session, project, rv){
      addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
      addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-     addPolylines(data=layers$linear_disturbance, color="black", weight=2, group="Linear disturbance") |>
-     addPolygons(data=layers$areal_disturbance, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-     addPolygons(data=layers$footprint_500m, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-     addPolygons(data=layers$fires, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-     addPolygons(data=layers$ifl_2000, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
-     addPolygons(data=layers$ifl_2020, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
-     addPolygons(data=layers$protected_areas, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+     addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
+     addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
+     addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+     addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+     addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+     addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+     addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+     #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
+     addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
      addLayersControl(position = "topright",
                          baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                          overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
-                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
                          options = layersControlOptions(collapsed = FALSE)) |>
         hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
-                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
     map2b
   })
   
@@ -276,10 +290,10 @@ estimateRangesServer <- function(input, output, session, project, rv){
       addLayersControl(position = "topright",
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                        overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
                        options = layersControlOptions(collapsed = FALSE)) |>
       hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
   })
 
   

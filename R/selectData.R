@@ -33,9 +33,12 @@ selectDataServer <- function(input, output, session, project, rv){
   observeEvent(input$selectInput, {
     req(input$selectInput)
     
-    namelist <- c("linear_disturbance", "areal_disturbance", "ifl_2000", "ifl_2020", "protected_areas","footprint_500m", "fires")
+    namelist <- c("linear_disturbance", "areal_disturbance", "Intact_FL_2000", "Intact_FL_2020", "protected_areas","footprint_500m", "fires","Quartz_Claims", "Placer Claims")
     if (input$selectInput == "usedemo") {
-      for(name in namelist){
+      li <- st_layers('www/little_rancheria.gpkg')$name
+      available <- intersect(namelist, li)
+      
+      for(name in available){
         i<- st_read('www/little_rancheria.gpkg', name, quiet = TRUE)
         j<- i |>  st_transform(4326)
         
