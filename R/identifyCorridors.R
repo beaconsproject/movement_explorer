@@ -34,10 +34,10 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     x <- gps_csv()
     ids <- as.character(sort(unique(x$id)))
     seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
-    updateSelectInput(session, "id3a", choices=c("ALL",ids), selected="43141")
+    updateSelectInput(session, "id3a", choices=c("Please select", "ALL",ids), selected="Please select")
     updateSelectInput(session, "season3a", choices=c("Spring migration","Fall migration"), selected="Spring migration")
     updateSliderInput(session, "daterange3a", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
-    updateSelectInput(session, "id3b", choices=c("ALL",ids), selected="43141")
+    updateSelectInput(session, "id3b", choices=c("Please select", "ALL",ids), selected="Please select")
     updateSelectInput(session, "season3b", choices=c("Spring migration","Fall migration"), selected="Fall migration")
     updateSliderInput(session, "daterange3b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
@@ -54,26 +54,32 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     
   # Select tracks for one individual
   trk_one3a <- reactive({
-    if (input$id3a=="ALL" & input$season3a=="ALL") {
-      trk_all() |> filter(year>=input$daterange3a[1] & year<=input$daterange3a[2])
-    } else if (input$id3a=="ALL" & !input$season3a=="ALL") {
-      trk_all() |> filter(season==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
-    } else if (!input$id3a=="ALL" & input$season3a=="ALL") {
-      trk_all() |> filter(id==input$id3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
-    } else {
-      trk_all() |> filter(id==input$id3a & season==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
+    req(trk_all())
+    if(input$id3a != "Please select"){
+      if (input$id3a=="ALL" & input$season3a=="ALL") {
+        trk_all() |> filter(year>=input$daterange3a[1] & year<=input$daterange3a[2])
+      } else if (input$id3a=="ALL" & !input$season3a=="ALL") {
+        trk_all() |> filter(season==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
+      } else if (!input$id3a=="ALL" & input$season3a=="ALL") {
+        trk_all() |> filter(id==input$id3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
+      } else {
+        trk_all() |> filter(id==input$id3a & season==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
+      }
     }
   })
 
   trk_one3b <- reactive({
-    if (input$id3b=="ALL" & input$season3b=="ALL") {
-      trk_all() |> filter(year>=input$daterange3b[1] & year<=input$daterange3b[2])
-    } else if (input$id3b=="ALL" & !input$season3b=="ALL") {
-      trk_all() |> filter(season==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
-    } else if (!input$id3b=="ALL" & input$season3b=="ALL") {
-      trk_all() |> filter(id==input$id3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
-    } else {
-      trk_all() |> filter(id==input$id3b & season==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
+    req(trk_all())
+    if(input$id3b != "Please select"){
+      if (input$id3b=="ALL" & input$season3b=="ALL") {
+        trk_all() |> filter(year>=input$daterange3b[1] & year<=input$daterange3b[2])
+      } else if (input$id3b=="ALL" & !input$season3b=="ALL") {
+        trk_all() |> filter(season==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
+      } else if (!input$id3b=="ALL" & input$season3b=="ALL") {
+        trk_all() |> filter(id==input$id3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
+      } else {
+        trk_all() |> filter(id==input$id3b & season==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
+      }
     }
   })
 
@@ -234,26 +240,27 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
 
   output$map3a <- renderLeaflet({
+    layers <- rv$layers_4326()
+    
     leaflet(options = leafletOptions(attributionControl=FALSE)) |>
       addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
       addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
       addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
       addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-      addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
-      addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
-      addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
-      addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+      addPolylines(data=layers$linear_disturbance, color="black", weight=2, group="Linear disturbance") |>
+      addPolygons(data=layers$areal_disturbance, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+      addPolygons(data=layers$footprint_500m, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+      addPolygons(data=layers$fires, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+      addPolygons(data=layers$ifl_2000, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+      addPolygons(data=layers$ifl_2020, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+      addPolygons(data=layers$protected_areas, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
       addLayersControl(position = "topright",
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                       overlayGroups = c("Study area", "Points", "Tracks", "Corridors", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
+                       overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
                        options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
+      hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
   })
   
   observeEvent(input$runButton3, {
@@ -277,30 +284,39 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       addPolylines(data=path3a(), color="blue", weight=2, group=paste0("Tracks")) |>
       addPolygons(data=corridor3a(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Corridors") |>
       addLegend("topleft", colors=cols, labels=years, title="Year") |>
-      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE))
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
+      addLayersControl(position = "topright",
+                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                       overlayGroups = c("Study area", "Points", "Tracks", "Corridors", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "Inatct FL 2000", "Intact FL 2020", "Protected areas"),
+                       options = layersControlOptions(collapsed = FALSE)) |>
+      hideGroup(c("Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
     })
   
   output$map3b <- renderLeaflet({
+    
+    layers <- rv$layers_4326()
+    
     leaflet(options = leafletOptions(attributionControl=FALSE)) |>
       addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
       addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
       addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
       addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-      addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
-      addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
-      addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
-      addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+      addPolylines(data=layers$linear_disturbance, color="black", weight=2, group="Linear disturbance") |>
+      addPolygons(data=layers$areal_disturbance, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+      addPolygons(data=layers$footprint_500m, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+      addPolygons(data=layers$fires, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+      addPolygons(data=layers$ifl_2000, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+      addPolygons(data=layers$ifl_2020, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+      addPolygons(data=layers$protected_areas, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
       addLayersControl(position = "topright",
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                       overlayGroups = c("Study area", "Points", "Tracks", "Corridors", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
+                       overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
                        options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
+      hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
   })
   
   observeEvent(input$runButton3, {
@@ -324,7 +340,14 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       addPolylines(data=path3b(), color="blue", weight=2, group=paste0("Tracks")) |>
       addPolygons(data=corridor3b(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Corridors") |>
       addLegend("topleft", colors=cols, labels=years, title="Year") |>
-      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE))
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
+      addLayersControl(position = "topright",
+                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                       overlayGroups = c("Study area", "Points", "Tracks", "Corridors", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                       options = layersControlOptions(collapsed = FALSE)) |>
+      hideGroup(c("Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
   })
 
   # Save ranges

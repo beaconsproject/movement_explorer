@@ -9,7 +9,7 @@ estimateRanges <- tabItem(tabName = "ranges",
         sliderInput("h2a", "KDE bandwidth (0 = estimated by app):", min=0, max=1, value=c(0), step=0.01)
       ),
       box(width=9,
-        leafletOutput("map2a", height=550) |> withSpinner()
+          leafletOutput("map2a", height=550) |> withSpinner()
       ),
       box(width=3,
         selectInput("id2b", "Select individual:", choices=NULL, multiple=FALSE),
@@ -20,22 +20,25 @@ estimateRanges <- tabItem(tabName = "ranges",
         sliderInput("h2b", "KDE bandwidth (0 = estimated by app):", min=0, max=1, value=c(0), step=0.01)
       ),
       box(width=9,
-        leafletOutput("map2b", height=550) |> withSpinner()
+            leafletOutput("map2b", height=550) |> withSpinner()
       )
   )
 )
 
-estimateRangesServer <- function(input, output, session, project, rv){
 
+estimateRangesServer <- function(input, output, session, project, rv){
+  
+  lock <- reactiveVal(FALSE)
+  
   # Update choices for inputs based on movement data
   observeEvent(c(input$selectInput, input$csv1), {
     x <- gps_csv()
     ids <- as.character(sort(unique(x$id)))
     seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
-    updateSelectInput(session, "id2a", choices=c("ALL",ids), selected="43141")
+    updateSelectInput(session, "id2a", choices=c("Please select", "ALL", ids), selected="Please select")
     updateSelectInput(session, "season2a", choices=c("ALL","Summer range","Winter range"), selected="Summer range")
     updateSliderInput(session, "daterange2a", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
-    updateSelectInput(session, "id2b", choices=c("ALL",ids), selected="43141")
+    updateSelectInput(session, "id2b", choices=c("Please select", "ALL", ids), selected="Please select")
     updateSelectInput(session, "season2b", choices=c("ALL","Summer range","Winter range"), selected="Winter range")
     updateSliderInput(session, "daterange2b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
@@ -51,31 +54,42 @@ estimateRangesServer <- function(input, output, session, project, rv){
   savedRanges <<- list()
   
   trk_one2a <- reactive({
-    if (input$id2a=="ALL" & input$season2a=="ALL") {
-      trk_all() |> filter(year>=input$daterange2a[1] & year<=input$daterange2a[2])
-    } else if (input$id2a=="ALL" & !input$season2a=="ALL") {
-      trk_all() |> filter(season==input$season2a & (year>=input$daterange2a[1] & year<=input$daterange2a[2]))
-    } else if (!input$id2a=="ALL" & input$season2a=="ALL") {
-      trk_all() |> filter(id==input$id2a & (year>=input$daterange2a[1] & year<=input$daterange2a[2]))
-    } else {
-      trk_all() |> filter(id==input$id2a & season==input$season2a & (year>=input$daterange2a[1] & year<=input$daterange2a[2]))
+    req(trk_all())
+    if(input$id2a != "Please select"){
+      if (input$id2a=="ALL" & input$season2a=="ALL") {
+        trk_all() |> filter(year>=input$daterange2a[1] & year<=input$daterange2a[2])
+      } else if (input$id2a=="ALL" & !input$season2a=="ALL") {
+        trk_all() |> filter(season==input$season2a & (year>=input$daterange2a[1] & year<=input$daterange2a[2]))
+      } else if (!input$id2a=="ALL" & input$season2a=="ALL") {
+        trk_all() |> filter(id==input$id2a & (year>=input$daterange2a[1] & year<=input$daterange2a[2]))
+      } else {
+        trk_all() |> filter(id==input$id2a & season==input$season2a & (year>=input$daterange2a[1] & year<=input$daterange2a[2]))
+      }
+    } else{
+      return(NULL)
     }
   })
 
   trk_one2b <- reactive({
-    if (input$id2b=="ALL" & input$season2b=="ALL") {
-      trk_all() |> filter(year>=input$daterange2b[1] & year<=input$daterange2b[2])
-    } else if (input$id2b=="ALL" & !input$season2b=="ALL") {
-      trk_all() |> filter(season==input$season2b & (year>=input$daterange2b[1] & year<=input$daterange2b[2]))
-    } else if (!input$id2b=="ALL" & input$season2b=="ALL") {
-      trk_all() |> filter(id==input$id2b & (year>=input$daterange2b[1] & year<=input$daterange2b[2]))
-    } else {
-      trk_all() |> filter(id==input$id2b & season==input$season2b & (year>=input$daterange2b[1] & year<=input$daterange2b[2]))
+    req(trk_all())
+    if(input$id2b != "Please select"){
+      if (input$id2b=="ALL" & input$season2b=="ALL") {
+        trk_all() |> filter(year>=input$daterange2b[1] & year<=input$daterange2b[2])
+      } else if (input$id2b=="ALL" & !input$season2b=="ALL") {
+        trk_all() |> filter(season==input$season2b & (year>=input$daterange2b[1] & year<=input$daterange2b[2]))
+      } else if (!input$id2b=="ALL" & input$season2b=="ALL") {
+        trk_all() |> filter(id==input$id2b & (year>=input$daterange2b[1] & year<=input$daterange2b[2]))
+      } else {
+        trk_all() |> filter(id==input$id2b & season==input$season2b & (year>=input$daterange2b[1] & year<=input$daterange2b[2]))
+      }
+    } else{
+      return(NULL)
     }
   })
 
   # Create sf linestrings for mapping
   path2a <- reactive({
+    req(trk_one2a())
     st_as_sf(trk_one2a(), coords = c("x_", "y_"), crs = 4326) |>
       st_transform(3578) |>
       group_by(id, year) |> 
@@ -85,6 +99,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
   })
 
   path2b <- reactive({
+    req(trk_one2b())
     st_as_sf(trk_one2b(), coords = c("x_", "y_"), crs = 4326) |>
       st_transform(3578) |>
       group_by(id, year) |> 
@@ -95,6 +110,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
 
   # Estimate home range
   hr2a <- reactive({
+    req(trk_one2a())
     if (input$hr2a=="MCP") {
       x <- hr_mcp(trk_one2a(), levels=input$levels2a)
     } else if (input$hr2a=="KDE") {
@@ -119,6 +135,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
 
   # Estimate home range
   hr2b <- reactive({
+    req(trk_one2b())
     if (input$hr2b=="MCP") {
       x <- hr_mcp(trk_one2b(), levels=input$levels2b)
     } else if (input$hr2b=="KDE") {
@@ -141,28 +158,35 @@ estimateRangesServer <- function(input, output, session, project, rv){
     hr_isopleths(x)
   })
 
+
   # Leaflet map with locations, home ranges, and disturbances
   output$map2a <- renderLeaflet({
-    leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+    map2a <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
       addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
       addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-      addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-      addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
-      addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
-      addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
-      addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
-      addLayersControl(position = "topright",
-                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                       overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
-                       options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
+      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
+    
+    layers <- rv$layers_4326()
+  
+    if(input$getButton){
+      map2a <- map2a |>
+        addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
+        addPolylines(data=layers$linear_disturbance, color="black", weight=2, group="Linear disturbance") |>
+        addPolygons(data=layers$areal_disturbance, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolygons(data=layers$footprint_500m, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+        addPolygons(data=layers$fires, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+        addPolygons(data=layers$ifl_2000, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+        addPolygons(data=layers$ifl_2020, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+        addPolygons(data=layers$protected_areas, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+        addLayersControl(position = "topright",
+                         baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                         overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
+                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                         options = layersControlOptions(collapsed = FALSE)) |>
+        hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
+                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+    }
+     map2a 
   })
 
   observeEvent(input$runButton2, {
@@ -189,30 +213,40 @@ estimateRangesServer <- function(input, output, session, project, rv){
       #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=hr2()$level, fillOpacity=0.5, group="Ranges") |>
       #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=pal(hr2()$level), fillOpacity=input$alpha, group="Ranges") |>
       addLegend("topleft", colors=cols, labels=years, title="Year") |>
-      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) 
-  })
-
-  output$map2b <- renderLeaflet({
-    leaflet(options = leafletOptions(attributionControl=FALSE)) |>
-      addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
-      addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-      addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
-      addPolylines(data=line_sf(), color="black", weight=2, group="Linear disturbance") |>
-      addPolygons(data=poly_sf(), color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=fp500(), color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-      addPolygons(data=fire(), color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=ifl2000(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2000") |>
-      addPolygons(data=ifl2020(), color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="IFL 2020") |>
-      addPolygons(data=pa(), color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) |>
       addLayersControl(position = "topright",
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                        overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"),
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
                        options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "IFL 2000", "IFL 2020", "Protected areas"))
+      hideGroup(c("Tracks",  "Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+  })
+
+  output$map2b <- renderLeaflet({
+    
+    layers <- rv$layers_4326()
+    
+   map2b <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+     addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
+     addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
+     addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
+     addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") |>
+     addPolylines(data=layers$linear_disturbance, color="black", weight=2, group="Linear disturbance") |>
+     addPolygons(data=layers$areal_disturbance, color="black", weight=1, fill=TRUE, group="Areal disturbance") |>
+     addPolygons(data=layers$footprint_500m, color="black", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+     addPolygons(data=layers$fires, color="darkred", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+     addPolygons(data=layers$ifl_2000, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+     addPolygons(data=layers$ifl_2020, color="darkgreen", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+     addPolygons(data=layers$protected_areas, color="green", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+     addLayersControl(position = "topright",
+                         baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                         overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
+                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                         options = layersControlOptions(collapsed = FALSE)) |>
+        hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
+                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
+    map2b
   })
   
   observeEvent(input$runButton2, {
@@ -238,9 +272,46 @@ estimateRangesServer <- function(input, output, session, project, rv){
       #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=hr2()$level, fillOpacity=0.5, group="Ranges") |>
       #addPolygons(data=hr2(), stroke=TRUE, color="red", opacity=1, weight=2, fillColor=pal(hr2()$level), fillOpacity=input$alpha, group="Ranges") |>
       addLegend("topleft", colors=cols, labels=years, title="Year") |>
-      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE)) 
+      addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE))|>
+      addLayersControl(position = "topright",
+                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                       overlayGroups = c("Study area", "Points", "Tracks", "Ranges", "Linear disturbance", "Areal disturbance", "Fires",
+                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"),
+                       options = layersControlOptions(collapsed = FALSE)) |>
+      hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
+                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas"))
   })
 
+  
+  # Observe changes in map2a and update map2b
+  observeEvent(input$map2a_bounds, {
+    req(input$sync_maps)
+    bounds <- input$map2a_bounds
+    leafletProxy("map2b") |> fitBounds(
+      lng1 = bounds$west, lat1 = bounds$south,
+      lng2 = bounds$east, lat2 = bounds$north
+    )
+  })
+  
+  # Optionally, do the reverse too
+  observeEvent(input$map2b_bounds, {
+    req(input$sync_maps)
+    bounds <- input$map2b_bounds
+    leafletProxy("map2a") |> fitBounds(
+      lng1 = bounds$west, lat1 = bounds$south,
+      lng2 = bounds$east, lat2 = bounds$north
+    )
+  })
+  observeEvent(input$map2a_bounds, {
+    req(input$sync_maps)
+    req(!lock())
+    lock(TRUE)
+    bounds <- input$map2a_bounds
+    leafletProxy("map2b") |> fitBounds(bounds$west, bounds$south, bounds$east, bounds$north)
+    lock(FALSE)
+  })
+  
+  
   # Save ranges
   observeEvent(input$saveRanges, {
     req(input$saveRanges)

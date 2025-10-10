@@ -11,14 +11,16 @@ server = function(input, output, session) {
 
   reactiveValsList <- list(
     savedRanges = reactiveVal(list()),
-    savedPaths = reactiveVal(list())
+    savedPaths = reactiveVal(list()), 
+    layers = reactiveVal(list()),
+    layers_4326 = reactiveVal(list())
   )
   
   # R/selectData.R
-  selectDataServer(input, output, session, project)
+  selectDataServer(input, output, session, project, reactiveValsList)
 
   # R/ExploreData.R
-  exploreDataServer(input, output, session, project)
+  exploreDataServer(input, output, session, project, reactiveValsList)
 
   # R/estimateRanges.R
   estimateRangesServer(input, output, session, project, reactiveValsList)
