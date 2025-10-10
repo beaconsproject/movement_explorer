@@ -9,14 +9,18 @@ dwdDataServer <- function(input, output, session, project, rv){
       
       savedPaths <- rv$savedPaths()
       savedRanges <- rv$savedRanges()
+      layers <- rv$layers()
       
-      studyarea <- studyarea() |> st_transform(3578)
-      line_sf <- line_sf() |> st_transform(3578)
-      poly_sf <- poly_sf() |> st_transform(3578)
-      fire <- fire() |> st_transform(3578)
-      ifl2000 <- ifl2000() |> st_transform(3578)
-      ifl2020 <- ifl2020() |> st_transform(3578)
-      pa <- pa() |> st_transform(3578)
+      studyarea <- studyarea() 
+      line_sf <- layers$linear_disturbance 
+      poly_sf <- layers$areal_disturbance 
+      fire <- layers$fires 
+      ifl2000 <- layers$Intact_FL_2000
+      ifl2020 <- layers$Intact_FL_2020 
+      pa <- layers$protected_areas 
+      pj1 <- layers$Placer_Claims
+      pj2 <- layers$Quartz_Claims
+      fp_500m <- layers$footprint_500m
       
       if(input$selectInput =="usedemo"){
         st_write(studyarea, file, "studyarea", append=TRUE)
@@ -26,6 +30,10 @@ dwdDataServer <- function(input, output, session, project, rv){
         st_write(ifl2000, file, "Intact_FL_2000", append=TRUE)
         st_write(ifl2020, file, "Intact_FL_2020", append=TRUE)
         st_write(pa, file, "protected_areas", append=TRUE)
+        st_write(pj1, file, "Placer_Claims", append=TRUE)
+        st_write(pj2, file, "Quartz_Claims", append=TRUE)
+        st_write(fp_500m, file, "footprint_500m", append=TRUE)
+        
       } 
       
       for (layer_name in names(savedPaths)) {
