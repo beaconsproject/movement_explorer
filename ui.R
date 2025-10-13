@@ -42,6 +42,7 @@ ui = dashboardPage(skin="black",
       conditionalPanel(
         condition="input.selectInput=='usedata'",
         fileInput("csv1", "Movement data (csv):", accept=".csv"),
+        fileInput("gpkg1", "Disturbance data (gpkg):", accept=".gpkg")
       ),
       actionButton("getButton", "Load data")
     ),

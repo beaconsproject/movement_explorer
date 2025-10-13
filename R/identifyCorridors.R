@@ -1,37 +1,35 @@
 identifyCorridors <- tabItem(tabName = "corridors",
   fluidRow(
-     box(width=3,
+    tabBox(width=3,
+      tabPanel("Map 1 parameters",
         selectInput("id3a", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season3a", "Select season:", choices=NULL),
         sliderInput("daterange3a", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
-        selectInput("hr3a", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
+        selectInput("hr3a", "Estimator method:", choices=c("Line buffer")), #, "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3a", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
-        sliderInput("min3a", "Min individuals:", min=1, max=20, value=3, step=1, sep=""),
-        sliderInput("patch3a", "Min patch size (km2):", min=0, max=5, value=1, step=0.1, sep="")
-      ),
-      box(width=9,
-          div(
-            style = "position: relative;",  # allows layering inside
-            leafletOutput("map3a", height = 550) |> withSpinner(),
-            tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; right: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
-          )
-      ),
-      box(width=3,
+        sliderInput("min3a", "Min individuals for corridor:", min=1, max=20, value=3, step=1, sep=""),
+        sliderInput("crumbs3a", "Drop patches smaller than (km2):", min=1, max=1000, value=100, step=50, sep=""),
+        sliderInput("holes3a", "fill holes small than (km2):", min=1, max=1000, value=200, step=50, sep="")),
+      tabPanel("Map 2 parameters",
         selectInput("id3b", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season3b", "Select season:", choices=NULL),
         sliderInput("daterange3b", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
-        selectInput("hr3b", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
+        selectInput("hr3b", "Estimator method:", choices=c("Line buffer")), #, "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3b", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
-        sliderInput("min3b", "Min individuals:", min=1, max=20, value=3, step=1, sep=""),
-        sliderInput("patch3b", "Min patch size (km2):", min=0, max=5, value=1, step=0.1, sep=""),
+        sliderInput("min3b", "Min individuals for corridor:", min=1, max=20, value=3, step=1, sep=""),
+        sliderInput("crumbs3a", "Drop patches smaller than (km2):", min=1, max=1000, value=100, step=50, sep=""),
+        sliderInput("holes3a", "Fill holes smaller than (km2):", min=1, max=1000, value=200, step=50, sep="")),
       ),
-      box(width=9,
-          div(
-            style = "position: relative;",  # allows layering inside
-            leafletOutput("map3a", height = 550) |> withSpinner(),
-            tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; right: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
-          )
-      )
+    tabBox(width=9,
+      tabPanel("Map 1",
+        div(style = "position: relative;",  # allows layering inside
+        leafletOutput("map3a", height = 600) |> withSpinner(),
+        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
+      tabPanel("Map 2",
+        div(style = "position: relative;",  # allows layering inside
+        leafletOutput("map3b", height = 600) |> withSpinner(),
+        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")))
+    )
   )
 )
 
@@ -93,34 +91,47 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
 
   path3a <- reactive({
     st_as_sf(trk_one3a(), coords = c("x_", "y_"), crs = 4326) |>
-      st_transform(3578) |>
       group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
-      st_cast("LINESTRING") |>
-      st_transform(4326)
+      st_cast("LINESTRING")
   })
 
   path3b <- reactive({
     st_as_sf(trk_one3b(), coords = c("x_", "y_"), crs = 4326) |>
-      st_transform(3578) |>
       group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
-      st_cast("LINESTRING") |>
-      st_transform(4326)
+      st_cast("LINESTRING")
+  })
+
+  # Rasterized range
+  rhr3a <- reactive({
+    hr <- hr_kde(trk_one3a(), levels=0.999) |> 
+      hr_isopleths() |>
+      mutate(one=1) |>
+      dplyr::select(one) |>
+      st_transform(3578)
+    rhr <- st_rasterize(hr, dx=100, dy=100) |> 
+      rast()
+  })
+
+  # Rasterized range
+  rhr3b <- reactive({
+    hr <- hr_kde(trk_one3b(), levels=0.999) |> 
+      hr_isopleths() |>
+      mutate(one=1) |>
+      dplyr::select(one) |>
+      st_transform(3578)
+    rhr <- st_rasterize(hr, dx=100, dy=100) |> 
+      rast()
   })
 
   # Line buffer method
   path3buffa <- reactive({
+
+    # Population-level
     if (input$id3a=="ALL") {
 
-      hr <- hr_kde(trk_all(), levels=0.999) |> 
-        hr_isopleths() |>
-        mutate(one=1) |>
-        dplyr::select(one) |>
-        st_transform(3578)
-      rhr <- st_rasterize(hr, dx=100, dy=100) |> 
-        rast()
-
+      # Buffer tracks by some amount
       buf <- st_as_sf(trk_one3a(), coords = c("x_", "y_"), crs = 4326) |>
         st_transform(3578) |>
         group_by(id, year) |> 
@@ -128,10 +139,11 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
         st_cast("LINESTRING") |>
         st_buffer(input$buffer3a)    
 
+      # Create cumulative raster (value = 1 to 25 caribou)
       for (i in unique(buf$id)) {
         b1 <- buf |> filter(id==i)|>
-          summarize(id=mean(id))
-        rb1 <- rasterize(b1, rhr, background=0)
+          summarize(id=mean(id)) # this dissolves boundaries
+        rb1 <- rasterize(b1, rhr3a(), background=0)
         if (i==unique(buf$id)[1]) {
           rall <- rb1
         } else {
@@ -139,15 +151,37 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
         }
       }
 
-      r <- subst(rall, 0, NA)
-      rcl <- r > input$min3a
-      rcl <- subst(rcl, 0, NA)
-      rp <- patches(rcl)
-      v <- as.polygons(rp)
-      vp <- v[expanse(v, unit="m") > input$patch3a * 1000000, ] # drop small polygons
-      vp <- st_as_sf(vp) |>
+      # Old method
+      #r <- subst(rall, 0, NA)
+      #rcl <- r > input$min3a
+      #rcl <- subst(rcl, 0, NA)
+      #rp <- patches(rcl)
+      #v <- as.polygons(rp)
+      #vp <- v[expanse(v, unit="m") > input$patch3a * 1000000, ] # drop small polygons
+      #vp <- st_as_sf(vp) |>
+      #  st_transform(4326)
+
+      # Reclass cumulative raster using user-defined threshold (e.g., 2 means >2)
+      r <- classify(rall, rcl = c(-Inf, input$min3a, Inf)) |> as.numeric()
+
+      # Convert to polygons
+      v <- ifel(r > 0, r, NA) |> 
+        as.polygons() |> 
+        st_as_sf()
+
+      # Drop small polygons based on user-defined threshold (e.g., 101 km2)
+      #v <- drop_crumbs(v, units::set_units(input$crumbs3a, km^2))
+      v <- drop_crumbs(v, input$crumbs3a * 1000000)
+
+      # Fill holes based on user-defined threshold (e.g., 201 km2)
+      #v <- fill_holes(v, units::set_units(input$holes3a, km^2))
+      v <- fill_holes(v, input$holes3a * 1000000)
+      
+      # Smooth boundary
+      vp <- smooth(v, method = "ksmooth", smoothness=1) |> 
         st_transform(4326)
 
+    # Individual-level
     } else {
       vp <- st_as_sf(trk_one3a(), coords = c("x_", "y_"), crs = 4326) |>
         st_transform(3578) |>
@@ -164,27 +198,23 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
 
   # Line buffer method
   path3buffb <- reactive({
+
+    # Population-level
     if (input$id3b=="ALL") {
 
-      hr <- hr_kde(trk_all(), levels=0.999) |> 
-        hr_isopleths() |>
-        mutate(one=1) |>
-        dplyr::select(one) |>
-        st_transform(3578)
-      rhr <- st_rasterize(hr, dx=100, dy=100) |> 
-        rast()
-
-      buf <- st_as_sf(trk_one3b(), coords = c("x_", "y_"), crs = 4326) |>
+       # Buffer tracks by some amount
+       buf <- st_as_sf(trk_one3b(), coords = c("x_", "y_"), crs = 4326) |>
         st_transform(3578) |>
         group_by(id, year) |> 
         summarize(do_union=FALSE) |> 
         st_cast("LINESTRING") |>
         st_buffer(input$buffer3b)    
 
+      # Create cumulative raster (value = 1 to 25 caribou)
       for (i in unique(buf$id)) {
         b1 <- buf |> filter(id==i)|>
           summarize(id=mean(id))
-        rb1 <- rasterize(b1, rhr, background=0)
+        rb1 <- rasterize(b1, rhr3b(), background=0)
         if (i==unique(buf$id)[1]) {
           rall <- rb1
         } else {
@@ -192,15 +222,36 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
         }
       }
 
-      r <- subst(rall, 0, NA)
-      rcl <- r > input$min3b
-      rcl <- subst(rcl, 0, NA)
-      rp <- patches(rcl)
-      v <- as.polygons(rp)
-      vp <- v[expanse(v, unit="m") > input$patch3b * 1000000, ] # drop small polygons
-      vp <- st_as_sf(vp) |>
+      #r <- subst(rall, 0, NA)
+      #rcl <- r > input$min3b
+      #rcl <- subst(rcl, 0, NA)
+      #rp <- patches(rcl)
+      #v <- as.polygons(rp)
+      #vp <- v[expanse(v, unit="m") > input$patch3b * 1000000, ] # drop small polygons
+      #vp <- st_as_sf(vp) |>
+      #  st_transform(4326)
+
+      # Reclass cumulative raster using user-defined threshold (e.g., 2 means >2)
+      r <- classify(rall, rcl = c(-Inf, input$min3b, Inf)) |> as.numeric()
+
+      # Convert to polygons
+      v <- ifel(r > 0, r, NA) |> 
+        as.polygons() |> 
+        st_as_sf()
+
+      # Drop small polygons based on user-defined threshold (e.g., 101 km2)
+      #v <- drop_crumbs(v, units::set_units(input$crumbs3b, km^2))
+      v <- drop_crumbs(v, input$crumbs3b * 1000000)
+
+      # Fill holes based on user-defined threshold (e.g., 201 km2)
+      #v <- fill_holes(v, units::set_units(input$holes3b, km^2))
+      v <- fill_holes(v, input$holes3b * 1000000)
+
+      # Smooth boundary
+      vp <- smooth(v, method = "ksmooth", smoothness=1) |> 
         st_transform(4326)
 
+    # Individual-level
     } else {
       vp <- st_as_sf(trk_one3b(), coords = c("x_", "y_"), crs = 4326) |>
         st_transform(3578) |>
@@ -217,14 +268,110 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
 
   # Brownian bridge method
   od3a <- reactive({
-    od <- od(trk_one3a(), model = fit_ctmm(trk_one3a(), "bm"), trast = make_trast(trk_one3a()))
-    iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
+    if (input$id3a=="ALL") {
+      m <- 1
+      for (i in sort(unique(trk_one3a()$id))) {
+        n <- 1
+        for (j in unique(trk_one3a()$year)) {
+          cat(i, "in", j, "...\n"); flush.console()
+          x <- trk_one3a() |> filter(id==i & year==j)
+          if (nrow(x) > 1) {
+            od <- od(x, model = fit_ctmm(x, "bm"), trast=rhr3a())
+            names(od) <- paste0(i,"_",j)
+            if (n==1) {
+              od_all <- od
+            } else {
+              od_all <- c(od_all, od)
+            }
+            n <- n + 1
+          }
+        }
+        od_mean <- mean(od_all)
+        names(od_mean) <- i
+        iso95 <- hr_isopleths(od_mean, levels=0.95) |> mutate(id=i)
+        if (m==1) {
+          od_mean_all <- od_mean
+          iso_all_95 <- iso95
+        } else {
+          od_mean_all <- c(od_mean_all, od_mean)
+          iso_all_95 <- rbind(iso_all_95, iso95)
+        }
+        m <- m + 1
+      }
+      for (i in iso_all_95$id) {
+        r <- iso_all_95 |> 
+          filter(id==i) |>
+          select(id) |>
+          rasterize(rhr3a()) |>
+          subst(NA, 0)
+        if (i==iso_all_95$id[1]) {
+          rsum <- r
+        } else {
+          rsum <- rsum + r
+        }
+      }
+      rsum_class <- classify(rsum, rcl = c(-Inf, 2, Inf)) |> # e.g., 2 means >2
+        as.numeric() |>
+        subst(0, NA)
+      iso <- hr_isopleths(od, levels=0.99) |> st_transform(4326)
+    } else {
+      od <- od(trk_one3a(), model = fit_ctmm(trk_one3a(), "bm"), trast = make_trast(trk_one3a()))
+      iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
+    }
   })
 
   # Brownian bridge method
   od3b <- reactive({
-    od <- od(trk_one3b(), model = fit_ctmm(trk_one3b(), "bm"), trast = make_trast(trk_one3b()))
-    iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
+    if (input$id3b=="ALL") {
+      m <- 1
+      for (i in sort(unique(trk_one3b()$id))) {
+        n <- 1
+        for (j in unique(trk_one3b()$year)) {
+          cat(i, "in", j, "...\n"); flush.console()
+          x <- trk_one3b() |> filter(id==i & year==j)
+          if (nrow(x) > 1) {
+            od <- od(x, model = fit_ctmm(x, "bm"), trast=rhr3b())
+            names(od) <- paste0(i,"_",j)
+            if (n==1) {
+              od_all <- od
+            } else {
+              od_all <- c(od_all, od)
+            }
+            n <- n + 1
+          }
+        }
+        od_mean <- mean(od_all)
+        names(od_mean) <- i
+        iso95 <- hr_isopleths(od_mean, levels=0.95) |> mutate(id=i)
+        if (m==1) {
+          od_mean_all <- od_mean
+          iso_all_95 <- iso95
+        } else {
+          od_mean_all <- c(od_mean_all, od_mean)
+          iso_all_95 <- rbind(iso_all_95, iso95)
+        }
+        m <- m + 1
+      }
+      for (i in iso_all_95$id) {
+        r <- iso_all_95 |> 
+          filter(id==i) |>
+          select(id) |>
+          rasterize(rhr3b()) |>
+          subst(NA, 0)
+        if (i==iso_all_95$id[1]) {
+          rsum <- r
+        } else {
+          rsum <- rsum + r
+        }
+      }
+      rsum_class <- classify(rsum, rcl = c(-Inf, 2, Inf)) |> # e.g., 2 means >2
+        as.numeric() |>
+        subst(0, NA)
+      iso <- hr_isopleths(od, levels=0.99) |> st_transform(4326)
+    } else {
+      od <- od(trk_one3b(), model = fit_ctmm(trk_one3b(), "bm"), trast = make_trast(trk_one3b()))
+      iso <- hr_isopleths(od, levels=0.95) |> st_transform(4326)
+    }
   })
 
   corridor3a <- reactive({
@@ -248,29 +395,34 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
 
   output$map3a <- renderLeaflet({
-    layers <- rv$layers_4326()
-    
-    leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+    map3a <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
       addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
       addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-      addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-      addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
-      addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
-      addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-      addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
-      addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
-      addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
-      #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
-      addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
-      addLayersControl(position = "topright",
-                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                       overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
-                       options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
+      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
+    
+    layers <- rv$layers_4326()
+    
+    if (input$getButton) {
+      map3a <- map3a |>
+        addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
+        addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
+        addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+        addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+        addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+        addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+        addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+        #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
+        addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
+        addLayersControl(position = "topright",
+                         baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                         overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
+                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
+                         options = layersControlOptions(collapsed = TRUE)) |>
+        hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
+                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
+      }
+      map3a
   })
   
   observeEvent(input$runButton3, {
@@ -299,36 +451,40 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                        overlayGroups = c("Study area", "Points", "Tracks", "Corridors", "Linear disturbance", "Areal disturbance", "Fires",
                                          "Footprint 500m", "Inatct FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
-                       options = layersControlOptions(collapsed = FALSE)) |>
+                       options = layersControlOptions(collapsed = TRUE)) |>
       hideGroup(c("Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
                   "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
     })
   
   output$map3b <- renderLeaflet({
+    map3b <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+      addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
+      addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
+      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
     
     layers <- rv$layers_4326()
     
-    leaflet(options = leafletOptions(attributionControl=FALSE)) |>
-      addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
-      addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
-      addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-      addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-      addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
-      addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
-      addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-      addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-      addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
-      addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
-      addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
-      #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
-      addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
-      addLayersControl(position = "topright",
-                       baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                       overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
-                                         "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
-                       options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
-                  "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
+    if (input$getButton) {
+      map3b <- map3b |>
+        addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
+        addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
+        addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
+        addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
+        addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
+        addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
+        addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
+        addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
+        #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
+        addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
+        addLayersControl(position = "topright",
+                         baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                         overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
+                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
+                         options = layersControlOptions(collapsed = TRUE)) |>
+        hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
+                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
+      }
+map3b
   })
   
   observeEvent(input$runButton3, {
@@ -357,7 +513,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
                        baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
                        overlayGroups = c("Study area", "Points", "Tracks", "Corridors", "Linear disturbance", "Areal disturbance", "Fires",
                                          "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
-                       options = layersControlOptions(collapsed = FALSE)) |>
+                       options = layersControlOptions(collapsed = TRUE)) |>
       hideGroup(c("Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
                   "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
   })

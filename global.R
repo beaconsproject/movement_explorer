@@ -12,6 +12,7 @@ library(stars)
 library(bslib)
 library(shinycssloaders)
 library(amt)
+library(smoothr)
 library(markdown)
 library(shinyscreenshot)
 

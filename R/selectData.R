@@ -49,6 +49,23 @@ selectDataServer <- function(input, output, session, project, rv){
         pj_layers[[name]] <- j
         rv$layers_4326(pj_layers)
       }
+    } else if (input$selectInput == "usedata") {
+      #req(input$gpkg1)
+      file <- input$gpkg1$datapath
+      ext <- tools::file_ext(file)
+      li <- st_layers('www/little_rancheria.gpkg')$name
+      available <- intersect(namelist, li)
+      for(name in available){
+        i<- st_read('www/little_rancheria.gpkg', name, quiet = TRUE)
+        j<- i |>  st_transform(4326)
+        
+        current_layers <- rv$layers()
+        current_layers[[name]] <- i
+        rv$layers(current_layers)
+        pj_layers <- rv$layers_4326()
+        pj_layers[[name]] <- j
+        rv$layers_4326(pj_layers)
+      }
     }
   })
 
