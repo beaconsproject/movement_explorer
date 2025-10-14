@@ -20,31 +20,52 @@ exploreDataServer <- function(input, output, session, project, rv){
   
   observeEvent(input$getButton, {
     layers <- rv$layers_4326()
-  
+
     # Leaflet map with locations, home ranges, and disturbances
     output$map1 <- renderLeaflet({
-      leaflet(options = leafletOptions(attributionControl=FALSE)) |>
+      map1 <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
         addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
-        addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") |>
-        addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance") |>
-        addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance") |>
-        addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m") |>
-        addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires") |>
-        addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000") |>
-        addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020") |>
-        addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") |>
-        #addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims") |>
-        addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims") |>
-        addLayersControl(position = "topright",
-                         baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                         overlayGroups = c("Study area", "Linear disturbance", "Areal disturbance", "Fires",
-                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
-                         options = layersControlOptions(collapsed = FALSE)) |>
-        hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
-                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
+        addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") 
+      
+      if(isMappable(layers$linear_disturbance)){
+        map1 <- map1 |> addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance")
+      }
+      if(isMappable(layers$areal_disturbance)){
+        map1 <- map1 |> addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance")
+      }
+      if(isMappable(layers$footprint_500m)){
+        map1 <- map1 |> addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m")
+      }
+      if(isMappable(layers$fires)){
+        map1 <- map1 |> addPolygons(data=layers$fires, color="#996633", weight=1, fill=TRUE, fillOpacity=0.5, group="Fires")
+      }
+      if(isMappable(layers$Intact_FL_2000)){
+        map1 <- map1 |> addPolygons(data=layers$Intact_FL_2000, color="#3366FF", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2000")
+      }
+      if(isMappable(layers$Intact_FL_2020)){
+        map1 <- map1 |> addPolygons(data=layers$Intact_FL_2020, color="#000066", weight=1, fill=TRUE, fillOpacity=0.5, group="Intact FL 2020")
+      }
+      if(isMappable(layers$protected_areas)){
+        map1 <- map1 |> addPolygons(data=layers$protected_areas, color="#699999", weight=1, fill=TRUE, fillOpacity=0.5, group="Protected areas") 
+      }
+      if(isMappable(layers$Placer_Claims)){
+        map1 <- map1 |> addPolygons(data=layers$Placer_Claims, color='#666666', fill=T, weight=1, group="Placer Claims")
+      }
+      if(isMappable(layers$Quartz_Claims)){
+        map1 <- map1 |> addPolygons(data=layers$Quartz_Claims, color='#CCCCCC', fill=T, weight=1, group="Quartz Claims")
+      }  
+      
+      map1 <- map1 |> addLayersControl(position = "topright",
+                                               baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
+                                               overlayGroups = c("Study area", rv$mappedLayer()),
+                                               options = layersControlOptions(collapsed = FALSE)) |>
+        hideGroup(rv$mappedLayer())
+  
+      map1
     })
+    
   })
   
   # Update choices for inputs based on movement data
@@ -102,11 +123,9 @@ exploreDataServer <- function(input, output, session, project, rv){
         addScaleBar(position = "bottomleft", options = scaleBarOptions(metric = TRUE, imperial = FALSE))|>
         addLayersControl(position = "topright",
                          baseGroups=c("Esri.WorldTopoMap","Esri.WorldImagery","Esri.WorldGrayCanvas"),
-                         overlayGroups = c("Study area", "Points", "Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                                           "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"),
+                         overlayGroups = c("Study area", "Points", "Tracks", rv$mappedLayer()),
                          options = layersControlOptions(collapsed = FALSE)) |>
-        hideGroup(c("Tracks", "Linear disturbance", "Areal disturbance", "Fires",
-                    "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
+        hideGroup(c("Tracks", rv$mappedLayer()))
       
   })
 

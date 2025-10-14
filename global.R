@@ -22,3 +22,7 @@ options(DT.options = list(scrollX = TRUE))
 
 # Color schemes for 2020-2025
 col_yrs6 <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33")
+
+isMappable <- function(x) {
+  !is.null(x) && inherits(x, "sf") && nrow(x) > 0
+}

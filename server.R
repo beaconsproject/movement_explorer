@@ -10,6 +10,7 @@ server = function(input, output, session) {
   })
 
   reactiveValsList <- list(
+    mappedLayer = reactiveVal(),
     savedRanges = reactiveVal(list()),
     savedPaths = reactiveVal(list()), 
     layers = reactiveVal(list()),
