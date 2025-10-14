@@ -4,8 +4,18 @@ Movement paths (corridors) can be estimated for individual or groups of individu
 
 ### Methods for generating movement paths
 
-Three methods are available to generate movement paths at the individual level but only the line buffer method can currently be used at the population level.
+Three methods are available to generate movement paths at the individual level but only the line buffer method can currently be used at the population level. All three methods are available for mapping migration corridors at the individual-level but only the first method is available at the population-level due to speed constraints. We provide some example code below for running the latter two methods using R.
 
 - **Line buffer method**: This is the simplest and quickest method and simply consists of buffering the movement tracks by a user-selected buffer distance.
 - **Brownian bridge movement model (BBMM)**: This is a probabilistic method that incorporates movement path and temporal autocorrelation but can be computationally intensive. It can also result in breaks when relocations are few and far apart.
+  - Approach 1: (implemented)
+  - Approach 2: (not implemented)
+- **Brownian bridge movement model (BBMM)**: This is a probabilistic method that incorporates movement path and temporal autocorrelation but can be computationally intensive. It can also result in breaks when relocations are few and far apart.
 - **Mixed approach**: As its name suggests, this is a combination of the two methods. Essentially, it is the BBMM method with gaps filled by the line buffer method.
+
+### Population-level corridors
+
+Due to speed constraints, we have only included the first approach in this app. Below we provide some code for implementing the other two methods.
+
+### References
+
