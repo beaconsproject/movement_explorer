@@ -39,6 +39,35 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
 
   lock <- reactiveVal(FALSE)
 
+  #######################################
+  ## observe on pop analysis sliders
+  #######################################
+  observe({
+    if(input$id3a != "ALL"){
+      disable("min3a")
+      disable("crumbs3a")
+      disable("holes3a")
+    }else{
+      enable("min3a")
+      enable("crumbs3a")
+      enable("holes3a")
+    }
+  })
+  
+  ## observe on pop analysis
+  observe({
+    if(input$id3b != "ALL"){
+      disable("min3b")
+      disable("crumbs3b")
+      disable("holes3b")
+    }else{
+      enable("min3b")
+      enable("crumbs3b")
+      enable("holes3b")
+    }
+  })
+  ###########################
+  
   # Update choices for inputs based on movement data
   observeEvent(c(input$selectInput, input$csv1), {
     x <- gps_csv()
