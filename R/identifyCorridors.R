@@ -21,13 +21,15 @@ identifyCorridors <- tabItem(tabName = "corridors",
         sliderInput("holes3a", "Fill holes smaller than (km2):", min=1, max=1000, value=200, step=50, sep="")),
       ),
     tabBox(width=9,
-      tabPanel("Map 1",
+      tabPanel("Seasonal Migration Corridors",
+        p("Map 1"),
         div(style = "position: relative;",  # allows layering inside
-        leafletOutput("map3a", height = 600) |> withSpinner(),
-        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
-      tabPanel("Map 2",
+        leafletOutput("map3a", height = 500) |> withSpinner(),
+        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")),
+        br(),
+        p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
-        leafletOutput("map3b", height = 600) |> withSpinner(),
+        leafletOutput("map3b", height = 500) |> withSpinner(),
         tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")))
     )
   )
@@ -35,15 +37,17 @@ identifyCorridors <- tabItem(tabName = "corridors",
 
 identifyCorridorsServer <- function(input, output, session, project, rv){
 
+  lock <- reactiveVal(FALSE)
+
   # Update choices for inputs based on movement data
   observeEvent(c(input$selectInput, input$csv1), {
     x <- gps_csv()
     ids <- as.character(sort(unique(x$id)))
     seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
-    updateSelectInput(session, "id3a", choices=c("Please select", "ALL",ids), selected="Please select")
+    updateSelectInput(session, "id3a", choices=c("Please select", "ALL",ids), selected=43141) # selected="Please select"
     updateSelectInput(session, "season3a", choices=c("Spring migration","Fall migration"), selected="Spring migration")
     updateSliderInput(session, "daterange3a", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
-    updateSelectInput(session, "id3b", choices=c("Please select", "ALL",ids), selected="Please select")
+    updateSelectInput(session, "id3b", choices=c("Please select", "ALL",ids), selected=43141) # selected="Please select"
     updateSelectInput(session, "season3b", choices=c("Spring migration","Fall migration"), selected="Fall migration")
     updateSliderInput(session, "daterange3b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
@@ -484,7 +488,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
         hideGroup(c("Linear disturbance", "Areal disturbance", "Fires",
                     "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
       }
-map3b
+    map3b
   })
   
   observeEvent(input$runButton3, {
@@ -518,6 +522,35 @@ map3b
                   "Footprint 500m", "Intact FL 2000", "Intact FL 2020", "Protected areas", "Placer Claims", "Quartz Claims"))
   })
 
+  # Observe changes in map3a and update map3b
+  observeEvent(input$map3a_bounds, {
+    req(input$sync_maps3)
+    bounds <- input$map3a_bounds
+    leafletProxy("map3b") |> fitBounds(
+      lng1 = bounds$west, lat1 = bounds$south,
+      lng2 = bounds$east, lat2 = bounds$north
+    )
+  })
+  
+  # Optionally, do the reverse too
+  observeEvent(input$map3b_bounds, {
+    req(input$sync_maps3)
+    bounds <- input$map3b_bounds
+    leafletProxy("map3a") |> fitBounds(
+      lng1 = bounds$west, lat1 = bounds$south,
+      lng2 = bounds$east, lat2 = bounds$north
+    )
+  })
+  
+  observeEvent(input$map3a_bounds, {
+    req(input$sync_maps3)
+    req(!lock())
+    lock(TRUE)
+    bounds <- input$map3a_bounds
+    leafletProxy("map3b") |> fitBounds(bounds$west, bounds$south, bounds$east, bounds$north)
+    lock(FALSE)
+  })
+  
   # Save ranges
   observeEvent(input$savePaths, {
     req(input$savePaths)

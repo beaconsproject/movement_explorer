@@ -17,13 +17,15 @@ estimateRanges <- tabItem(tabName = "ranges",
         sliderInput("h2b", "KDE bandwidth (0 = estimated by app):", min=0, max=1, value=c(0), step=0.01))
     ),
     tabBox(width = 9,
-      tabPanel("Map 1",
+      tabPanel("Seasonal and Home Ranges",
+        p("Map 1"),
         div(style = "position: relative;",  # allows layering inside
-        leafletOutput("map2a", height = 600) |> withSpinner(),
-        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
-      tabPanel("Map 2",
+        leafletOutput("map2a", height = 500) |> withSpinner(),
+        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")),
+        br(),
+        p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
-        leafletOutput("map2b", height = 600) |> withSpinner(),
+        leafletOutput("map2b", height = 500) |> withSpinner(),
         tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")))
     )
   )
@@ -39,10 +41,10 @@ estimateRangesServer <- function(input, output, session, project, rv){
     x <- gps_csv()
     ids <- as.character(sort(unique(x$id)))
     seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
-    updateSelectInput(session, "id2a", choices=c("Please select", "ALL", ids), selected="Please select")
+    updateSelectInput(session, "id2a", choices=c("Please select", "ALL", ids), selected=43141) # selected="Please select"
     updateSelectInput(session, "season2a", choices=c("ALL","Summer range","Winter range"), selected="Summer range")
     updateSliderInput(session, "daterange2a", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
-    updateSelectInput(session, "id2b", choices=c("Please select", "ALL", ids), selected="Please select")
+    updateSelectInput(session, "id2b", choices=c("Please select", "ALL", ids), selected=43141) # selected="Please select"
     updateSelectInput(session, "season2b", choices=c("ALL","Summer range","Winter range"), selected="Winter range")
     updateSliderInput(session, "daterange2b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
@@ -296,7 +298,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
   
   # Observe changes in map2a and update map2b
   observeEvent(input$map2a_bounds, {
-    req(input$sync_maps)
+    req(input$sync_maps2)
     bounds <- input$map2a_bounds
     leafletProxy("map2b") |> fitBounds(
       lng1 = bounds$west, lat1 = bounds$south,
@@ -306,15 +308,16 @@ estimateRangesServer <- function(input, output, session, project, rv){
   
   # Optionally, do the reverse too
   observeEvent(input$map2b_bounds, {
-    req(input$sync_maps)
+    req(input$sync_maps2)
     bounds <- input$map2b_bounds
     leafletProxy("map2a") |> fitBounds(
       lng1 = bounds$west, lat1 = bounds$south,
       lng2 = bounds$east, lat2 = bounds$north
     )
   })
+
   observeEvent(input$map2a_bounds, {
-    req(input$sync_maps)
+    req(input$sync_maps2)
     req(!lock())
     lock(TRUE)
     bounds <- input$map2a_bounds
