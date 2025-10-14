@@ -29,6 +29,6 @@ server = function(input, output, session) {
   # R/identifyCorridors.R
   identifyCorridorsServer(input, output, session, project, reactiveValsList)
   
-  # R/dwdData.R
-  dwdDataServer(input, output, session, project, reactiveValsList)
+  # R/downloadData.R
+  downloadDataServer(input, output, session, project, reactiveValsList)
 }

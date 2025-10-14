@@ -1,6 +1,6 @@
 ## Welcome to Movement Explorer
 
-Understanding how animals use space and migrate is crucial for conservation and for understanding the effects of environmental changes. To that end, **Movement Explorer** was designed to enable users to visualize animal locations and trajectories, estimate annual and seasonal ranges, and identify seasonal movement corridors (paths). A built-in ***User guide*** tab provides step-by-step instructions and function descriptions, while the ***Dataset requirements*** tab details data formats and spatial layers needed to run the app.
+Understanding how animals use space and migrate is crucial for conservation and for understanding the effects of environmental changes. To that end, BEACONs **Movement Explorer** was designed to enable users to visualize animal locations and trajectories, estimate annual and seasonal ranges, and identify seasonal movement corridors (paths). A built-in ***User guide*** tab provides step-by-step instructions and function descriptions, while the ***Dataset requirements*** tab details data formats and spatial layers needed to run the app.
 
 <br>
 <div align="center">

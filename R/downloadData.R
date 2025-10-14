@@ -1,4 +1,4 @@
-dwdDataServer <- function(input, output, session, project, rv){
+downloadDataServer <- function(input, output, session, project, rv){
 
   # Download disturbance gpkg
   output$saveData <- downloadHandler(
