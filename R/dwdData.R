@@ -6,7 +6,6 @@ dwdDataServer <- function(input, output, session, project, rv){
       paste0("little_rancheria_", Sys.Date(), ".gpkg")
     },
     content = function(file) {
-      browser()
       savedPaths <- rv$savedPaths()
       savedRanges <- rv$savedRanges()
       layers <- rv$layers()
