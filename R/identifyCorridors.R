@@ -5,7 +5,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
         selectInput("id3a", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season3a", "Select season:", choices=NULL),
         sliderInput("daterange3a", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
-        selectInput("hr3a", "Estimator method:", choices=c("Line buffer")), #, "Brownian bridge", "Mixed approach")),
+        selectInput("hr3a", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3a", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
         sliderInput("min3a", "Min individuals for corridor:", min=1, max=20, value=3, step=1, sep=""),
         sliderInput("crumbs3a", "Drop patches smaller than (km2):", min=1, max=1000, value=100, step=50, sep=""),
@@ -14,7 +14,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
         selectInput("id3b", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season3b", "Select season:", choices=NULL),
         sliderInput("daterange3b", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
-        selectInput("hr3b", "Estimator method:", choices=c("Line buffer")), #, "Brownian bridge", "Mixed approach")),
+        selectInput("hr3b", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3b", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
         sliderInput("min3b", "Min individuals for corridor:", min=1, max=20, value=3, step=1, sep=""),
         sliderInput("crumbs3a", "Drop patches smaller than (km2):", min=1, max=1000, value=100, step=50, sep=""),
@@ -48,6 +48,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       disable("crumbs3a")
       disable("holes3a")
     }else{
+      updateSelectInput(session, "hr3a", choices=c("Line buffer"), selected="Line buffer")
       enable("min3a")
       enable("crumbs3a")
       enable("holes3a")
@@ -61,6 +62,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       disable("crumbs3b")
       disable("holes3b")
     }else{
+      updateSelectInput(session, "hr3b", choices=c("Line buffer"), selected="Line buffer")
       enable("min3b")
       enable("crumbs3b")
       enable("holes3b")
