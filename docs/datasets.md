@@ -23,7 +23,7 @@ Any additional variables will be loaded and can be viewed but will not be used i
 
 ### Input 2 (optional): Disturbances and conservation areas
 
-The easiest way to create this optional file is to use the BEACONs Geopackage Creator (**Add link here**). As long as your study area is located within the limits of the underlying database (i.e., all of the Yukon and the northern half of BC), you simply upload your study area, select the layers you want, and run the app. Alternatively, you will need to create your own geopackage comprising one or more of layers described below. For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** In addition, all spatial layers must have the same projection.
+The easiest way to create this optional file is to use the BEACONs Geopackage Creator (https://beaconsproject.shinyapps.io/geopackage_creator/). As long as your study area is located within the limits of the underlying database (i.e., all of the Yukon and the northern half of BC), you simply upload your study area, select the layers you want, and run the app. Alternatively, you will need to create your own geopackage comprising one or more of layers described below. For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** In addition, all spatial layers must have the same projection.
 
 Format: 
 - Geopackage file (".gpkg")
