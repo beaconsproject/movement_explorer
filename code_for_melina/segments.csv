@@ -1,0 +1,7 @@
+type,name,start,end
+Season,Early winter,Oct-21,Jan-31
+Season,Late winter,Feb-01,Apr-15
+Season,Summer,Jun-16,Sep-14
+Season,Fall rut,Sep-15,Oct-20
+Migration,Spring migration,Apr-01,Jun-30
+Migration,Fall migration,Sep-01,Oct-31
