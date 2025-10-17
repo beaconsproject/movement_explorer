@@ -1,6 +1,4 @@
 # Merge GPS data with simple season-migration table
-# Revised: 2025-10-16
-# Author: Pierre Vernier
 
 library(tidyverse)
 
@@ -24,21 +22,4 @@ for (i in 1:nrow(x)) {
     }
   }
 }
-write_csv(y, "little_rancheria_merged.csv")
-
-
-################################################################################
-# TEST
-
-# Standalone script
-z1 <- read_csv("little_rancheria_merged.csv") |> 
-  filter(migration=="Fall migration", year==2023)
-min(z1$yday)
-max(z1$yday)
-
-# Movement Explorer (selectData.R)
-z2 <- read_csv("test_output.csv") |>
-  filter(migration=="Fall migration", year==2023)
-min(z2$yday)
-max(z2$yday)
-################################################################################
+write_csv(y, "caribou_plus_segments.csv")
