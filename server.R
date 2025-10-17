@@ -14,7 +14,9 @@ server = function(input, output, session) {
     savedRanges = reactiveVal(list()),
     savedPaths = reactiveVal(list()), 
     layers = reactiveVal(list()),
-    layers_4326 = reactiveVal(list())
+    layers_4326 = reactiveVal(list()),
+    season = reactiveVal(),
+    migration = reactiveVal()
   )
   
   # R/selectData.R
