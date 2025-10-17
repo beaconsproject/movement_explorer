@@ -72,7 +72,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   
   # Update choices for inputs based on movement data
   observeEvent(input$getButton, {
-    x <- gps_csv()
+    x <- rv$gps_data()
     ids <- as.character(sort(unique(x$id)))
     #seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
     migration_val <- rv$migration()
@@ -481,10 +481,10 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
   
   observeEvent(input$runButton3, {
-    req(trk_one3a(), gps_csv(), corridor3a(), path3a())
+    req(trk_one3a(), rv$gps_data(), corridor3a(), path3a())
     
     gps <- isolate(trk_one3a())
-    years <- isolate(unique(gps_csv()$year))
+    years <- isolate(unique(rv$gps_data()$year))
     corridor3a <- isolate(corridor3a())
     path3a <- isolate(path3a())
     
@@ -559,10 +559,10 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
   
   observeEvent(input$runButton3, {
-    req(trk_one3b(), gps_csv(), corridor3b(), path3b())
+    req(trk_one3b(), rv$gps_data(), corridor3b(), path3b())
 
     gps <- isolate(trk_one3b())
-    years <- isolate(unique(gps_csv()$year))
+    years <- isolate(unique(rv$gps_data()$year))
     corridor3a <- isolate(corridor3b())
     path3b <- isolate(path3b())
     

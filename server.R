@@ -15,6 +15,7 @@ server = function(input, output, session) {
     savedPaths = reactiveVal(list()), 
     layers = reactiveVal(list()),
     layers_4326 = reactiveVal(list()),
+    gps_data = reactiveVal(),
     season = reactiveVal(),
     migration = reactiveVal()
   )

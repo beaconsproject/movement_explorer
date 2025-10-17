@@ -70,7 +70,7 @@ exploreDataServer <- function(input, output, session, project, rv){
   
   # Update choices for inputs based on movement data
   observeEvent(input$getButton, {
-    x <- gps_csv()
+    x <- rv$gps_data()
     season_val <- rv$season()
     ids <- as.character(sort(unique(x$id)))
     updateSelectInput(session, "id", choices=c("Please select","All",ids), selected="Please select")
@@ -106,7 +106,7 @@ exploreDataServer <- function(input, output, session, project, rv){
  
   observeEvent(input$runButton1, {
     req(trk_one())
-      years <- unique(gps_csv()$year)
+      years <- unique(rv$gps_data()$year)
       cols <- col_yrs6[1:length(years)]
       year_pal <- colorNumeric(palette=col_yrs6[1:length(years)], domain=years)
       gps <- trk_one() |> 

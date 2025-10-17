@@ -42,8 +42,19 @@ ui = dashboardPage(skin="black",
       conditionalPanel(
         condition="input.selectInput=='usedata'",
         fileInput("csv1", "Movement data (csv):", accept=".csv"),
-        div(style = "margin-top: -20px;", selectInput("season_col", "Set the season column", choices = NULL,  multiple = FALSE)),
-        div(style = "margin-top: -20px;", selectInput("mig_col", "Set the migration column", choices = NULL,  multiple = FALSE)),
+        radioButtons("colIncluded", "Source of season/migration data:",
+                     choices = list("Included in uploaded CSV" = "incol", "From external file" = "extcol"),
+                     selected = character(0), 
+                     inline = FALSE),
+        conditionalPanel(
+          condition = "input.colIncluded == 'incol'",
+          div(style = "margin-top: -20px;", selectInput("season_col", "Set the season column", choices = NULL,  multiple = FALSE)),
+          div(style = "margin-top: -20px;", selectInput("mig_col", "Set the migration column", choices = NULL,  multiple = FALSE))
+        ),
+        conditionalPanel(
+          condition = "input.colIncluded == 'extcol'",
+          fileInput("csv2", " Season and migration file (csv):", accept=".csv")
+        ),
         fileInput("gpkg1", "Disturbance data (gpkg):", accept=".gpkg")
       ),
       actionButton("getButton", "Load data")

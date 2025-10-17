@@ -11,47 +11,99 @@ selectData <- tabItem(tabName = "select",
 selectDataServer <- function(input, output, session, project, rv){
  
   # Read gps movement data
-  gps_csv <<- eventReactive(list(input$selectInput,input$csv1), {
-    req(input$selectInput)  # Ensure `selectInput` is not NULL
+  #gps_csv <<- eventReactive(list(input$selectInput,input$csv1), {
+  #  req(input$selectInput)  # Ensure `selectInput` is not NULL
+  #  
+  #  if (input$selectInput == "usedemo") {
+   #   
+  #    readr::read_csv('www/little_rancheria_season_migration.csv') |>
+ #         mutate(year=year(timestamp), yday=yday(timestamp))
+  #  } else if (input$selectInput == "usedata") {
+ #     req(input$csv1)
+ #     readr::read_csv(input$csv1$datapath) |>
+ #       mutate(year=year(timestamp), yday=yday(timestamp))
+ #   }
+  #})
+
+  observeEvent(list(input$selectInput, input$csv1), {
+    req(input$selectInput)
+    
     if (input$selectInput == "usedemo") {
-      
-      readr::read_csv('www/little_rancheria_season_migration.csv') |>
-          mutate(year=year(timestamp), yday=yday(timestamp))
+      f <- readr::read_csv('www/little_rancheria_season_migration.csv') |>
+        mutate(year = year(timestamp), yday = yday(timestamp))
     } else if (input$selectInput == "usedata") {
       req(input$csv1)
-      readr::read_csv(input$csv1$datapath) |>
-        mutate(year=year(timestamp), yday=yday(timestamp))
+      f <- readr::read_csv(input$csv1$datapath) |>
+        mutate(year = year(timestamp), yday = yday(timestamp))
     }
+    
+    rv$gps_data(f)  # store the dataframe in reactiveVal
   })
-
   
-  observeEvent(c(input$selectInput == "usedata", gps_csv()), {
-    x <- gps_csv()
+  segment_csv <<- eventReactive(input$csv2, {
+    req(input$csv2)
+    i <- readr::read_csv(input$csv2$datapath) |>
+      mutate(yday_start = yday(ymd(paste(year(today()), start, sep="-"))),
+             yday_end = yday(ymd(paste(year(today()), end, sep="-"))))  
+  })  
+  
+  observeEvent(c(input$colIncluded == "incol", rv$gps_data()), {
+    x <- rv$gps_data()
     updateSelectInput(session, "season_col", choices= colnames(x), selected=colnames(x)[1]) # selected="Please select"
     updateSelectInput(session, "mig_col", choices= colnames(x), selected=colnames(x)[1])
   })
   
-  observeEvent(gps_csv(), {
-    f <- gps_csv()
-    req(f)
-    
+  observe({
+    req(rv$gps_data())
+    f <- rv$gps_data()
+    colInc <- input$colIncluded  
+
     if(input$selectInput == "usedemo"){
       season <- f$season |> unique() |> na.omit() |> sort()
       rv$season(season)
       migration <- f$migration |> unique() |> na.omit() |> sort()
       rv$migration(migration)
-    }else{
-      req(input$season_col, input$mig_col)
-      season <- f[[input$season_col]] |> unique() |> na.omit() |> sort()
-      rv$season(season)
-      migration <- f[[input$mig_col]] |> unique() |> na.omit() |> sort()
-      rv$migration(migration)
+    }else if (input$selectInput == "usedata"){
+      req(colInc)
+      if(colInc == "incol"){
+        req(input$season_col, input$mig_col)
+        season <- f[[input$season_col]] |> unique() |> na.omit() |> sort()
+        rv$season(season)
+        migration <- f[[input$mig_col]] |> unique() |> na.omit() |> sort()
+        rv$migration(migration)
+      }else{
+        req(segment_csv())
+        x <- segment_csv()
+        
+        season <- x |> filter(type=="Season") |> pull(name) |> unique() |> na.omit() |> sort()
+        rv$season(season)
+        migration <- x |> filter(type=="Migration") |> pull(name) |> unique() |> na.omit() |> sort()
+        rv$migration(migration)
+        print(head(f))
+        for (i in 1:nrow(x)) {
+          if (x$type[i]=="Season") {
+            if (x$yday_start[i] < x$yday_end[i]) {    
+              f <- f |> mutate(season=ifelse(yday>=x$yday_start[i] & yday<=x$yday_end[i], x$name[i], season))
+            } else {
+              f <- f |> mutate(season=ifelse(yday>=x$yday_start[i] | yday<=x$yday_end[i], x$name[i], season))
+            }
+          } else if (x$type[i]=="Migration") {
+            if (x$yday_start[i] < x$yday_end[i]) {    
+              f <- f |> mutate(migration=ifelse(yday>=x$yday_start[i] & yday<=x$yday_end[i], x$name[i], migration))
+            } else {
+              f <- f |> mutate(migration=ifelse(yday<=x$yday_start[i] & yday>=x$yday_end[i], x$name[i], migration))
+            }
+          }
+        }
+        rv$gps_data(f)
+      }
     }
+      
   }) 
     
   # Create study area boundary based on KDE
   studyarea <<- reactive({
-    trk <- gps_csv() |>
+    trk <- rv$gps_data() |>
       make_track(.x=longitude, .y=latitude, crs = 4326)
     aoi <- hr_kde(trk, levels=0.9999) |> hr_isopleths()
   })
@@ -108,18 +160,18 @@ selectDataServer <- function(input, output, session, project, rv){
   
   # Create tracks using amt package
   trk_all <<- eventReactive(input$getButton, {
-    gps_csv() |> make_track(.x=longitude, .y=latitude, .t=timestamp, all_cols=TRUE, crs = 4326)
+    rv$gps_data() |> make_track(.x=longitude, .y=latitude, .t=timestamp, all_cols=TRUE, crs = 4326)
   })
   
   # Output 'GPS data' to table
   output$gps_data <- renderDT({
     req(input$getButton)
-    datatable(gps_csv())
+    datatable(rv$gps_data())
   })
 
   # Output 'Sampling duration' to plot
   output$duration <- renderPlot({
-   x <- gps_csv() |>
+   x <- rv$gps_data() |>
       mutate(id = as.factor(id), year = year(timestamp))
     ggplot(data=x, aes(x=timestamp, y=id)) +
       geom_path(size=1) +

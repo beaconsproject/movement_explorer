@@ -40,7 +40,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
   observeEvent(input$getButton, {
     season_val <- rv$season()
     
-    x <- gps_csv()
+    x <- rv$gps_data()
     ids <- as.character(sort(unique(x$id)))
     #seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
     updateSelectInput(session, "id2a", choices=c("Please select", "ALL", ids), selected=43141) # selected="Please select"
@@ -219,11 +219,11 @@ estimateRangesServer <- function(input, output, session, project, rv){
   })
 
   observeEvent(input$runButton2, {
-    req(trk_one2a(), gps_csv(), path2a(), hr2a())
+    req(trk_one2a(), rv$gps_data(), path2a(), hr2a())
     
     # isolate() ensures the map uses the current inputs at button press only
     gps <- isolate(trk_one2a())
-    years <- isolate(unique(gps_csv()$year))
+    years <- isolate(unique(rv$gps_data()$year))
     path <- isolate(path2a())
     hr <- isolate(hr2a())
     
@@ -300,10 +300,10 @@ estimateRangesServer <- function(input, output, session, project, rv){
   })
   
   observeEvent(input$runButton2, {
-    req(trk_one2b(), gps_csv(), path2b(), hr2b())
+    req(trk_one2b(), rv$gps_data(), path2b(), hr2b())
     
     gps <- isolate(trk_one2b())
-    years <- isolate(unique(gps_csv()$year))
+    years <- isolate(unique(rv$gps_data()$year))
     path <- isolate(path2b())
     hr <- isolate(hr2b())
       
