@@ -14,7 +14,8 @@ selectDataServer <- function(input, output, session, project, rv){
   gps_csv <<- eventReactive(list(input$selectInput,input$csv1), {
     req(input$selectInput)  # Ensure `selectInput` is not NULL
     if (input$selectInput == "usedemo") {
-      readr::read_csv('www/little_rancheria.csv') |>
+      
+      readr::read_csv('www/little_rancheria_season_migration.csv') |>
           mutate(year=year(timestamp), yday=yday(timestamp))
     } else if (input$selectInput == "usedata") {
       req(input$csv1)
@@ -23,6 +24,31 @@ selectDataServer <- function(input, output, session, project, rv){
     }
   })
 
+  
+  observeEvent(c(input$selectInput == "usedata", gps_csv()), {
+    x <- gps_csv()
+    updateSelectInput(session, "season_col", choices= colnames(x), selected=colnames(x)[1]) # selected="Please select"
+    updateSelectInput(session, "mig_col", choices= colnames(x), selected=colnames(x)[1])
+  })
+  
+  observeEvent(gps_csv(), {
+    f <- gps_csv()
+    req(f)
+    
+    if(input$selectInput == "usedemo"){
+      season <- f$season |> unique() |> na.omit() |> sort()
+      rv$season(season)
+      migration <- f$migration |> unique() |> na.omit() |> sort()
+      rv$migration(migration)
+    }else{
+      req(input$season_col, input$mig_col)
+      season <- f[[input$season_col]] |> unique() |> na.omit() |> sort()
+      rv$season(season)
+      migration <- f[[input$mig_col]] |> unique() |> na.omit() |> sort()
+      rv$migration(migration)
+    }
+  }) 
+    
   # Create study area boundary based on KDE
   studyarea <<- reactive({
     trk <- gps_csv() |>
