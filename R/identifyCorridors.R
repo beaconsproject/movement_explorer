@@ -102,11 +102,11 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       if (input$id3a=="ALL" & input$season3a=="ALL") {
         trk_all() |> filter(year>=input$daterange3a[1] & year<=input$daterange3a[2])
       } else if (input$id3a=="ALL" & !input$season3a=="ALL") {
-        trk_all() |> filter(season==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
+        trk_all() |> filter(migration==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
       } else if (!input$id3a=="ALL" & input$season3a=="ALL") {
         trk_all() |> filter(id==input$id3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
       } else {
-        trk_all() |> filter(id==input$id3a & season==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
+        trk_all() |> filter(id==input$id3a & migration==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
       }
     }
   })
@@ -117,11 +117,11 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       if (input$id3b=="ALL" & input$season3b=="ALL") {
         trk_all() |> filter(year>=input$daterange3b[1] & year<=input$daterange3b[2])
       } else if (input$id3b=="ALL" & !input$season3b=="ALL") {
-        trk_all() |> filter(season==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
+        trk_all() |> filter(migration==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
       } else if (!input$id3b=="ALL" & input$season3b=="ALL") {
         trk_all() |> filter(id==input$id3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
       } else {
-        trk_all() |> filter(id==input$id3b & season==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
+        trk_all() |> filter(id==input$id3b & migration==input$season3b & (year>=input$daterange3b[1] & year<=input$daterange3b[2]))
       }
     }
   })
@@ -519,7 +519,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     
     if (input$getButton) {
       map3b <- map3b |>
-        addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") 
+        addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") 
      
       if(isMappable(layers$linear_disturbance)){
         map3b <- map3b |> addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance")

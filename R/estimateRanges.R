@@ -1,7 +1,7 @@
 estimateRanges <- tabItem(tabName = "ranges",
   fluidRow(
     tabBox(width=3,
-      tabPanel("Map1 parameters",
+      tabPanel("Map 1 parameters",
         selectInput("id2a", "Select individual:", choices=NULL, multiple=FALSE),
         selectInput("season2a", "Select season:", choices=NULL),
         sliderInput("daterange2a", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
