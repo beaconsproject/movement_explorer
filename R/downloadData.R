@@ -3,7 +3,7 @@ downloadDataServer <- function(input, output, session, project, rv){
   # Download disturbance gpkg
   output$saveData <- downloadHandler(
     filename = function() {
-      paste0("little_rancheria_", Sys.Date(), ".gpkg")
+      paste0("movement_explorer_", Sys.Date(), ".gpkg")
     },
     content = function(file) {
       savedPaths <- rv$savedPaths()
