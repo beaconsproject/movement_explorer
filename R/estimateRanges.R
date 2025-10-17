@@ -59,6 +59,10 @@ estimateRangesServer <- function(input, output, session, project, rv){
     screenshot(id="map2b", scale=1, filename="range_plot2")
   })
 
+  observeEvent(input$app_range, {
+    screenshot()
+  })
+
   savedRanges <<- list()
   
   trk_one2a <- reactive({
@@ -99,21 +103,17 @@ estimateRangesServer <- function(input, output, session, project, rv){
   path2a <- reactive({
     req(trk_one2a())
     st_as_sf(trk_one2a(), coords = c("x_", "y_"), crs = 4326) |>
-      st_transform(3578) |>
       group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
-      st_cast("LINESTRING") |>
-      st_transform(4326)
+      st_cast("LINESTRING")
   })
 
   path2b <- reactive({
     req(trk_one2b())
     st_as_sf(trk_one2b(), coords = c("x_", "y_"), crs = 4326) |>
-      st_transform(3578) |>
       group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
-      st_cast("LINESTRING") |>
-      st_transform(4326)
+      st_cast("LINESTRING")
   })
 
   # Estimate home range

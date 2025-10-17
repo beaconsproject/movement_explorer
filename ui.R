@@ -76,6 +76,8 @@ ui = dashboardPage(skin="black",
       actionButton("range1", "Map1 screenshot"),
       br(),
       actionButton("range2", "Map2 screenshot"),
+      br(),
+      actionButton("app_range", "App screenshot"),
       
       #sliderInput("range_size", "Screen shot resolution", min=1, max=10, value=1)
     ),
@@ -89,6 +91,8 @@ ui = dashboardPage(skin="black",
       actionButton("path1", "Map1 screenshot"),
       br(),
       actionButton("path2", "Map2 screenshot"),
+      br(),
+      actionButton("app_corridor", "App screenshot"),
       #sliderInput("path_size", "Screen shot resolution", min=1, max=10, value=1)
     ),
     conditionalPanel(

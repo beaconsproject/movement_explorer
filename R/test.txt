@@ -1,0 +1,6 @@
+tabPanel("Test output",
+  verbatimTextOutput("text_output")),
+
+output$text_output <- renderPrint({
+  trk_one()
+})

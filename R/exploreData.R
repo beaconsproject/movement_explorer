@@ -72,24 +72,35 @@ exploreDataServer <- function(input, output, session, project, rv){
   observeEvent(input$getButton, {
     x <- rv$gps_data()
     season_val <- rv$season()
+    migration_val <- rv$migration()
     ids <- as.character(sort(unique(x$id)))
     updateSelectInput(session, "id", choices=c("Please select","All",ids), selected="Please select")
-    updateSelectInput(session, "season", choices=c("All", season_val), selected="All")
+    updateSelectInput(session, "season", choices=c("All", season_val, migration_val), selected="All")
     updateSliderInput(session, "daterange", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
   # Select tracks based on filters
   trk_one <- reactive({
     req(trk_all())
+    season_val <- rv$season()
+    migration_val <- rv$migration()
     if(input$id != "Please select"){
       if (input$id=="All" & input$season=="All") {
         trk_all() |> filter(year>=input$daterange[1] & year<=input$daterange[2])
       } else if (input$id=="All" & !input$season=="All") {
-        trk_all() |> filter(season==input$season & (year>=input$daterange[1] & year<=input$daterange[2]))
+        if (input$season %in% season_val) {
+          trk_all() |> filter(season==input$season & (year>=input$daterange[1] & year<=input$daterange[2]))
+        } else {
+          trk_all() |> filter(migration==input$season & (year>=input$daterange[1] & year<=input$daterange[2]))
+        }
       } else if (!input$id=="All" & input$season=="All") {
         trk_all() |> filter(id==input$id & (year>=input$daterange[1] & year<=input$daterange[2]))
       } else {
-        trk_all() |> filter(id==input$id & season==input$season & (year>=input$daterange[1] & year<=input$daterange[2]))
+        if (input$season %in% season_val) {
+          trk_all() |> filter(id==input$id & season==input$season & (year>=input$daterange[1] & year<=input$daterange[2]))
+        } else {
+          trk_all() |> filter(id==input$id & migration==input$season & (year>=input$daterange[1] & year<=input$daterange[2]))
+        }
       }
     }
   })
@@ -97,11 +108,9 @@ exploreDataServer <- function(input, output, session, project, rv){
   # Create sf linestrings for mapping
   path <- reactive({
     st_as_sf(trk_one(), coords = c("x_", "y_"), crs = 4326) |>
-      st_transform(3578) |>
       group_by(id, year) |> 
       summarize(do_union=FALSE) |> 
-      st_cast("LINESTRING") |>
-      st_transform(4326)
+      st_cast("LINESTRING")
   })
  
   observeEvent(input$runButton1, {

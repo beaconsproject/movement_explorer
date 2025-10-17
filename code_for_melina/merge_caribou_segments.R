@@ -20,8 +20,25 @@ for (i in 1:nrow(x)) {
     if (x$yday_start[i] < x$yday_end[i]) {    
       y <- y |> mutate(migration=ifelse(yday>=x$yday_start[i] & yday<=x$yday_end[i], x$name[i], migration))
     } else {
-      y <- y |> mutate(migration=ifelse(yday<=x$yday_start[i] & yday>=x$yday_end[i], x$name[i], migration))
+      y <- y |> mutate(migration=ifelse(yday>=x$yday_start[i] | yday<=x$yday_end[i], x$name[i], migration))
     }
   }
 }
-write_csv(y, "little_rancheria.csv")
+write_csv(y, "little_rancheria_merged.csv")
+
+
+################################################################################
+# TEST
+
+# Standalone script
+z1 <- read_csv("little_rancheria_merged.csv") |> 
+  filter(migration=="Fall migration", year==2023)
+min(z1$yday)
+max(z1$yday)
+
+# Movement Explorer (selectData.R)
+z2 <- read_csv("test_output.csv") |>
+  filter(migration=="Fall migration", year==2023)
+min(z2$yday)
+max(z2$yday)
+################################################################################

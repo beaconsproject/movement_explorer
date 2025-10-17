@@ -91,10 +91,11 @@ selectDataServer <- function(input, output, session, project, rv){
             if (x$yday_start[i] < x$yday_end[i]) {    
               f <- f |> mutate(migration=ifelse(yday>=x$yday_start[i] & yday<=x$yday_end[i], x$name[i], migration))
             } else {
-              f <- f |> mutate(migration=ifelse(yday<=x$yday_start[i] & yday>=x$yday_end[i], x$name[i], migration))
+              f <- f |> mutate(migration=ifelse(yday>=x$yday_start[i] | yday<=x$yday_end[i], x$name[i], migration))
             }
           }
         }
+        write_csv(f, "code_for_melina/test_output.csv")
         rv$gps_data(f)
       }
     }

@@ -3,7 +3,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
     tabBox(width=3,
       tabPanel("Map 1 parameters",
         selectInput("id3a", "Select individual:", choices=NULL, multiple=FALSE),
-        selectInput("season3a", "Select season:", choices=NULL),
+        selectInput("season3a", "Select migration period:", choices=NULL),
         sliderInput("daterange3a", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
         selectInput("hr3a", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3a", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
@@ -12,7 +12,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
         sliderInput("holes3a", "fill holes small than (km2):", min=1, max=1000, value=200, step=50, sep="")),
       tabPanel("Map 2 parameters",
         selectInput("id3b", "Select individual:", choices=NULL, multiple=FALSE),
-        selectInput("season3b", "Select season:", choices=NULL),
+        selectInput("season3b", "Select migration period:", choices=NULL),
         sliderInput("daterange3b", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
         selectInput("hr3b", "Estimator method:", choices=c("Line buffer", "Brownian bridge", "Mixed approach")),
         sliderInput("buffer3b", "Buffer size (m):", min=0, max=750, value=c(250), step=50, sep=""),
@@ -30,7 +30,9 @@ identifyCorridors <- tabItem(tabName = "corridors",
         p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map3b", height = 500) |> withSpinner(),
-        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")))
+        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
+      tabPanel("Test output",
+        verbatimTextOutput("text_output"))
     )
   )
 )
@@ -92,6 +94,10 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   observeEvent(input$path2, {
     screenshot(id="map3b", scale=1, filename="corridor_plot2")
   })
+
+  observeEvent(input$app_corridor, {
+    screenshot()
+  })
   
   savedRanges <<-list()
     
@@ -109,6 +115,11 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
         trk_all() |> filter(id==input$id3a & migration==input$season3a & (year>=input$daterange3a[1] & year<=input$daterange3a[2]))
       }
     }
+  })
+
+  output$text_output <- renderPrint({
+    trk_one3a()
+    #path3a()
   })
 
   trk_one3b <- reactive({
