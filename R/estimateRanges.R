@@ -37,15 +37,17 @@ estimateRangesServer <- function(input, output, session, project, rv){
   lock <- reactiveVal(FALSE)
 
   # Update choices for inputs based on movement data
-  observeEvent(c(input$selectInput, input$csv1), {
+  observeEvent(input$getButton, {
+    season_val <- rv$season()
+    
     x <- gps_csv()
     ids <- as.character(sort(unique(x$id)))
-    seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
+    #seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
     updateSelectInput(session, "id2a", choices=c("Please select", "ALL", ids), selected=43141) # selected="Please select"
-    updateSelectInput(session, "season2a", choices=c("ALL","Summer range","Winter range"), selected="Summer range")
+    updateSelectInput(session, "season2a", choices=c("ALL", season_val), selected=season_val[1])
     updateSliderInput(session, "daterange2a", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
     updateSelectInput(session, "id2b", choices=c("Please select", "ALL", ids), selected=43141) # selected="Please select"
-    updateSelectInput(session, "season2b", choices=c("ALL","Summer range","Winter range"), selected="Winter range")
+    updateSelectInput(session, "season2b", choices=c("ALL",season_val), selected=season_val[2])
     updateSliderInput(session, "daterange2b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 

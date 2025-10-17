@@ -20,7 +20,7 @@ exploreDataServer <- function(input, output, session, project, rv){
   
   observeEvent(input$getButton, {
     layers <- rv$layers_4326()
-
+    
     # Leaflet map with locations, home ranges, and disturbances
     output$map1 <- renderLeaflet({
       map1 <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
@@ -69,12 +69,12 @@ exploreDataServer <- function(input, output, session, project, rv){
   })
   
   # Update choices for inputs based on movement data
-  observeEvent(c(input$selectInput, input$csv1), {
+  observeEvent(input$getButton, {
     x <- gps_csv()
+    season_val <- rv$season()
     ids <- as.character(sort(unique(x$id)))
-    seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
     updateSelectInput(session, "id", choices=c("Please select","All",ids), selected="Please select")
-    updateSelectInput(session, "season", choices=c("All", seasons), selected="All")
+    updateSelectInput(session, "season", choices=c("All", season_val), selected="All")
     updateSliderInput(session, "daterange", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 

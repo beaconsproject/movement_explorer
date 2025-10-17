@@ -71,15 +71,17 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   ###########################
   
   # Update choices for inputs based on movement data
-  observeEvent(c(input$selectInput, input$csv1), {
+  observeEvent(input$getButton, {
     x <- gps_csv()
     ids <- as.character(sort(unique(x$id)))
-    seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
+    #seasons <- unique(x$season); seasons <- seasons[!is.na(seasons)]
+    migration_val <- rv$migration()
+    
     updateSelectInput(session, "id3a", choices=c("Please select", "ALL",ids), selected=43141) # selected="Please select"
-    updateSelectInput(session, "season3a", choices=c("Spring migration","Fall migration"), selected="Spring migration")
+    updateSelectInput(session, "season3a", choices=c(migration_val), selected=migration_val[1])
     updateSliderInput(session, "daterange3a", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
     updateSelectInput(session, "id3b", choices=c("Please select", "ALL",ids), selected=43141) # selected="Please select"
-    updateSelectInput(session, "season3b", choices=c("Spring migration","Fall migration"), selected="Fall migration")
+    updateSelectInput(session, "season3b", choices=c(migration_val), selected=migration_val[2])
     updateSliderInput(session, "daterange3b", min=min(x$year), max=max(x$year), value=c(min(x$year),max(x$year)))
   })
 
@@ -434,13 +436,10 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       addProviderTiles("Esri.WorldImagery", group="Esri.WorldImagery") |>
       addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
       addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap")
-    
+  
     layers <- rv$layers_4326()
     
     if (input$getButton) {
-      map3a <- map3a |>
-        addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area")
-      
       map3a <- map3a |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=2, group="Study area") 
       
