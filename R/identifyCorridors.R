@@ -31,8 +31,8 @@ identifyCorridors <- tabItem(tabName = "corridors",
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map3b", height = 500) |> withSpinner(),
         tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
-      tabPanel("Test output",
-        verbatimTextOutput("text_output"))
+      #tabPanel("Test output",
+      #  verbatimTextOutput("text_output"))
     )
   )
 )
@@ -117,10 +117,9 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     }
   })
 
-  output$text_output <- renderPrint({
-    trk_one3a()
-    #path3a()
-  })
+  #output$text_output <- renderPrint({
+  #  trk_one3a()
+  #})
 
   trk_one3b <- reactive({
     req(trk_all())
