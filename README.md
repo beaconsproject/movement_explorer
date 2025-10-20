@@ -1,6 +1,6 @@
 ## BEACONs Movement Explorer
 
-October 17, 2025
+October 19, 2025
 
 The BEACONs Movement Explorer is a simple app intended to be used as part of a workflow for exploring movement data. Specifically, the app can help users to:
 
