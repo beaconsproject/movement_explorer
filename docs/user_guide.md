@@ -6,11 +6,23 @@ The **Welcome** section includes an **Overview** of the app, a **User guide** (t
 
 ### Step 1. Select data
 
-The **Select data** section is where you upload the data that you would like to view and analyse. As long as your data is formatted correctly as described in the **Datasets** section, uploading it into the app is straightfoward. To use your own dataset, select the "Upload your own data" radiobutton. If, on the other hand, you just want to test the app out without your own data, you can just select "Use demo dataset" radiobutton.
+The **Select data** section is where you upload the data that you would like to view and analyse. You have two options: you can use the demo data that comes with the app or you can upload your own data.
 
-After the files have been selected, just click on the **Load data** button. Once the data are loaded they will be displayed in the three tabs on the right:
+Option 1 - Use the demo data. To you the demo data, simply select the "Use demo dataset" radiobutton and then click on the "Load data" button.
 
-Once the data has been loaded, you can view some summary information by navigating to the three tabs on the right:
+Option 2 - Use your own data. To use your own data, make sure that your data is formatted correctly as described in the **Datasets** section. If that's the case, select the "Upload your own data" radiobutton. You will now be presented with a few options.
+
+-   Movement data (required). Click on this button to upload your own animal movement data.
+
+-   Source of season/migration data
+
+    -   Option1. Included in uploaded CSV. Select this option if the "season" and "migration" attributes are already included with the movement data.
+
+    -   Option 2. From external file. Select this option if the "season" and "migration" attributes are not included. Once you select this radiobutton, you will be able to load a simple "Season and migration file" that will be merged to your movement data. The format of this file is described in te **Datasets** section.
+
+-   Disturbance data (optional). Click on the "Browse..." button to upload a geopackage file containing disturbance conservation data layers.
+
+After the files have been selected, just click on the **Load data** button. Once the data are loaded, you can view some summary information by navigating to the three tabs on the right:
 
 -   The **Movement data** tab displays the movement data that was uploaded.
 -   The **Sampling duration** tab plots a graph showing, for each individual animal, the length of time that its location was recorded.
