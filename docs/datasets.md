@@ -21,30 +21,6 @@ Optional attributes:
 
 Any additional variables will be loaded and can be viewed but will not be used in any of the analyses. 
 
-### Input 2: Seasonal and migration periods
-
-Format:
-- Text file - comma separated values (".csv")
-
-Required attributes:
-- **season**: name of season or migration period
-- **start**: start date in month-day format e.g., Jun-16
-- **end**: end date in month-day format e.g., Sep-14
-
-Example table:
-
-<pre>
-|season           |start  |end    |
-|-----------------|-------|-------|
-|Annual           |Jan-01 |Dec-31 |
-|Early winter     |Oct-21 |Jan-31 |
-|Late winter      |Feb-01 |Apr-15 |
-|Summer           |Jun-16 |Sep-14 |
-|Fall rut         |Sep-15 |Oct-20 |
-|Spring migration |Apr-01 |Jun-30 |
-|Fall migration   |Sep-01 |Oct-31 |
-</pre>
-
 ## Input 2 (optional): Seasonal and migration periods
 
 Format:

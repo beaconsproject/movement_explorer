@@ -22,28 +22,28 @@ welcomeServer <- function(input, output, session, project, rv){
   })
 
   output$user_guide_md <- renderUI({
-    md_text <- get_markdown_content(overview_url)
+    md_text <- get_markdown_content(user_guide_url)
     tmp_file <- tempfile(fileext = ".md")
     writeLines(md_text, tmp_file)
     includeMarkdown(tmp_file)
   })
 
   output$datasets_md <- renderUI({
-    md_text <- get_markdown_content(overview_url)
+    md_text <- get_markdown_content(datasets_url)
     tmp_file <- tempfile(fileext = ".md")
     writeLines(md_text, tmp_file)
     includeMarkdown(tmp_file)
   })
 
   output$estimateRanges_md <- renderUI({
-    md_text <- get_markdown_content(overview_url)
+    md_text <- get_markdown_content(estimateRanges_url)
     tmp_file <- tempfile(fileext = ".md")
     writeLines(md_text, tmp_file)
     includeMarkdown(tmp_file)
   })
   
   output$identifyCorridors_md <- renderUI({
-    md_text <- get_markdown_content(overview_url)
+    md_text <- get_markdown_content(identifyCorridors_url)
     tmp_file <- tempfile(fileext = ".md")
     writeLines(md_text, tmp_file)
     includeMarkdown(tmp_file)
