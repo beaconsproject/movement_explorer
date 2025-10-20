@@ -5,10 +5,12 @@ Understanding how animals use space and migrate is crucial for conservation and 
 <br>
 <div align="center">
 
-![](gabe1.jpg)
+![gabe1](https://github.com/user-attachments/assets/5415f08d-628b-46dd-a9d9-45dd83944907)
 
 </div>
 <br>
+
+
 
 📌 Note: **Movement Explorer** is intended to provide users with a simple way to visualize movement data and explore patterns e.g., movement corridors and high use areas. It is not intended to be used for data preparation and cleaning, nor for complex statistical analysis and modelling.
 
