@@ -83,19 +83,15 @@ selectDataServer <- function(input, output, session, project, rv){
         for (i in 1:nrow(x)) {
           if (x$type[i]=="Season") {
             if (x$yday_start[i] < x$yday_end[i]) {   
-              print("one") 
               f <- f |> mutate(season=ifelse(yday>=x$yday_start[i] & yday<=x$yday_end[i], x$name[i], season))
             } else {
-              print("two")
               f <- f |> mutate(season=ifelse(yday>=x$yday_start[i] | yday<=x$yday_end[i], x$name[i], season))
             }
           } else if (x$type[i]=="Migration") {
             if (x$yday_start[i] < x$yday_end[i]) {    
-              print("three")
               f <- f |> mutate(migration=ifelse(yday>=x$yday_start[i] & yday<=x$yday_end[i], x$name[i], migration))
             } else {
               f <- f |> mutate(migration=ifelse(yday>=x$yday_start[i] | yday<=x$yday_end[i], x$name[i], migration))
-              print("four")
             }
           }
         }

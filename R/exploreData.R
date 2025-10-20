@@ -11,7 +11,7 @@ exploreData <- tabItem(
                )
       ),
       
-      tabPanel("Help", includeMarkdown("docs/exploreData.md"))
+      #tabPanel("Help", includeMarkdown("docs/exploreData.md"))
     )
   )
 )

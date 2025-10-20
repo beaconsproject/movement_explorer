@@ -20,7 +20,10 @@ server = function(input, output, session) {
     migration = reactiveVal()
   )
   
-  # R/selectData.R
+  # R/welcome.R
+  welcomeServer(input, output, session, project, reactiveValsList)
+  
+    # R/selectData.R
   selectDataServer(input, output, session, project, reactiveValsList)
 
   # R/ExploreData.R

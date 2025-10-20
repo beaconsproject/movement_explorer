@@ -506,7 +506,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       clearGroup("Tracks")|>
       clearGroup("Corridors")|>
       clearControls() |>
-      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
+      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=1, color=~year_pal(year), 
                  fillColor=~year_pal(year), fillOpacity=1, group="Points", popup=gps$t_) |>
       addPolylines(data=path3a(), color="blue", weight=2, group=paste0("Tracks")) |>
       addPolygons(data=corridor3a(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Corridors") |>
@@ -584,7 +584,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
       clearGroup("Tracks")|>
       clearGroup("Corridors")|>
       clearControls() |>    
-      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
+      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=1, color=~year_pal(year), 
                  fillColor=~year_pal(year), fillOpacity=1, group="Points", popup=gps$t_) |>
       addPolylines(data=path3b(), color="blue", weight=2, group=paste0("Tracks")) |>
       addPolygons(data=corridor3b(), color="red", fill=T, weight=2, fillOpacity=0.5, group="Corridors") |>

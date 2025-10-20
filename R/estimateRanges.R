@@ -235,7 +235,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
       clearGroup("Tracks")|>
       clearGroup("Ranges")|>
       clearControls() |>
-      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
+      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=1, color=~year_pal(year), 
           fillColor=~year_pal(year), fillOpacity=1, group="Points", popup=gps$t_) |>
       addPolylines(data=path2a(), color="black", weight=1, group=paste0("Tracks")) |>
       addPolygons(data=hr2a(), color="blue", fill=F, weight=2, group="Ranges") |>
@@ -315,7 +315,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
       clearGroup("Tracks")|>
       clearGroup("Ranges")|>
       clearControls() |>
-      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=gps$first_obs, color=~year_pal(year), 
+      addCircles(data=gps, ~x_, ~y_, fill=T, stroke=T, weight=1, color=~year_pal(year), 
           fillColor=~year_pal(year), fillOpacity=1, group="Points", popup=gps$t_) |>
       addPolylines(data=path2b(), color="black", weight=1, group=paste0("Tracks")) |>
       addPolygons(data=hr2b(), color="blue", fill=F, weight=2, group="Ranges") |>
