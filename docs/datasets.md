@@ -1,6 +1,6 @@
 ## Dataset requirements
 
-The Movement Explorer comes with a demo dataset that can be used to explore the functionality of the app. Alternatively, you can upload your own data, which should consist of two input files:
+The Movement Explorer comes with a demo dataset that can be used to explore the functionality of the app. Alternatively, you can upload your own data, which should consist of three input files:
 
 ### Input 1: Animal movement data
 
@@ -21,7 +21,56 @@ Optional attributes:
 
 Any additional variables will be loaded and can be viewed but will not be used in any of the analyses. 
 
-### Input 2 (optional): Disturbances and conservation areas
+### Input 2: Seasonal and migration periods
+
+Format:
+- Text file - comma separated values (".csv")
+
+Required attributes:
+- **season**: name of season or migration period
+- **start**: start date in month-day format e.g., Jun-16
+- **end**: end date in month-day format e.g., Sep-14
+
+Example table:
+
+<pre>
+|season           |start  |end    |
+|-----------------|-------|-------|
+|Annual           |Jan-01 |Dec-31 |
+|Early winter     |Oct-21 |Jan-31 |
+|Late winter      |Feb-01 |Apr-15 |
+|Summer           |Jun-16 |Sep-14 |
+|Fall rut         |Sep-15 |Oct-20 |
+|Spring migration |Apr-01 |Jun-30 |
+|Fall migration   |Sep-01 |Oct-31 |
+</pre>
+
+## Input 2 (optional): Seasonal and migration periods
+
+Format:
+- Text file - comma separated values (".csv")
+
+Required attributes:
+- **type**: can only take one of two values: "Season" or "Migration"
+- **name**: name of season or migration period e.g., "Winter range" or "Fall migration"
+- **start**: start date in month-day format e.g., Jun-16
+- **end**: end date in month-day format e.g., Sep-14
+
+Example table:
+
+<pre>
+|type      |name             |start  |end    |
+|----------|-----------------|-------|-------|
+|Season    |Early winter     |Oct-21 |Jan-31 |
+|Season    |Late winter      |Feb-01 |Apr-15 |
+|Season    |Summer           |Jun-16 |Sep-14 |
+|Season    |Fall rut         |Sep-15 |Oct-20 |
+|Migration |Spring migration |Apr-01 |Jun-30 |
+|Migration |Fall migration   |Sep-01 |Oct-31 |
+</pre>
+
+
+### Input 3 (optional): Disturbances and conservation areas
 
 The easiest way to create this optional file is to use the BEACONs Geopackage Creator (https://beaconsproject.shinyapps.io/geopackage_creator/). As long as your study area is located within the limits of the underlying database (i.e., all of the Yukon and the northern half of BC), you simply upload your study area, select the layers you want, and run the app. Alternatively, you will need to create your own geopackage comprising one or more of layers described below. For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** In addition, all spatial layers must have the same projection.
 
