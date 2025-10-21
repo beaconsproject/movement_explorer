@@ -179,12 +179,18 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     if (input$id3a=="ALL") {
 
       # Buffer tracks by some amount
-      buf <- st_as_sf(trk_one3a(), coords = c("x_", "y_"), crs = 4326) |>
+      y <- st_as_sf(trk_one3a(), coords = c("x_", "y_"), crs = 4326) |>
         st_transform(3578) |>
         group_by(id, year) |> 
         summarize(do_union=FALSE) |> 
-        st_cast("LINESTRING") |>
-        st_buffer(input$buffer3a)    
+        st_cast("LINESTRING")
+      valid_indices <- sapply(st_geometry(y), function(geom) {
+        coords <- st_coordinates(geom)
+        return(nrow(coords) > 1)
+      })
+      z <- y[valid_indices, ]
+      buf <- z |> st_buffer(input$buffer3a) #|>
+        #st_cast("MULTIPOLYGON")
 
       # Create cumulative raster (value = 1 to 25 caribou)
       for (i in unique(buf$id)) {
@@ -249,14 +255,20 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
     # Population-level
     if (input$id3b=="ALL") {
 
-       # Buffer tracks by some amount
-       buf <- st_as_sf(trk_one3b(), coords = c("x_", "y_"), crs = 4326) |>
+      # Buffer tracks by some amount
+      y <- st_as_sf(trk_one3b(), coords = c("x_", "y_"), crs = 4326) |>
         st_transform(3578) |>
         group_by(id, year) |> 
         summarize(do_union=FALSE) |> 
-        st_cast("LINESTRING") |>
-        st_buffer(input$buffer3b)    
-
+        st_cast("LINESTRING")
+      valid_indices <- sapply(st_geometry(y), function(geom) {
+        coords <- st_coordinates(geom)
+        return(nrow(coords) > 1)
+      })
+      z <- y[valid_indices, ]
+      buf <- z |> st_buffer(input$buffer3b) #|>
+        #st_cast("MULTIPOLYGON")
+      
       # Create cumulative raster (value = 1 to 25 caribou)
       for (i in unique(buf$id)) {
         b1 <- buf |> filter(id==i)|>
