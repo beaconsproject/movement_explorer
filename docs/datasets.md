@@ -4,7 +4,7 @@ The Movement Explorer comes with a demo dataset that can be used to explore the 
 
 ### Input 1: Animal movement data
 
-The animal movement data needs to be in a CSV format with the attributes listed below. The easiest way to create this file is to use [BEACONs Movement Mapper](https://beaconsproject.shinyapps.io/movement_mapper/) to define migration and seasonal segments. See Input two below if you do not have this attribute..
+The animal movement data needs to be in a CSV format with the attributes listed below. The easiest way to create this file is to use [BEACONs Movement Mapper](https://beaconsproject.shinyapps.io/movement_mapper/) to define migration and seasonal segments. See Input 2 below if you do not have this attribute.
 
 Format:
 - Text file - comma separated values (".csv")
