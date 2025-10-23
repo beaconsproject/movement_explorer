@@ -4,7 +4,7 @@ The Movement Explorer comes with a demo dataset that can be used to explore the 
 
 ### Input 1: Animal movement data
 
-The animal movement data needs to be in a CSV format with the attributes listed below. The easiest way to create this file is to use BEACONs Movement Mapper to define migration and seasonal segments. See Input two below if you do not have this attribute..
+The animal movement data needs to be in a CSV format with the attributes listed below. The easiest way to create this file is to use [BEACONs Movement Mapper](https://beaconsproject.shinyapps.io/movement_mapper/) to define migration and seasonal segments. See Input two below if you do not have this attribute..
 
 Format:
 - Text file - comma separated values (".csv")
@@ -51,7 +51,7 @@ Example table:
 
 ### Input 3 (optional): Disturbances and conservation areas
 
-The easiest way to create this optional file is to use the BEACONs Geopackage Creator (https://beaconsproject.shinyapps.io/geopackage_creator/). As long as your study area is located within the limits of the underlying database (i.e., all of the Yukon and the northern half of BC), you simply upload your study area, select the layers you want, and run the app. Alternatively, you will need to create your own geopackage comprising one or more of layers described below. For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** In addition, all spatial layers must have the same projection.
+The easiest way to create this optional file is to use the [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/). As long as your study area is located within the limits of the underlying database (i.e., all of the Yukon and the northern half of BC), you simply upload your study area, select the layers you want, and run the app. Alternatively, you will need to create your own geopackage comprising one or more of layers described below. For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** In addition, all spatial layers must have the same projection.
 
 Format: 
 - Geopackage file (".gpkg")
