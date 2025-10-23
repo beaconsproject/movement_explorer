@@ -28,11 +28,11 @@ isMappable <- function(x) {
   !is.null(x) && inherits(x, "sf") && nrow(x) > 0
 }
 
-
 # Replace with raw GitHub URL
 overview_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/overview.md"
 user_guide_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/user_guide.md"
 datasets_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/datasets.md"
+selectData_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/selectData.md"
 exploreData_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/exploreData.md"
 estimateRanges_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/estimateRanges.md"
 identifyCorridors_url <- "https://raw.githubusercontent.com/beaconsproject/movement_explorer/main/docs/identifyCorridors.md"

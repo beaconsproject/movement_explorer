@@ -26,13 +26,25 @@ estimateRanges <- tabItem(tabName = "ranges",
         p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map2b", height = 500) |> withSpinner(),
-        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")))
+        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
+      tabPanel("User guide", uiOutput("estimateRanges_md")),
     )
   )
 )
 
 
 estimateRangesServer <- function(input, output, session, project, rv){
+
+  output$estimateRanges_md <- renderUI({
+    md_text <- get_markdown_content(estimateRanges_url)
+    if(md_text=="# Error\nCould not load markdown file from GitHub.") {
+      includeMarkdown("docs/estimateRanges.md")
+    } else {
+      tmp_file <- tempfile(fileext = ".md")
+      writeLines(md_text, tmp_file)
+      includeMarkdown(tmp_file)
+    }
+  })
   
   lock <- reactiveVal(FALSE)
 

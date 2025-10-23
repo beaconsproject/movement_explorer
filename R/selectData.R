@@ -3,12 +3,25 @@ selectData <- tabItem(tabName = "select",
     tabBox(id = "one", width="12",
       tabPanel("Movement data", DTOutput("gps_data")),
       tabPanel("Sampling duration", plotOutput("duration")),
-      tabPanel("Sampling rates", DTOutput("sampling_rates"))
+      tabPanel("Sampling rates", DTOutput("sampling_rates")),
+      tabPanel("User guide", uiOutput("selectData_md"))
     )
   )
 )
 
 selectDataServer <- function(input, output, session, project, rv){
+
+  output$selectData_md <- renderUI({
+    md_text <- get_markdown_content(selectData_url)
+    if(md_text=="# Error\nCould not load markdown file from GitHub.") {
+      includeMarkdown("docs/selectData.md")
+    } else {
+      tmp_file <- tempfile(fileext = ".md")
+      writeLines(md_text, tmp_file)
+      includeMarkdown(tmp_file)
+    }
+  })
+
  
   # Read gps movement data
   #gps_csv <<- eventReactive(list(input$selectInput,input$csv1), {

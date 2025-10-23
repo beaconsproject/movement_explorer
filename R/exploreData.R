@@ -3,20 +3,31 @@ exploreData <- tabItem(
   fluidRow(
     tabBox(
       id = "one", width = "12",
-      
-      tabPanel("Mapview",
-               div(style = "position: relative;",
-                 leafletOutput("map1", height = 800) |> withSpinner(),
-                 tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;")
-               )
-      ),
-      
-      #tabPanel("Help", includeMarkdown("docs/exploreData.md"))
+      tabPanel("Mapview", div(style = "position: relative;", leafletOutput("map1", height = 800) |> withSpinner(),
+                 tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"))),
+      tabPanel("User guide", uiOutput("exploreData_md"))
+      #tabPanel("Help", includeMarkdown("docs/exploreData.md")),
+      #tabPanel("Test output", verbatimTextOutput("text_output"))
     )
   )
 )
 
 exploreDataServer <- function(input, output, session, project, rv){
+
+  #output$text_output <- renderPrint({
+  #  print(get_markdown_content(explorerData_url))
+  #})
+
+  output$exploreData_md <- renderUI({
+    md_text <- get_markdown_content(explorerData_url)
+    if(md_text=="# Error\nCould not load markdown file from GitHub.") {
+      includeMarkdown("docs/exploreData.md")
+    } else {
+      tmp_file <- tempfile(fileext = ".md")
+      writeLines(md_text, tmp_file)
+      includeMarkdown(tmp_file)
+    }
+  })
   
   observeEvent(input$getButton, {
     layers <- rv$layers_4326()

@@ -1,4 +1,4 @@
-## Exploring movement data
+## Explore data
 
 The **Explore data** section allows the user to view the movement data interactively along with some underlying disturbance and conservation datasets described in the **Datasets requirements** help tab. Three filters are provided allowing the user to select individuals, seasons, and a range of years:
 

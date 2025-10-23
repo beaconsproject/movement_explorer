@@ -31,6 +31,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map3b", height = 500) |> withSpinner(),
         tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
+      tabPanel("User guide", uiOutput("identifyCorridors_md"))
       #tabPanel("Test output",
       #  verbatimTextOutput("text_output"))
     )
@@ -38,6 +39,17 @@ identifyCorridors <- tabItem(tabName = "corridors",
 )
 
 identifyCorridorsServer <- function(input, output, session, project, rv){
+
+  output$identifyCorridors_md <- renderUI({
+    md_text <- get_markdown_content(identifyCorridors_url)
+    if(md_text=="# Error\nCould not load markdown file from GitHub.") {
+      includeMarkdown("docs/identifyCorridors.md")
+    } else {
+      tmp_file <- tempfile(fileext = ".md")
+      writeLines(md_text, tmp_file)
+      includeMarkdown(tmp_file)
+    }
+  })
 
   lock <- reactiveVal(FALSE)
 
