@@ -4,7 +4,7 @@ The Movement Explorer comes with a demo dataset that can be used to explore the 
 
 ### Input 1: Animal movement data
 
-The animal movement data needs to be in a CSV format with the attributes listed below. **The functionality described in the next line will be implemented on 2025-10-16**. If the **season** attribute is not in the input file, you can use a dialog box to enter the start and end dates for as many seasons and migration periods as you like. Once this table is filled, the season attribute will automatically be created.
+The animal movement data needs to be in a CSV format with the attributes listed below. The easiest way to create this file is to use BEACONs Movement Mapper to define migration and seasonal segments. See Input two below if you do not have this attribute..
 
 Format:
 - Text file - comma separated values (".csv")
@@ -14,7 +14,8 @@ Required attributes:
 - **timestamp**: a timestamp indicating the year, month, day, hour, minute, second
 - **longitude**: longitude (crs:4326)
 - **latitude**: latitude (crs:4326)
-- **season**: name of season or migration period
+- **season**: name of season e.g., "Winter range"
+- **migration**: name of migration period e.g., "Fall migration"
 
 Optional attributes:
 - **elevation**: elevation in metres (not currently required)
@@ -22,6 +23,8 @@ Optional attributes:
 Any additional variables will be loaded and can be viewed but will not be used in any of the analyses. 
 
 ## Input 2 (optional): Seasonal and migration periods
+
+This input table is required if you do not have "season" and "migration" attributes in your animal movement data. In this case, you will need to create a simple table as described below. This table will then be automatically merged to your movement data. Note: This table will assign the same start and end dates for all individuals and years.
 
 Format:
 - Text file - comma separated values (".csv")
