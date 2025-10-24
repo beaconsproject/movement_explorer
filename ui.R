@@ -62,7 +62,7 @@ ui = dashboardPage(skin="black",
     conditionalPanel(
       condition="input.tabs=='explore'",
       selectInput("id", "Select individual:", choices=NULL, multiple=FALSE),
-      selectInput("season", "Select season:", choices=NULL),
+      selectInput("season", "Select season/migration period:", choices=NULL),
       sliderInput("daterange", "Select year(s):", min=2020, max=2025, value=c(2020,2025), sep=""),
       actionButton("runButton1", "Map data"),
     ),
