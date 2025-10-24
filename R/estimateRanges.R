@@ -21,12 +21,16 @@ estimateRanges <- tabItem(tabName = "ranges",
         p("Map 1"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map2a", height = 500) |> withSpinner(),
-        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")),
+        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
+        uiOutput("legendUIrange1")),
         br(),
         p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map2b", height = 500) |> withSpinner(),
-        tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
+        uiOutput("legendUIrange2")
+        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
+        )
+      )
       tabPanel("User guide", uiOutput("estimateRanges_md")),
     )
   )
@@ -230,6 +234,18 @@ estimateRangesServer <- function(input, output, session, project, rv){
      
   })
 
+  output$legendUIrange1 <- renderUI({
+    req(rv)  # ensure rv exists
+    if (!is.null(rv$mappedLayer())) {
+      tags$img(
+        src = "legend.png",
+        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
+      )
+    } else {
+      NULL
+    }
+  })
+  
   observeEvent(input$runButton2, {
     req(trk_one2a(), rv$gps_data(), path2a(), hr2a())
     
@@ -309,6 +325,18 @@ estimateRangesServer <- function(input, output, session, project, rv){
           hideGroup(rv$mappedLayer())
     }
     map2b
+  })
+  
+  output$legendUIrange2 <- renderUI({
+    req(rv)  # ensure rv exists
+    if (!is.null(rv$mappedLayer())) {
+      tags$img(
+        src = "legend.png",
+        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
+      )
+    } else {
+      NULL
+    }
   })
   
   observeEvent(input$runButton2, {
