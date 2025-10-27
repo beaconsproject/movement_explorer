@@ -1,6 +1,6 @@
 ## Welcome to Movement Explorer
 
-Understanding how animals use space and migrate is crucial for conservation and for understanding the effects of environmental changes. To that end, BEACONs **Movement Explorer** was designed to enable users to visualize animal locations and trajectories, estimate annual and seasonal ranges, and identify seasonal movement corridors (paths). A built-in ***User guide*** tab provides step-by-step instructions and function descriptions, while the ***Dataset requirements*** tab details data formats and spatial layers needed to run the app.
+Understanding how animals use landscapes is crucial for understanding their response to environmental change and land stewardship. To that end, BEACONs Movement Explorer allows users to visually explore animal locations and identify annual and seasonal ranges, and seasonal movement corridors (paths). A built-in **User guide** tab provides step-by-step instructions and function descriptions, while the **Dataset requirements** tab details data formats and spatial layers needed to run the app.
 
 <br>
 <div align="center">
@@ -16,7 +16,7 @@ Photo credit: Gabriel Rivest
 
 ### Input data
 
-**Movement Explorer** relies on several key spatial layers contained within two files: a text file ("csv" format) containing animal movement data and a GeoPackage file ("gpkg" format) containing disturbance and conservation datasets. A demo dataset is included with the app for the Little Rancheria herd located in southeast Yukon and northcentral BC. Alternatively, users may upload their own data, provided it follows the structure described in the ***Dataset requirements*** tab.
+**Movement Explorer** requires a text file (csv format) containing animal movement data and a GeoPackage file (gpkg format) containing spatial layers for display and exploration (e.g., human disturbance, fire, *etc.*).  A demo dataset is included with the app for the Little Rancheria caribou herd located in southeast Yukon and northcentral BC. Alternatively, users may upload their own data, provided it follows the structure described in the **Dataset requirements** tab.
 
 ### Functionality
 
@@ -24,23 +24,20 @@ The app consists of several sections:
 
 #### Select data
 
-- Use the builtin demo data or upload a custom data ("csv" and "gpkg" extensions) contabuiltin ining all required spatial layers.
-
-📌 Note: All layers in the GeoPackage must have the same projection. Additionally, the study area must capture the full extent of disturbance layers to ensure accurate analysis.
-<br>
+- Use the embedded demo dataset or upload custom data (i.e., csv text file and GeoPackage described above).
 
 #### Explore data
 
-- View and explore the animal movement data along with disturbance data (e.g., human-caused disturbances and fires) and conservation data (e.g., protected areas and intact forest landscapes). Movement data can be filtered animal Id, Year, or Season.
+- View and explore the animal movement data along with disturbance data (e.g., human disturbances and fires) and other spatial layers (e.g., protected areas and intact forest landscapes). Movement data can be filtered by animal Id, Year, and Season.
 
 #### Estimate ranges
 
-- Estimate annual or seasonal ranges (summer and winter) for individual animals or for the population using one of several methods: Minimum Convex Polygon (MCP), Kernel Density Estimation (KDE), Autocorrelated KDE (aKDE), or Local Convex Hull (LoCoH).
+- Estimate annual or seasonal ranges (e.g., summer and winter) for individual animals or for the population using one of several methods: Minimum Convex Polygon (MCP), Kernel Density Estimation (KDE), Autocorrelated KDE (aKDE), or Local Convex Hull (LoCoH).
 
 #### Identify corridors
 
-- Identify seasonal movement corridors (spring and fall) for individual animals or for the population using one of several methods: Line buffer, Brownian bridge movement model (BBMM), or a mixed approach.
+- Identify seasonal movement corridors (e.g., spring and fall) for individual animals or for the population using one of several methods: Line buffer, Brownian bridge movement model (BBMM), or a mixed approach.
 
 #### Download data
 
-- Download a GeoPackage of the range and corridor boundaries created by the app, as well as the input spatial layers (e.g., linear and areal disturbances).
+- Download a GeoPackage of the seasonal and home ranges and movement corridor boundaries created by the app, as well as the input spatial layers (e.g., linear and areal disturbances).
