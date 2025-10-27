@@ -1,37 +1,45 @@
 ## Dataset requirements
 
-The Movement Explorer comes with a demo dataset that can be used to explore the functionality of the app. Alternatively, you can upload your own data, which should consist of three input files:
+Movement Explorer comes with an embedded demo dataset that can be used to explore the functionality of the app. Alternatively, users can upload their own data via three input files:
+
+- Input 1: Animal movement (or location) data defined by longitude and latitude with timestamp
+- Input 2: Start and end dates for each season and migration period
+- Input 3: Spatial data for exploring ranges and movement such as human disturbance
 
 ### Input 1: Animal movement data
 
-The animal movement data needs to be in a CSV format with the attributes listed below. The easiest way to create this file is to use [BEACONs Movement Mapper](https://beaconsproject.shinyapps.io/movement_mapper/) to define migration and seasonal segments. See Input 2 below if you do not have this attribute.
+Animal movement data is uploaded as a CSV text file with the attributes listed below. This file can be created using [BEACONs Movement Mapper](https://beaconsproject.shinyapps.io/movement_mapper/), for example. 
 
 Format:
-- Text file - comma separated values (".csv")
+- CSV text file (comma separated values, .csv)
 
 Required attributes:
 - **id**: Individual identification e.g., collar id
 - **timestamp**: a timestamp indicating the year, month, day, hour, minute, second
 - **longitude**: longitude (crs:4326)
 - **latitude**: latitude (crs:4326)
-- **season**: name of season e.g., "Winter range"
-- **migration**: name of migration period e.g., "Fall migration"
+
+Required attributes if Input 2 does not exist:
+- **season**: name of the season within which the location occurs to e.g., "Winter"
+- **migration**: name of the migration period within which the location occurs e.g., "Fall migration"
 
 Optional attributes:
-- **elevation**: elevation in metres (not currently required)
+- **elevation**: elevation in metres at which the location occurred
 
-Any additional variables will be loaded and can be viewed but will not be used in any of the analyses. 
+Additional variables can be uploaded for viewing only.
 
-## Input 2 (optional): Seasonal and migration periods
+## Input 2: Season and migration periods
 
-This input table is required if you do not have "season" and "migration" attributes in your animal movement data. In this case, you will need to create a simple table as described below. This table will then be automatically merged to your movement data. Note: This table will assign the same start and end dates for all individuals and years.
+  📌 This file is only required if the Animal movement data (Input 1) does not have the "season" and "migration" attributes.
+
+This input table lists the start and end dates for each season and migration period. It is uploaded as a CSV text file with the attributes listed below.  This table is used by the app to assign each movement (or location) point to a season and/or migration period for all individuals and years.  
 
 Format:
-- Text file - comma separated values (".csv")
+- CSV text file (comma separated values, .csv)
 
 Required attributes:
 - **type**: can only take one of two values: "Season" or "Migration"
-- **name**: name of season or migration period e.g., "Winter range" or "Fall migration"
+- **name**: name of season or migration period e.g., "Winter" or "Fall migration"
 - **start**: start date in month-day format e.g., Jun-16
 - **end**: end date in month-day format e.g., Sep-14
 
@@ -49,9 +57,12 @@ Example table:
 </pre>
 
 
-### Input 3 (optional): Disturbances and conservation areas
+### Input 3 (optional): Spatial data for exploring ranges and movement
 
-The easiest way to create this optional file is to use the [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/). As long as your study area is located within the limits of the underlying database (i.e., all of the Yukon and the northern half of BC), you simply upload your study area, select the layers you want, and run the app. Alternatively, you will need to create your own geopackage comprising one or more of layers described below. For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** In addition, all spatial layers must have the same projection.
+Spatial layers can be uploaded into the app via a GeoPackage. For the moment, only the layers list below can be uploaded. 
+
+  📌 For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** 
+  📌 **ADD THIS TO THE APP**All spatial layers must have the same projection.
 
 Format: 
 - Geopackage file (".gpkg")
@@ -67,4 +78,4 @@ Potential layers:
 - **quartz_claims**
 - **placer_claims**
 
-Any additional layers will not be loaded nor used in any of the analyses.
+This GeoPackage can be created using [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/), for example. 
