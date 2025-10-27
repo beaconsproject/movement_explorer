@@ -62,8 +62,8 @@ selectDataServer <- function(input, output, session, project, rv){
   
   observeEvent(c(input$colIncluded == "incol", rv$gps_data()), {
     x <- rv$gps_data()
-    updateSelectInput(session, "season_col", choices= colnames(x), selected=colnames(x)[1]) # selected="Please select"
-    updateSelectInput(session, "mig_col", choices= colnames(x), selected=colnames(x)[1])
+    updateSelectInput(session, "season_col", choices= colnames(x), selected="season")
+    updateSelectInput(session, "mig_col", choices= colnames(x), selected="migration")
   })
   
   observe({
