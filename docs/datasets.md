@@ -59,10 +59,11 @@ Example table:
 
 ### Input 3 (optional): Spatial data for exploring ranges and movement
 
-Spatial layers can be uploaded into the app via a GeoPackage. For the moment, only the layers list below can be uploaded. 
+Spatial layers can be added to the app via a GeoPackage. For the moment, only the layers list below can be uploaded. 
 
   📌 For the app to recognize the spatial layers in the GeoPackage, the layer names **must exactly match the expected names shown below.** 
-  📌 **ADD THIS TO THE APP**All spatial layers must have the same projection.
+  
+  📌 All spatial layers must have the same projection.
 
 Format: 
 - Geopackage file (".gpkg")
@@ -78,4 +79,4 @@ Potential layers:
 - **quartz_claims**
 - **placer_claims**
 
-This GeoPackage can be created using [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/), for example. 
+This GeoPackage can be created using [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/), for example, or manually in QGIS. 
