@@ -31,7 +31,7 @@ identifyCorridors <- tabItem(tabName = "corridors",
         p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map3b", height = 500) |> withSpinner(),
-        uiOutput("legendUIcorridor1"))),
+        uiOutput("legendUIcorridor2"))),
         #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
       tabPanel("User guide", uiOutput("identifyCorridors_md"))
       #tabPanel("Test output",
