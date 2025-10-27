@@ -3,12 +3,9 @@ exploreData <- tabItem(
   fluidRow(
     tabBox(
       id = "one", width = "12",
-      tabPanel("Mapview",
-               div(style = "position: relative;",
-                 leafletOutput("map1", height = 800) |> withSpinner(),
-                 uiOutput("legendUI")
-               )
-      ),
+      tabPanel("Mapview", div(style = "position: relative;", leafletOutput("map1", height = 800) |> withSpinner(),
+                              uiOutput("legendUI")
+      )),
       tabPanel("User guide", uiOutput("exploreData_md"))
       #tabPanel("Help", includeMarkdown("docs/exploreData.md")),
       #tabPanel("Test output", verbatimTextOutput("text_output"))
@@ -84,16 +81,14 @@ exploreDataServer <- function(input, output, session, project, rv){
   })
   
   output$legendUI <- renderUI({
-    req(rv)  # ensure rv exists
+    req(rv)  
     if (!is.null(rv$mappedLayer())) {
-      tags$img(
-        src = "legend.png",
-        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
-      )
+      tags$img(src = "legend.png",style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;")
     } else {
       NULL
     }
   })
+  
   # Update choices for inputs based on movement data
   observeEvent(input$getButton, {
     x <- rv$gps_data()

@@ -21,16 +21,14 @@ estimateRanges <- tabItem(tabName = "ranges",
         p("Map 1"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map2a", height = 500) |> withSpinner(),
-        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
         uiOutput("legendUIrange1")),
+        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")),
         br(),
         p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map2b", height = 500) |> withSpinner(),
-        uiOutput("legendUIrange2")
-        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;")
-        )
-      )
+        uiOutput("legendUIrange2"))),
+        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
       tabPanel("User guide", uiOutput("estimateRanges_md")),
     )
   )
@@ -160,6 +158,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
   # Estimate home range
   hr2b <- reactive({
     req(trk_one2b())
+    
     if (input$hr2b=="MCP") {
       x <- hr_mcp(trk_one2b(), levels=input$levels2b)
     } else if (input$hr2b=="KDE") {
@@ -182,7 +181,15 @@ estimateRangesServer <- function(input, output, session, project, rv){
     hr_isopleths(x)
   })
 
-
+  output$legendUIrange1 <- renderUI({
+    req(rv)  
+    if (!is.null(rv$mappedLayer())) {
+      tags$img(src = "legend.png", style = "position: absolute; bottom: 25px; left: 10px; width: 175px; opacity: 0.9; z-index: 9999;")
+    } else {
+      NULL
+    }
+  })
+  
   # Leaflet map with locations, home ranges, and disturbances
   output$map2a <- renderLeaflet({
     map2a <- leaflet(options = leafletOptions(attributionControl=FALSE)) |>
@@ -232,18 +239,6 @@ estimateRangesServer <- function(input, output, session, project, rv){
     }
      map2a 
      
-  })
-
-  output$legendUIrange1 <- renderUI({
-    req(rv)  # ensure rv exists
-    if (!is.null(rv$mappedLayer())) {
-      tags$img(
-        src = "legend.png",
-        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
-      )
-    } else {
-      NULL
-    }
   })
   
   observeEvent(input$runButton2, {
@@ -328,12 +323,9 @@ estimateRangesServer <- function(input, output, session, project, rv){
   })
   
   output$legendUIrange2 <- renderUI({
-    req(rv)  # ensure rv exists
+    req(rv)  
     if (!is.null(rv$mappedLayer())) {
-      tags$img(
-        src = "legend.png",
-        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
-      )
+      tags$img(src = "legend.png", style = "position: absolute; bottom: 25px; left: 10px; width: 175px; opacity: 0.9; z-index: 9999;")
     } else {
       NULL
     }

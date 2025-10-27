@@ -31,10 +31,11 @@ identifyCorridors <- tabItem(tabName = "corridors",
         p("Map 2"),
         div(style = "position: relative;",  # allows layering inside
         leafletOutput("map3b", height = 500) |> withSpinner(),
-        uiOutput("legendUIcorridor2")
-        )
-      )
+        uiOutput("legendUIcorridor1"))),
+        #tags$img(src = "legend.png", style = "position: absolute; bottom: 15px; left: 15px; width: 150px; opacity: 0.9; z-index: 9999;"))),
       tabPanel("User guide", uiOutput("identifyCorridors_md"))
+      #tabPanel("Test output",
+      #  verbatimTextOutput("text_output"))
     )
   )
 )
@@ -117,7 +118,6 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   # Select tracks for one individual
   trk_one3a <- reactive({
     req(trk_all())
-    browser()
     if(input$id3a != "Please select"){
       if (input$id3a=="ALL" & input$season3a=="ALL") {
         trk_all() |> filter(year>=input$daterange3a[1] & year<=input$daterange3a[2])
@@ -137,6 +137,7 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
 
   trk_one3b <- reactive({
     req(trk_all())
+    
     if(input$id3b != "Please select"){
       if (input$id3b=="ALL" & input$season3b=="ALL") {
         trk_all() |> filter(year>=input$daterange3b[1] & year<=input$daterange3b[2])
@@ -517,12 +518,9 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
   
   output$legendUIcorridor1 <- renderUI({
-    req(rv)  # ensure rv exists
+    req(rv) 
     if (!is.null(rv$mappedLayer())) {
-      tags$img(
-        src = "legend.png",
-        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
-      )
+      tags$img(src = "legend.png", style = "position: absolute; bottom: 25px; left: 10px; width: 175px; opacity: 0.9; z-index: 9999;")
     } else {
       NULL
     }
@@ -607,12 +605,9 @@ identifyCorridorsServer <- function(input, output, session, project, rv){
   })
   
   output$legendUIcorridor2 <- renderUI({
-    req(rv)  # ensure rv exists
+    req(rv)  
     if (!is.null(rv$mappedLayer())) {
-      tags$img(
-        src = "legend.png",
-        style = "position: absolute; bottom: 15px; right: 15px; width: 200px; opacity: 0.9; z-index: 9999;"
-      )
+      tags$img(src = "legend.png", style = "position: absolute; bottom: 25px; left: 10px; width: 175px; opacity: 0.9; z-index: 9999;")
     } else {
       NULL
     }
