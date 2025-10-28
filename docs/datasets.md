@@ -76,7 +76,25 @@ Potential layers:
 - **fire**: fire polygons (polygons)
 - **footprint_500m**: combined linear and areal disturbances buffered by 500m (polygon)
 - **protected_areas**: protected and conserved areas, including IPCAs (polygons)
-- **quartz_claims**
-- **placer_claims**
+- **quartz_claims**: quartz mining claims
+- **placer_claims**: placer mining claims
 
 This GeoPackage can be created using [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/), for example, or manually in QGIS. 
+
+### Demo Dataset - Spatial Data
+
+The demo dataset contains the following spatial layers: 
+
+- Study area 
+- Linear disturbance: human linear disturbances mapped by the [Yukon Government](https://map-data.service.yukon.ca/geoyukon/Environmental_Monitoring/Surface_Disturbance_Linear_Features/) and the BEACONs Project 
+- Areal disturbance: human areal disturbances mapped by the [Yukon Government](https://map-data.service.yukon.ca/geoyukon/Environmental_Monitoring/Surface_Disturbance_Areal_Features/) and the BEACONs Project
+- Quartz claims: https://map-data.service.yukon.ca/geoyukon/Mining/Quartz_Claims_50k/
+- Fires: fire polygons https://cwfis.cfs.nrcan.gc.ca/datamart
+- Protected_areas: https://open.canada.ca/data/en/dataset/6c343726-1e92-451a-876a-76e17d398a1c
+- Intact IFL 2000: Distribution of intact forest landscapes in the year 2000 (Potapov et al. 2017). https://intactforests.org
+- Intact IFL 2020: Distribution of intact forest landscapes in the year 2020 (Potapov et al. 2017). https://intactforests.org
+
+#### References
+
+Potapov, P., Hansen, M. C., Laestadius L., Turubanova S., Yaroshenko A., Thies C., Smith W., Zhuravleva I., Komarova A., Minnemeyer S., Esipova E. The last frontiers of wilderness: Tracking loss of intact forest landscapes from 2000 to 2013. Science Advances, 2017; 3:e1600821
+
