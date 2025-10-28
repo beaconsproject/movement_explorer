@@ -1,32 +1,30 @@
 ## User guide
 
-The BEACONs Movement Explorer app is designed to assist users to visualize and analyze animal movement data, helping to better understand animal space use, including how they move between seasonal ranges. The app is divided into several sections as indicated in the left sidebar. A typical workflow involves 1) selecting data, exploring data visually, estimating home ranges, and identifying and mapping corridors.
+The BEACONs **Movement Explorer** app assists users with visualizing and analyzing animal movement data to better understand how animals use the landscape, including movement between seasonal ranges. The app is divided into six sections as listed on the left sidebar, in the order of a typical workflow: select data, explore data visually, estimate annual and seasonal ranges, identify movement corridors, and download results.
 
-The **Welcome** section includes an **Overview** of the app, a **User guide** (this section), a description of the **Datasets requirements** to use the app, and sections describing how to **Estimate ranges** and **Identify corridors**. It is highly recommended that a user first read these sections, especially the **Datasets requirements** section prior to using the app.
+The **Welcome** section includes the **Overview** landing page that provides a concise introduction to the app and its functionality. It also includes this **User guide** and a description of the **Datasets requirements** used by Movement Explorer. It is recommended that a user first read these sections, especially the **Dataset requirements** prior to using the app.
 
 ### Step 1. Select data
 
-The **Select data** section is where you upload the data that you would like to view and analyse. You have two options: you can use the demo data that comes with the app or you can upload your own data.
+In this step, the user uploads spatial data into **Movement Explorer**. There are two options: 
 
-Option 1 - To use the demo data, simply select the "Use demo dataset" radiobutton and then click on the "Load data" button.
+1. **Use demo data** - This dataset is embedded in the App. The dataset includes multi-year location data with season and migration assignments for 24 individuals, as well as spatial datasets for linear and areal datasets of human disturbance, human footprint, intact forest landscapes, fire, and quartz claims. 
 
-Option 2 - To use your own data, first make sure that your data is formatted correctly as described in the **Datasets requirements** section. If that's the case, select the "Upload your own data" radiobutton. You will now be presented with a few options.
+2. **Upload your own data** - If selected, the menu will expand.
 
--   Movement data (required). Click on this button to upload your own animal movement data.
+    📌 Users are responsible for ensuring that all data satisfies the specification detailed in the **Dataset requirements** tab.
 
--   Source of season/migration data
+    **Movement data (csv)** (see Dataset requirements - Input 1) - Click on "Browse", navigate to the csv file with the animal movement (or location) data, and click "Open".
 
-    -   Option1. Included in uploaded CSV. Select this option if the "season" and "migration" attributes are already included with the movement data.
+    **Source of season/migration data** (see Dataset requirements - Input 2) - If the **Movement data** includes the attributes "season" and "migration", select **Included in uploaded csv**. If not, select **From external file** and browse to **Season and migration csv file** and click "Open". This text file contains the start and end dates for each season and migration period. The App will use this file to assign each location in the **Movement data** to a season and/or migration period.   
 
-    -   Option 2. From external file. Select this option if the "season" and "migration" attributes are not included. Once you select this radiobutton, you will be able to load a simple "Season and migration file" that will be merged to your movement data. The format of this file is described in te **Datasets requirements** section.
+    **Disturbance data (gpkg)** (see Dataset requirements - Input 3) - This dataset is optional and contains spatial layers in a GeoPackage. Click on "Browse", navigate to the gpkg file, and click "Open".
 
--   Disturbance data (optional). Click on the "Browse..." button to upload a geopackage file containing disturbance and conservation data layers. Note, that you can use the [BEACONs Geopackage Creator](https://beaconsproject.shinyapps.io/geopackage_creator/) app to create this dataset.
+    After option 1 or 2 above has been completed, click on the **Load data** button. Once the data are loaded, summary information for the **Movement data** will appear in the three tabs on the right:
 
-After the files have been selected, click on the **Load data** button. Once the data are loaded, you can view some summary information by navigating to the three tabs on the right:
-
--   The **Movement data** tab displays the movement data that was uploaded.
--   The **Sampling duration** tab plots a graph showing, for each individual animal, the length of time that its location was recorded.
--   The **Sampling rates** tab displays descriptive statistics of sampling rates for each individual animal such as the average length of time between relocation.
+    - **Movement data** is a table of the movement data. Most attributes are defined in **Data requirements - Input 1**. **yday** is the day of the year out of 365. For example, April 1 would be the 91st day of the year.
+    - **Sampling duration** is a graph plotting the length of time data was collected for each individual in the dataset. 
+    - **Sampling rates** displays descriptive statistics of sampling rates for each individual animal such as the average length of time between relocation.
 
 ### Step 2. Explore data
 
