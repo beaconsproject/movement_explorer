@@ -20,11 +20,13 @@ In this step, the user uploads spatial data into **Movement Explorer**. There ar
 
     **Disturbance data (gpkg)** (see Dataset requirements - Input 3) - This dataset is optional and contains spatial layers in a GeoPackage. Click on "Browse", navigate to the gpkg file, and click "Open".
 
-    After option 1 or 2 above has been completed, click on the **Load data** button. Once the data are loaded, summary information for the **Movement data** will appear in the three tabs on the right:
+ After option 1 or 2 above has been completed, click on the **Load data** button. 
+ 
+ Once the data are loaded, summary information for the **Movement data** will appear in the three tabs on the right:
 
-    - **Movement data** is a table of the movement data. Most attributes are defined in **Data requirements - Input 1**. **yday** is the day of the year out of 365. For example, April 1 would be the 91st day of the year.
-    - **Sampling duration** is a graph plotting the length of time data was collected for each individual in the dataset. 
-    - **Sampling rates** displays descriptive statistics of sampling rates for each individual animal such as the average length of time between relocation.
+- **Movement data** is a table of the movement data. Most attributes are defined in **Data requirements - Input 1**. **yday** is the day of the year out of 365. For example, April 1 would be the 91st day of the year.
+- **Sampling duration** is a graph plotting the length of time data was collected for each individual in the dataset. 
+- **Sampling rates** displays descriptive statistics of sampling rates for each individual animal such as the average length of time between relocation.
 
 ### Step 2. Explore data
 
