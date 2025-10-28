@@ -30,7 +30,7 @@ In this step, the user uploads spatial data into **Movement Explorer**. There ar
 
 ### Step 2. Explore data
 
-In this step, the user can visually explore the movement data along with optional spatial data such as human disturbance and fire, for example, in the **Mapview** on the right. 
+In this step, the **Movement data** is explored along with optional spatial data such as human disturbance and fire, for example, in the **Mapview** on the right. 
 
 **Mapview** has an interactive legend in the top right. There are three background options: ESRI.WorldTopoMap, ESRI.WorldImagery, and ESRI.WorldGrayCanvas. The spatial layers listed below the background options are either from the Demo dataset or uploaded as a GeoPackage (Input 3) in **Step 1. Select data**. The layers can be turned on and off by clicking the boxes next to the names. Below the interative legend is a static legend showing the colour for each spatial layer.
 
