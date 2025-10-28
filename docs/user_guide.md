@@ -30,7 +30,19 @@ In this step, the user uploads spatial data into **Movement Explorer**. There ar
 
 ### Step 2. Explore data
 
-The **Explore data** section allows the user to view the movement data interactively along with some optional underlying disturbance and conservation datasets described in the **Datasets requirements** help tab. Three filters are provided that allow the user to select individuals, seasons, and a range of years. The **Mapview** tab includes an interactive map displaying GPS relocations for all animals in the study area.
+In this step, the user can visually explore the movement data along with optional spatial data such as human disturbance and fire, for example, in the **Mapview** on the right. 
+
+**Mapview** has an interactive legend in the top right. There are three background options: ESRI.WorldTopoMap, ESRI.WorldImagery, and ESRI.WorldGrayCanvas. The spatial layers listed below the background options are either from the Demo dataset or uploaded as a GeoPackage (Input 3) in **Step 1. Select data**. The layers can be turned on and off by clicking the boxes next to the names. Below the interative legend is a static legend showing the colour for each spatial layer.
+
+Using the menu on the left, movement data is added to the **Mapview** as follows: 
+
+**Select individual** - The dropdown menu lists all individuals in the movement data. To add movement data to the map, start by selecting an individual or **all** individuals. 
+
+**Select season/migration period** - The data displayed can be restricted to a season or migration period. Using the dropdown menu, specify the season or migration period to be displayed. All data can be displayed by selecting **All**.
+
+**Select year(s)** - The data displayed can be restricted by year. Using the slider, select the year or years of data to be displayed in the Mapview.
+
+Next, click on the **Map data** button to load the data onto the Mapview.
 
 ### Step 3. Estimate ranges
 
