@@ -2,10 +2,9 @@
 
 Understanding how animals use landscapes is crucial for understanding their response to environmental change and land stewardship. To that end, BEACONs **Movement Explorer** allows users to visually explore animal locations and identify annual and seasonal ranges, and seasonal movement corridors (paths). A built-in **User guide** tab provides step-by-step instructions and function descriptions, while the **Dataset requirements** tab details data formats and spatial layers needed to run the app.
 
-<br>
 <div align="center">
 
-![gabe1](https://github.com/user-attachments/assets/5415f08d-628b-46dd-a9d9-45dd83944907)
+![Web Image](../docs/gabe1.jpg)
 
 Photo credit: Gabriel Rivest
 
