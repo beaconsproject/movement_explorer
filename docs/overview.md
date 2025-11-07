@@ -2,7 +2,7 @@
 
 
 <br><br>
-<center><img src="docs/gabe1.jpg"></center>
+<center><img src="https://github.com/user-attachments/assets/5415f08d-628b-46dd-a9d9-45dd83944907"></center>
 <br><br>
 
 Photo credit: Gabriel Rivest
