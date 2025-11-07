@@ -11,9 +11,3 @@ The BEACONs Movement Explorer is a simple app intended to be used as part of a w
 Please note that the app has some known issues and is in development, and we would appreciate your feedback on any issues or suggestions you may have.
 
 To run the app, simply point your browser to: https://beaconsproject.shinyapps.io/movement_explorer/
-
-<br><br>
-<center><img src="pics/gabe1.jpg"></center>
-<br><br>
-
-Photo credit: Gabriel Rivest
