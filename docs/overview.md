@@ -2,7 +2,7 @@
 
 
 <br><br>
-<center><img src="pics/gabe1.jpg"></center>
+<center><img src="docs/gabe1.jpg"></center>
 <br><br>
 
 Photo credit: Gabriel Rivest
