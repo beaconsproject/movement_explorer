@@ -1,6 +1,5 @@
 ## Welcome to Movement Explorer
 
-Understanding how animals use landscapes is crucial for understanding their response to environmental change and land stewardship. To that end, BEACONs **Movement Explorer** allows users to visually explore animal locations and identify annual and seasonal ranges, and seasonal movement corridors (paths). A built-in **User guide** tab provides step-by-step instructions and function descriptions, while the **Dataset requirements** tab details data formats and spatial layers needed to run the app.
 
 <br><br>
 <center><img src="pics/gabe1.jpg"></center>
@@ -8,14 +7,13 @@ Understanding how animals use landscapes is crucial for understanding their resp
 
 Photo credit: Gabriel Rivest
 
-</div>
 <br>
 
 📌 Note: **Movement Explorer** is intended to provide users with a simple way to visualize movement data and explore patterns e.g., movement corridors and high use areas. It is not intended to be used for data preparation and cleaning, nor for complex statistical analysis and modelling.
 
 ### Input data
 
-**Movement Explorer** requires a text file (csv format) containing animal movement data and a GeoPackage file (gpkg format) containing spatial layers for display and exploration (e.g., human disturbance, fire, *etc.*).  A demo dataset is included with the app for the Little Rancheria caribou herd located in southeast Yukon and northcentral BC. Alternatively, users may upload their own data, provided it follows the structure described in the **Dataset requirements** tab.
+**Movement Explorer** requires a text file ("csv" format) containing animal movement data and a GeoPackage ("gpkg" format) containing spatial layers for display and exploration (e.g., human disturbance, fire, etc.). A demo dataset is included with the app for the Little Rancheria caribou herd located in southeast Yukon and northcentral BC. Alternatively, users may upload their own data, provided it follows the structure described in the ***Dataset requirements*** tab.
 
 ### Functionality
 
@@ -23,11 +21,14 @@ The app consists of several sections:
 
 #### Select data
 
-- Use the embedded demo dataset or upload custom data (i.e., csv text file and GeoPackage described above).
+- Use the embedded demo dataset or upload custom data (i.e., text file of location data and GeoPackage containing all spatial layers).
+
+📌 Note: All spatial layers in the GeoPackage must have the same projection.
+<br>
 
 #### Explore data
 
-- View and explore the animal movement data along with disturbance data (e.g., human disturbances and fires) and other spatial layers (e.g., protected areas and intact forest landscapes). Movement data can be filtered by animal Id, Year, and Season.
+- View and explore the animal movement data along with disturbance data (e.g., human-caused disturbances and fires) and other spatial layers (e.g., protected areas and intact forest landscapes). Movement data can be filtered animal Id, Year, and Season.
 
 #### Estimate ranges
 
@@ -39,4 +40,4 @@ The app consists of several sections:
 
 #### Download data
 
-- Download a GeoPackage of the seasonal and home ranges and movement corridor boundaries created by the app, as well as the input spatial layers (e.g., linear and areal disturbances).
+- Download a GeoPackage containig the seasonal and home ranges and movement corridor boundaries created by the app, as well as the input spatial layers (e.g., linear and areal disturbances).
