@@ -6,7 +6,7 @@ Understanding how animals use landscapes is crucial for understanding their resp
 <center><img src="https://github.com/user-attachments/assets/5415f08d-628b-46dd-a9d9-45dd83944907"></center>
 <br><br>
 
-Photo credit: Gabriel Rivest
+<center>Photo credit: Gabriel Rivest</center>
 
 <br>
 
