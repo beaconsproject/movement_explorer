@@ -42,7 +42,7 @@ selectDataServer <- function(input, output, session, project, rv){
     req(input$selectInput)
     
     if (input$selectInput == "usedemo") {
-      f <- readr::read_csv('www/little_rancheria_season_migration.csv') |>
+      f <- readr::read_csv('www/little_rancheria.csv') |>
         mutate(year = year(timestamp), yday = yday(timestamp))
     } else if (input$selectInput == "usedata") {
       req(input$csv1)

@@ -45,9 +45,9 @@ exploreDataServer <- function(input, output, session, project, rv){
         map1 <- map1 |> addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance")
       }
       if(isMappable(layers$areal_disturbance)){
-        i <- layers$areal_disturbance |> st_make_valid() 
-        i_poly <- i[st_geometry_type(i) %in% c("POLYGON", "MULTIPOLYGON"), ] 
-        map1 <- map1 |> addPolygons(data=i_poly, color="#660000", weight=1, fill=TRUE, group="Areal disturbance")
+        #i <- layers$areal_disturbance |> st_make_valid() 
+        #i_poly <- i[st_geometry_type(i) %in% c("POLYGON", "MULTIPOLYGON"), ] 
+        map1 <- map1 |> addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance")
       }
       if(isMappable(layers$footprint_500m)){
         map1 <- map1 |> addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m")
