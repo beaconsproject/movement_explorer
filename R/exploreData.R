@@ -40,12 +40,14 @@ exploreDataServer <- function(input, output, session, project, rv){
         addProviderTiles("Esri.WorldGrayCanvas", group="Esri.WorldGrayCanvas") |>
         addProviderTiles("Esri.WorldTopoMap", group="Esri.WorldTopoMap") |>
         addPolygons(data=studyarea(), color="black", fill=F, weight=3, group="Study area") 
+    browser()
       
       if(isMappable(layers$linear_disturbance)){
         map1 <- map1 |> addPolylines(data=layers$linear_disturbance, color="#CC3333", weight=2, group="Linear disturbance")
       }
       if(isMappable(layers$areal_disturbance)){
-        map1 <- map1 |> addPolygons(data=layers$areal_disturbance, color="#660000", weight=1, fill=TRUE, group="Areal disturbance")
+        i <- layers$areal_disturbance |> st_make_valid()
+        map1 <- map1 |> addPolygons(data=i, color="#660000", weight=1, fill=TRUE, group="Areal disturbance")
       }
       if(isMappable(layers$footprint_500m)){
         map1 <- map1 |> addPolygons(data=layers$footprint_500m, color="#663399", weight=1, fill=TRUE, fillOpacity=0.5, group="Footprint 500m")
