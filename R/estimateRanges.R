@@ -133,6 +133,7 @@ estimateRangesServer <- function(input, output, session, project, rv){
   # Estimate home range
   hr2a <- reactive({
     req(trk_one2a())
+    if (nrow(trk_one2a()) > 2) {
     if (input$hr2a=="MCP") {
       x <- hr_mcp(trk_one2a(), levels=input$levels2a)
     } else if (input$hr2a=="KDE") {
@@ -153,13 +154,22 @@ estimateRangesServer <- function(input, output, session, project, rv){
       x <- hr_locoh(trk_one2a(), levels=lvl)
     }
     hr_isopleths(x)
+    } else {
+      showModal(modalDialog(
+        title = "No seasonal range estimated!",
+        "There is not enough data to estimate the seasonal range, please select additional years or another individual",
+        easyClose = FALSE,
+        footer = modalButton("OK")
+      ))
+      return()
+    }
   })
 
   # Estimate home range
   hr2b <- reactive({
     req(trk_one2b())
-    
-    if (input$hr2b=="MCP") {
+    if (nrow(trk_one2b()) > 2) {
+      if (input$hr2b=="MCP") {
       x <- hr_mcp(trk_one2b(), levels=input$levels2b)
     } else if (input$hr2b=="KDE") {
       lvl <- input$levels2b
@@ -179,6 +189,15 @@ estimateRangesServer <- function(input, output, session, project, rv){
       x <- hr_locoh(trk_one2b(), levels=lvl)
     }
     hr_isopleths(x)
+    } else {
+      showModal(modalDialog(
+        title = "No seasonal range estimated!",
+        "There is not enough data to estimate the seasonal range, please select additional years or another individual",
+        easyClose = FALSE,
+        footer = modalButton("OK")
+      ))
+      return()
+    }
   })
 
   output$legendUIrange1 <- renderUI({
