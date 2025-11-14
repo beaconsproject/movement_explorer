@@ -10,7 +10,8 @@ downloadDataServer <- function(input, output, session, project, rv){
       savedRanges <- rv$savedRanges()
       layers <- rv$layers()
       nm_layer <- names(layers)
-      st_write(studyarea(), file, "studyarea", append=TRUE)
+      studyarea <- studyarea() |> st_transform(3578)
+      st_write(studyarea, file, "studyarea", append=TRUE)
       
       if(length(layers)>0){
         for(i in nm_layer){
